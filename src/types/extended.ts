@@ -1,0 +1,180 @@
+import { PaymentStatus, PaymentType, UserRole } from "./schema"
+
+export interface Product {
+    id: number
+    name: string
+    basePrice: number
+    stock: number 
+    category: Category
+    isActive: boolean
+    description?: string
+    images?: string[]
+    skus?: SKU[]
+    
+    measurementUnit: string
+    allowFractional: boolean
+    
+    createdAt?: string
+    brand?: string
+    model?: string
+    pointsValue?: number
+}
+
+export interface SKU {
+    id: number
+    code: string
+    price: number
+    stock: number
+    attributes?: VariantOption[]
+}
+
+export interface VariantOption {
+    name: string
+    value: string
+}
+
+export interface Category {
+    id: number
+    name: string
+    slug: string
+}
+
+export interface User {
+    id: number
+    name: string
+    email: string
+    role: UserRole
+    points: number
+}
+
+export interface Sale {
+    id: number
+    uuid: string
+    total: number
+    items: any[]
+    createdAt: string
+    paymentStatus: PaymentStatus
+    paymentType: PaymentType
+    pointsUsed?: number
+    pointsDiscount?: number
+}
+
+export interface StoreConfig {
+    taxRate: number
+    currencySymbol: string
+    enablePoints: boolean
+    enableShipping: boolean
+    enableCoupons?: boolean
+    maintenanceMode: boolean
+    baseCurrency?: string
+    
+    storeName?: string
+    contactEmail?: string
+    contactPhone?: string
+    address?: string
+    
+    lowStockThreshold: number
+    criticalStockThreshold: number
+    webSafetyStock: number
+    preventStockout: boolean
+    
+   
+    pointsPerCurrency: number
+    enablePointsRedemption?: boolean
+    moneyPerPoint?: number
+    freeShippingThreshold?: number
+    
+   
+    enableEvents: boolean
+    enabledPaymentMethods?: string[]
+    enableBranches: boolean
+    enableTransfers: boolean
+    enableStockMovements: boolean
+    enableStockControl: boolean
+    
+   
+    socialInstagram?: string
+    socialFacebook?: string
+    socialTwitter?: string
+
+    customMeasurementUnits?: string[]
+
+   
+    logoUrl?: string
+    marqueeText?: string[]
+    bannerImage?: BannerSlide[]
+    adImage?: string
+    adText?: string
+    secondaryAds?: { url: string, link?: string }[]
+    
+   
+    openingHours?: Record<string, { open: string, close: string, closed: boolean }>
+    
+    enableAutoBackup?: boolean
+    backupFrequency?: 'DAILY' | 'WEEKLY' | 'MONTHLY'
+
+    activeEvent?: Event
+    overriddenByEvent?: {
+        marqueeText?: boolean
+        bannerImage?: boolean
+        secondaryAds?: boolean
+        enableShipping?: boolean
+        enablePoints?: boolean
+        enabledPaymentMethods?: boolean
+    }
+}
+
+export interface ShippingZone {
+    id: number
+    country?: string
+    province?: string
+    city?: string
+    cost: number
+    active: boolean
+}
+export interface Discount {
+    id: number
+    name: string
+    type: 'PERCENTAGE' | 'FIXED_AMOUNT' | 'FIXED_PRICE'
+    value: number
+    scope: 'PRODUCT' | 'CATEGORY' | 'BRAND' | 'SKU' | 'GLOBAL'
+    targetIds: number[]
+    active: boolean
+    priority: number
+}
+
+export interface Event {
+    id: number
+    name: string
+    startDate: string
+    endDate: string
+    active: boolean
+    discounts?: Discount[]
+    shippingConfig?: { type: 'NORMAL' | 'FREE' | 'DISCOUNT', value: number }
+    shippingEnabled?: boolean
+    paymentMethods?: string[]
+    couponsEnabled?: boolean
+    pointsEnabled?: boolean
+    deliveryMethods?: string[]
+    bannerMessages?: { top: string, middle: string, bottom: string }
+    
+    heroBanners?: BannerSlide[]
+    marqueeText?: string[]
+    secondaryAds?: { url: string, link?: string }[]
+
+    type?: 'PERCENTAGE' | 'FIXED'
+    value?: number
+}
+
+export interface BannerSlide {
+    id: string | number
+    url: string
+    title?: string
+    titleLine2?: string
+    subtitle?: string
+    backgroundColor?: string
+    cta?: {
+        primary?: { text: string, href: string }
+        secondary?: { text: string, href: string }
+    }
+}

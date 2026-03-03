@@ -1,0 +1,423 @@
+import { Product } from '@/types/schema';
+import axios from 'axios';
+import { toast } from 'sonner';
+
+let lastToastMessage = "";
+let lastToastTime = 0;
+const TOAST_THROTTLE = 4000; 
+
+function throttledToastError(message: string, description?: string) {
+    const now = Date.now();
+    
+    const isConnectionError = message.toLowerCase().includes('conectar') || message.toLowerCase().includes('network');
+    
+    if (isConnectionError) {
+        if (now - lastToastTime < TOAST_THROTTLE) return;
+    } else {
+        if (message === lastToastMessage && now - lastToastTime < 2000) return;
+    }
+    
+    lastToastMessage = message;
+    lastToastTime = now;
+    
+    toast.error(message, { 
+        description, 
+        duration: 5000,
+        style: { border: '1px solid #7c3aed' } 
+    });
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
+
+const api = axios.create({
+    baseURL: API_URL,
+    withCredentials: true 
+})
+
+
+api.interceptors.request.use(
+    (config) => {
+        // 1. Token de Autenticación
+        if (typeof window !== 'undefined') {
+            const storage = sessionStorage.getItem('admin-auth-storage')
+            if (storage) {
+                const { state } = JSON.parse(storage)
+                if (state?.token) {
+                     config.headers.Authorization = `Bearer ${state.token}`
+                }
+            }
+        }
+
+       
+     
+        if (typeof window !== 'undefined') {
+            const branchStorage = localStorage.getItem('branch-storage')
+            if (branchStorage) {
+                try {
+                    const parsed = JSON.parse(branchStorage)
+                    const activeId = parsed.state?.activeBranch?.id
+                    
+                    if (activeId) {
+                        
+                        config.headers['x-branch-id'] = activeId.toString()
+                        
+                        if (config.method === 'get') {
+                             config.params = { ...config.params, branchId: activeId }
+                        }
+                    }
+                } catch (e) {
+                }
+            }
+        }
+
+        return config
+    },
+    (error) => Promise.reject(error)
+)
+
+// Interceptor de Respuesta: Manejar 401 y Toasts Globales
+api.interceptors.response.use(
+    (response) => {
+         
+         if (typeof window !== 'undefined') {
+             const method = response.config?.method?.toLowerCase();
+             if (['post', 'put', 'patch', 'delete'].includes(method || '')) {
+                
+                 if (!response.config?.headers['x-silence-toast']) {
+                      const msg = response.data?.message;
+                      if (msg) toast.success(msg);
+                 }
+             }
+         }
+         return response;
+    },
+    (error) => {
+        // 1. Manejo de Sesión (401)
+        if (error.response?.status === 401) {
+            import('@/store/use-auth-store').then(({ useAuthStore }) => {
+                useAuthStore.getState().logout()
+            })
+            if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+                 window.location.href = '/login'
+            }
+        }
+        
+        // 2. Disparo de Toast Gráfico (Ignorar si la petición pidió evadirlo explícitamente en el futuro)
+        if (typeof window !== 'undefined' && error.response?.status !== 401) {
+             const message = error.response?.data?.message || 'Ocurrió un error inesperado al conectar con el servidor.';
+             throttledToastError(
+                 message, 
+                 error.response?.status >= 500 ? 'Contacte a soporte técnico.' : 'Revise los datos ingresados.'
+             );
+        }
+
+        return Promise.reject(error)
+    }
+)
+
+export const ProductsAPI = {
+    getAll: async (params?: any) => {
+        const { data } = await api.get('/products', { params })
+        return data
+    },
+    getOne: async (id: number) => {
+        const { data } = await api.get(`/products/${id}`)
+        return data.data
+    },
+    create: async (product: Partial<Product>) => {
+        const { data } = await api.post('/products', product)
+        return data.data
+    },
+    update: async (id: number, product: Partial<Product>) => {
+        const { data } = await api.put(`/products/${id}`, product)
+        return data.data
+    },
+    delete: async (id: number) => {
+        const { data } = await api.delete(`/products/${id}`)
+        return data
+    },
+    updatePrices: async (id: number, prices: any[]) => {
+        const { data } = await api.put(`/products/${id}/prices`, { prices })
+        return data.data
+    },
+    getPrices: async (id: number) => {
+        const { data } = await api.get(`/products/${id}/prices`)
+        return data.data
+    },
+    exportCodes: async (payload: { type: 'QR' | 'BARCODE', selectAll: boolean, selectedIds: number[], filters: any }) => {
+        const response = await api.post('/products/export-codes', payload, { responseType: 'blob' })
+        return response
+    }
+}
+
+export const ConfigAPI = {
+    get: async (params?: any) => {
+        const { data } = await api.get('/config', { params })
+        return data
+    },
+    update: async (config: any) => {
+        const { data } = await api.put('/config', config)
+        return data
+    },
+    downloadBackup: async () => {
+        const response = await api.get('/backups/download-manual', { responseType: 'blob' })
+        return response
+    }
+}
+
+export const ShippingAPI = {
+    getZones: async () => {
+        const { data } = await api.get('/shipping')
+        return data
+    },
+    createZone: async (zone: any) => {
+        const { data } = await api.post('/shipping', zone)
+        return data
+    },
+    updateZone: async (id: number, zone: any) => {
+        const { data } = await api.put(`/shipping/${id}`, zone)
+        return data
+    },
+    deleteZone: async (id: number) => {
+        await api.delete(`/shipping/${id}`)
+    },
+    calculateCost: async (location: any) => {
+        const { data } = await api.post('/shipping/calculate-cost', location)
+        return data
+    }
+}
+
+export const CategoriesAPI = {
+    getAll: async () => {
+        const { data } = await api.get('/categories')
+        return data.data || data
+    },
+    create: async (data: any) => {
+        const { data: res } = await api.post('/categories', data)
+        return res
+    },
+    update: async (id: number, data: any) => {
+        const { data: res } = await api.put(`/categories/${id}`, data)
+        return res
+    },
+    delete: async (id: number) => {
+        await api.delete(`/categories/${id}`)
+    }
+}
+
+export const UsersAPI = {
+    getAll: async (params?: any) => {
+        const { data } = await api.get('/users', { params })
+        return data
+    },
+    getOne: async (id: number) => {
+        const { data } = await api.get(`/users/${id}`)
+        return data
+    },
+    create: async (data: any) => {
+        const { data: res } = await api.post('/users', data)
+        return res
+    },
+    update: async (id: number, data: any) => {
+        const { data: res } = await api.put(`/users/${id}`, data)
+        return res
+    },
+    delete: async (id: number) => {
+        await api.delete(`/users/${id}`)
+    }
+}
+
+export const SalesAPI = {
+    getAll: async (params?: any) => {
+        const { data } = await api.get('/sales', { params })
+        return data
+    },
+    getOne: async (id: number) => {
+        const { data } = await api.get(`/sales/${id}`)
+        return data
+    },
+    create: async (data: any) => {
+        const { data: res } = await api.post('/sales/checkout', data)
+        return res
+    },
+    update: async (id: number, data: any) => {
+        const { data: res } = await api.put(`/sales/${id}`, data)
+        return res.data
+    }
+}
+
+export const CouponsAPI = {
+    getAll: async () => {
+        const { data } = await api.get('/coupons')
+        return data
+    },
+    create: async (data: any) => {
+        return await api.post('/coupons', data)
+    },
+    update: async (id: number, data: any) => {
+        return await api.put(`/coupons/${id}`, data)
+    },
+    delete: async (id: number) => {
+        await api.delete(`/coupons/${id}`)
+    },
+    validate: async (code: string, amount: number) => {
+        const { data } = await api.post('/coupons/validate', { code, amount })
+        return data
+    }
+}
+
+export const ContentAPI = {
+    get: async () => {
+        const { data } = await api.get('/admin/content')
+        return data
+    },
+    update: async (data: any) => {
+        const { data: res } = await api.put('/admin/content', data)
+        return res
+    }
+}
+
+export const CommentsAPI = {
+    getAll: async () => {
+        const { data } = await api.get('/comments')
+        return data.data || data
+    },
+    moderate: async (id: number, approved: boolean) => {
+        const { data } = await api.put(`/comments/${id}/moderate`, { approved })
+        return data
+    },
+    delete: async (id: number) => {
+        await api.delete(`/comments/${id}`)
+    }
+}
+
+export const AdminAPI = {
+    getStats: async (params?: any) => {
+        const { data } = await api.get('/admin/stats', { params })
+        return data.data
+    },
+    getAuditLogs: async (params?: any) => {
+        const { data } = await api.get('/admin/audit', { params })
+        return data.data 
+    }
+}
+
+export const PromosAPI = {
+    getDiscounts: async () => {
+        const { data } = await api.get('/promos/discounts')
+        return data
+    },
+    createDiscount: async (data: any) => {
+        const { data: res } = await api.post('/promos/discounts', data)
+        return res
+    },
+    deleteDiscount: async (id: number) => {
+        await api.delete(`/promos/discounts/${id}`)
+    },
+    updateDiscount: async (id: number, data: any) => {
+        const { data: res } = await api.put(`/promos/discounts/${id}`, data)
+        return res
+    },
+    getEvents: async () => {
+        const { data } = await api.get('/promos/events')
+        return data
+    },
+    createEvent: async (data: any) => {
+        const { data: res } = await api.post('/promos/events', data)
+        return res
+    },
+    updateEvent: async (id: number, data: any) => {
+        const { data: res } = await api.put(`/promos/events/${id}`, data)
+        return res
+    },
+    deleteEvent: async (id: number) => {
+        await api.delete(`/promos/events/${id}`)
+    }
+}
+
+export const UploadAPI = {
+    upload: async (file: File) => {
+        const formData = new FormData()
+        formData.append('image', file)
+        const { data } = await api.post('/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        return data.data.url
+    }
+}
+
+export const SkuAPI = {
+    create: async (data: any) => {
+        const { data: res } = await api.post('/skus', data)
+        return res.data
+    },
+    update: async (id: number, data: any) => {
+        const { data: res } = await api.put(`/skus/${id}`, data)
+        return res.data
+    },
+    delete: async (id: number) => {
+        await api.delete(`/skus/${id}`)
+    },
+    
+    updateStock: async (id: number, quantity: number, type: 'increment' | 'decrement' | 'set') => {
+        const { data } = await api.put(`/skus/${id}/stock`, { quantity, type })
+        return data.data
+    }
+}
+
+export const TransfersAPI = {
+    getAll: async (params?: any) => {
+        const { data } = await api.get('/transfers', { params })
+        return data.data
+    },
+    updateStatus: async (id: number, status: 'APPROVED' | 'REJECTED') => {
+        const { data } = await api.patch(`/transfers/${id}`, { status })
+        return data.data
+    }
+}
+
+export const BlogAPI = {
+    getAll: async (params?: any) => {
+        const { data } = await api.get('/blog', { params })
+        return data
+    },
+    getOne: async (slug: string) => {
+        const { data } = await api.get(`/blog/${slug}`)
+        return data
+    },
+    create: async (post: any) => {
+        const { data } = await api.post('/blog', post)
+        return data
+    },
+    update: async (id: number, post: any) => {
+        const { data } = await api.put(`/blog/${id}`, post)
+        return data
+    },
+    delete: async (id: number) => {
+        await api.delete(`/blog/${id}`)
+    }
+}
+
+export const CurrenciesAPI = {
+    getAll: async (active?: boolean) => {
+        const { data } = await api.get('/currencies', { params: { active } })
+    
+        return data.data
+    },
+    create: async (currency: any) => {
+        const { data } = await api.post('/currencies', currency)
+        return data.data
+    },
+    update: async (id: number, currency: any) => {
+        const { data } = await api.put(`/currencies/${id}`, currency)
+        return data.data
+    },
+    delete: async (id: number) => {
+        await api.delete(`/currencies/${id}`)
+    }
+}
+
+export default api
+

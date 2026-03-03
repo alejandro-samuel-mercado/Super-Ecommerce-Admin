@@ -1,0 +1,77 @@
+import api from './api'
+
+export interface InventoryItem {
+    id: number | string
+    skuId: number
+    skuCode: string
+    productName: string
+    categoryName: string
+    image: string | null
+    variant: string
+    stock: number
+    minStock: number
+    price: string
+    measurementUnit: string   
+    allowFractional: boolean  
+    updatedAt: string
+}
+
+
+export function getUnitLabel(unit: string): string {
+    const map: Record<string, string> = {
+        UNIDAD: 'u',
+        KG: 'kg',
+        LITRO: 'L',
+        METRO: 'm',
+        GRAMO: 'g',
+        MILILITRO: 'ml',
+    }
+    return map[unit] ?? unit.toLowerCase()
+}
+
+export function formatStock(stock: number, unit: string): string {
+    const label = getUnitLabel(unit)
+    if (unit === 'UNIDAD') return `${stock} u`
+    const formatted = parseFloat(stock.toFixed(3)).toString()
+    return `${formatted} ${label}`
+}
+
+
+export function formatPrice(price: number | string, unit: string): string {
+    const amount = typeof price === 'string' ? parseFloat(price) : price
+    const formatted = isNaN(amount) ? '0' : amount.toFixed(2).replace(/\.00$/, '')
+    if (!unit || unit === 'UNIDAD') return `$${formatted}`
+    return `$${formatted}/${getUnitLabel(unit)}`
+}
+
+const CONVERSION: Record<string, { factor: number; baseUnit: string }> = {
+    GRAMO: { factor: 0.001, baseUnit: 'KG' },
+    MILILITRO: { factor: 0.001, baseUnit: 'LITRO' },
+    CENTIMETRO: { factor: 0.01, baseUnit: 'METRO' },
+    KG: { factor: 1, baseUnit: 'KG' },
+    LITRO: { factor: 1, baseUnit: 'LITRO' },
+    METRO: { factor: 1, baseUnit: 'METRO' },
+    UNIDAD: { factor: 1, baseUnit: 'UNIDAD' },
+}
+
+export function convertToBaseUnit(qty: number, displayUnit: string): number {
+    const conv = CONVERSION[displayUnit]
+    if (!conv) return qty
+    return qty * conv.factor
+}
+
+export const StockControlService = {
+   
+    getInventory: async (branchId: number, params?: { search?: string, categoryId?: number, supplierId?: number, brand?: string, stockLevel?: string }) => {
+        const { data } = await api.get('/admin/stock/inventory', {
+            params: { ...params, branchId }
+        })
+        return data.data as InventoryItem[]
+    },
+
+    
+    updateInventory: async (id: number, updates: { stock?: number, minStock?: number, price?: number }) => {
+        const { data } = await api.put(`/admin/stock/inventory/${id}`, updates)
+        return data.data
+    }
+}

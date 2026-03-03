@@ -1,0 +1,282 @@
+"use client"
+import React from 'react'
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { User, UserRole } from "@/types/schema"
+import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
+import { ArrowUpDown, Edit, Search, Settings2, Trash, UserPlus } from "lucide-react"
+import { useState } from "react"
+
+
+
+interface UserTableProps {
+    data: User[]
+    currentUserRole: UserRole
+    currentFilter?: string | null
+    onView: (user: User) => void
+    onEdit: (user: User) => void
+    onDelete: (user: User) => void
+}
+
+export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit, onDelete }: UserTableProps) {
+    const [sorting, setSorting] = useState<any>([])
+    const [columnFilters, setColumnFilters] = useState<any>([])
+    
+    const rawColumns: ColumnDef<User>[] = [
+        {
+            accessorKey: "name",
+            header: ({ column }) => {
+                return (
+                    <Button className="hover:cursor-pointer" variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+                        Nombre
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                )
+            },
+        },
+        {
+            accessorKey: "email",
+            header: "Email",
+        },
+        {
+            accessorKey: "dni",
+            header: "DNI",
+            cell: ({ row }) => <span className="font-mono text-muted-foreground">{row.getValue("dni") || "-"}</span>
+        },
+        {
+            accessorKey: "phone",
+            header: "Teléfono",
+            cell: ({ row }) => <span className="text-muted-foreground">{row.getValue("phone") || "-"}</span>
+        },
+ 
+        {
+            id: "branches",
+            header: "Branch(es)",
+            cell: ({ row }) => {
+                const user = row.original;
+                if (user.roleId === 5 || user.roleId === 6) {
+                    if (user.roleId === 5 && (!user.adminBranches || user.adminBranches.length === 0)) {
+                         return <Badge variant="outline" className="border-borderH text-purple-600 dark:text-purple-400 text-[10px]">Global</Badge>
+                    }
+                    if (user.adminBranches && user.adminBranches.length > 0) {
+                        return (
+                            <div className="flex flex-wrap gap-1 max-w-[200px]">
+                                {user.adminBranches.map((as: any) => (
+                                    <Badge key={as.branchId} variant="outline" className="text-[10px] bg-muted border-border text-muted-foreground">
+                                        {as.branch?.name || `#${as.branchId}`}
+                                    </Badge>
+                                ))}
+                            </div>
+                        )
+                    }
+                     return <span className="text-muted-foreground text-xs italic">Sin asignar</span>
+                }
+                
+                if (user.roleId === 7) { 
+                     if (user.branch) {
+                         return <Badge variant="secondary" className="bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border-blue-200 dark:border-blue-800">{user.branch.name}</Badge>
+                     }
+                     return <Badge variant="destructive" className="text-[10px]">Sin Asignar</Badge>
+                }
+
+                return <span className="text-muted-foreground">-</span>
+            }
+        },
+        {
+            accessorKey: "status",
+            header: "Estado",
+            cell: ({ row }) => {
+                const status = row.getValue("status") as string
+                return (
+                     <Badge variant={status === 'ACTIVE' ? 'outline' : 'destructive'} 
+                            className={status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' : ''}>
+                        {status}
+                     </Badge>
+                )
+            }
+        },
+        
+        {
+            id: "actions",
+            cell: ({ row }) => {
+                const user = row.original
+                
+                const canEdit = currentUserRole === 'SUPER_ADMIN' || 
+                               (currentUserRole === 'ADMIN' && user.roleId !== 5) || 
+                               (currentUserRole === 'EMPLOYEE' && user.roleId === 8)
+
+                return (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:cursor-pointer">
+                                <span className="sr-only">Open menu</span>
+                               <Settings2 className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground shadow-xl z-50 min-w-[200px]">
+                            <DropdownMenuLabel className="text-muted-foreground uppercase text-xs font-bold tracking-wider px-4 py-2">Acciones</DropdownMenuLabel>
+
+                            {canEdit && (
+                                <>
+                                    <DropdownMenuItem 
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            onEdit(user)
+                                        }} 
+                                        className="hover:bg-secondary/5 cursor-pointer p-3 text-sm font-medium transition-colors text-secondary"
+                                    >
+                                        <Edit className="mr-3 h-5 w-5" /> Editar
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator className="bg-border" />
+                                    <DropdownMenuItem 
+                                        className="hover:bg-destructive/5 text-destructive cursor-pointer p-3 text-sm font-medium transition-colors" 
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            onDelete(user)
+                                        }}
+                                    >
+                                        <Trash className="mr-3 h-5 w-5" /> Eliminar
+                                    </DropdownMenuItem>
+                                </>
+                            )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )
+            },
+        },
+    ]
+
+    const columns = React.useMemo(() => {
+        if (currentFilter === 'CUSTOMER') {
+            return rawColumns.filter(col => col.id !== 'branches');
+        }
+        return rawColumns;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentFilter]);
+
+    const [globalFilter, setGlobalFilter] = useState("")
+
+    const filteredData = React.useMemo(() => {
+         return data
+    }, [data])
+
+    const table = useReactTable({
+        data: filteredData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        onSortingChange: setSorting,
+        getSortedRowModel: getSortedRowModel(),
+        onColumnFiltersChange: setColumnFilters,
+        onGlobalFilterChange: setGlobalFilter,
+        getFilteredRowModel: getFilteredRowModel(),
+        state: {
+            sorting,
+            columnFilters,
+            globalFilter,
+        },
+    })
+
+    return (
+        <div className="space-y-4">
+          
+            <div className="flex flex-col sm:flex-row items-center justify-between py-4 sm:px-0 px-6 gap-6 sm:gap-0">
+                <div className="relative w-full max-w-sm group ">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary">
+                        <Search className="h-4 w-4" />
+                    </div>
+                    <Input
+                        placeholder="Buscar por Nombre, DNI, Email o Teléfono..."
+                        value={globalFilter ?? ""}
+                        onChange={(event) => setGlobalFilter(event.target.value)}
+                         className="pl-10 pr-4 rounded-full shadow-sm w-full bg-gray-200 border-3 border-gray-400/20"
+                    />
+                </div>
+                
+                {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'ADMIN' || currentUserRole === 'EMPLOYEE') && (
+                    <Button onClick={() => onEdit({} as User)} className="bg-indigo-600 hover:bg-indigo-700 shadow-sm text-white hover:cursor-pointer">
+                        <UserPlus className="mr-2 h-4 w-4" /> Nuevo Usuario
+                    </Button>
+                )}
+            </div>
+            
+            <div className="sm:rounded-3xl rounded-none border-4 border-zinc-300 dark:border-zinc-600 shadow-[0_0_20px_rgba(0,0,0,0.2)] hover:shadow-[0_0_30px_rgba(0,0,0,0.2)] hover:border-borderH hover:ring-4 hover:ring-zinc-500/10 transition-all duration-300 bg-card  overflow-hidden">
+                <Table >
+                    <TableHeader className="bg-muted/50">
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <TableRow key={headerGroup.id} className="hover:bg-muted/50 border-border">
+                                {headerGroup.headers.map((header) => {
+                                    return (
+                                        <TableHead key={header.id} className="text-muted-foreground font-semibold">
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
+                                        </TableHead>
+                                    )
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map((row) => (
+                                <TableRow
+                                    key={row.id}
+                                    data-state={row.getIsSelected() && "selected"}
+                                    className="hover:bg-gray-800/20  hover:rounded-2xl    transition-colors border-border cursor-pointer"
+                                    onClick={() => onView(row.original)}
+                                >
+                                    {row.getVisibleCells().map((cell) => (
+                                        <TableCell key={cell.id}>
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                                    No hay resultados.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+            <div className="flex items-center justify-end space-x-2 py-4">
+                <Button
+                    variant="outline"
+                    size="sm" 
+                    className="hover:cursor-pointer"
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
+                >
+                    Anterior
+                </Button>
+                <Button
+                    variant="outline"
+                    size="sm" 
+                    className="hover:cursor-pointer"
+                    onClick={() => table.nextPage()}
+                    disabled={!table.getCanNextPage()}
+                >
+                    Siguiente
+                </Button>
+            </div>
+        </div>
+    )
+}
