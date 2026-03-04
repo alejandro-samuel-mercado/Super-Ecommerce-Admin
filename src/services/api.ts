@@ -243,6 +243,10 @@ export const SalesAPI = {
     update: async (id: number, data: any) => {
         const { data: res } = await api.put(`/sales/${id}`, data)
         return res.data
+    },
+    refund: async (id: number, data: { reason: string }) => {
+        const { data: res } = await api.post(`/sales/${id}/refund`, data)
+        return res.data
     }
 }
 

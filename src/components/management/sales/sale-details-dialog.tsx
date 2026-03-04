@@ -11,11 +11,12 @@ import { useBranchStore } from "@/store/branch.store"
 import { Sale } from "@/types/schema"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { Calendar, CreditCard, Download, FileText, Loader2, MapPin, Package, Printer, Store, User } from "lucide-react"
+import { AlertCircle, Calendar, CreditCard, Download, FileText, Loader2, MapPin, Package, Printer, Store, User, XCircle } from "lucide-react"
 import { useRef, useState } from "react"
 import { useReactToPrint } from "react-to-print"
 import { toast } from "sonner"
 import { TicketTemplate } from "../../sales/ticket-template"
+import { Textarea } from "@/components/ui/textarea"
 
 interface SaleDetailsDialogProps {
     open: boolean
@@ -38,6 +39,29 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
     });
 
     const [isDownloading, setIsDownloading] = useState(false)
+    const [isRefundDialogOpen, setIsRefundDialogOpen] = useState(false)
+    const [refundReason, setRefundReason] = useState("")
+    const [isRefunding, setIsRefunding] = useState(false)
+
+    const handleRefund = async () => {
+        if (!refundReason.trim()) {
+            toast.error("El motivo de anulación es requerido")
+            return
+        }
+        setIsRefunding(true)
+        try {
+            await SalesAPI.refund(sale.id, { reason: refundReason })
+            toast.success("Venta anulada correctamente. Stock y puntos revertidos.")
+            setIsRefundDialogOpen(false)
+            setRefundReason("")
+            onSaleUpdated()
+            onOpenChange(false)
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || "Error al anular venta")
+        } finally {
+            setIsRefunding(false)
+        }
+    }
 
     const canEditPayment = ['REJECTED'].includes(sale.paymentStatus) 
     const canEditDelivery = sale.deliveryStatus !== 'DELIVERED' && !['CANCELLED', 'REJECTED', 'PENDING'].includes(sale.paymentStatus);
@@ -96,6 +120,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
 
 
     return (
+        <>
         <Dialog open={open} onOpenChange={(val) => !val && onOpenChange(false)}>
             <DialogContent className="sm:max-w-[800px]  border-4 border-secondary/60 shadow-2xl  text-card-foreground max-h-[90vh] overflow-y-auto  p-4 gap-0">
                 
@@ -156,7 +181,6 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                             <SelectContent>
                                                 <SelectItem value="PENDING">PENDIENTE</SelectItem>
                                                 <SelectItem value="PAID">PAGADO</SelectItem>
-                                                <SelectItem value="CANCELLED">CANCELADO</SelectItem>
                                                 <SelectItem value="REJECTED">RECHAZADO</SelectItem>
                                             </SelectContent>
                                         </Select>
@@ -195,6 +219,19 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                         <p className="text-xs font-mono bg-amber-50 dark:bg-amber-900/10 p-1.5 rounded border border-amber-100 dark:border-amber-900/30 text-amber-700 dark:text-amber-400 mt-1 select-all">
                                             {sale.mpPaymentId}
                                         </p>
+                                    </div>
+                                )}
+                                
+                                {['PAID', 'SHIPPED', 'DELIVERED'].includes(sale.paymentStatus) && (
+                                    <div className="pt-4 mt-2">
+                                        <Button 
+                                            variant="destructive" 
+                                            className="w-full font-bold uppercase py-6 flex items-center gap-2 shadow-lg shadow-red-900/20"
+                                            onClick={() => setIsRefundDialogOpen(true)}
+                                            type="button"
+                                        >
+                                            <XCircle size={20} /> Devolución / Anular Venta
+                                        </Button>
                                     </div>
                                 )}
                             </div>
@@ -393,5 +430,45 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+
+        <Dialog open={isRefundDialogOpen} onOpenChange={setIsRefundDialogOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle className="text-red-600 flex items-center gap-2">
+                        <AlertCircle className="h-5 w-5" />
+                        Anular Venta #{sale.id}
+                    </DialogTitle>
+                </DialogHeader>
+                <div className="py-4 space-y-4">
+                    <p className="text-sm text-foreground">
+                        Esta acción cancelará la venta, retornará el stock físico al inventario de la sucursal y revertirá los puntos de fidelidad involucrados en la orden.
+                    </p>
+                    <div className="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-md border border-amber-200 dark:border-amber-900/50">
+                        <p className="text-xs text-amber-800 dark:text-amber-400 font-bold uppercase mb-1">⚠️ Atención Administrativa</p>
+                        <p className="text-xs text-amber-700 dark:text-amber-500">
+                            El bloqueo de stock se deshará instantáneamente. El dinero deberá ser devuelto manualmente al cliente mediante el portal de cobro pertinente.
+                        </p>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="reason" className="text-xs uppercase font-bold text-muted-foreground">Motivo de Anulación (Requerido)</Label>
+                        <Textarea
+                            id="reason"
+                            placeholder="Ej. Devolución de producto por garantía, Arrepentimiento de compra..."
+                            value={refundReason}
+                            onChange={(e) => setRefundReason(e.target.value)}
+                            className="resize-none"
+                        />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsRefundDialogOpen(false)} disabled={isRefunding}>Cancelar</Button>
+                    <Button variant="destructive" onClick={handleRefund} disabled={isRefunding || !refundReason.trim()}>
+                        {isRefunding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <XCircle className="w-4 h-4 mr-2" />}
+                        Confirmar Anulación
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+        </>
     )
 }
