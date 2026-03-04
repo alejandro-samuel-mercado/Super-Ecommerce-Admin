@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { Textarea } from "@/components/ui/textarea"
 import { SalesAPI } from "@/services/api"
 import { useBranchStore } from "@/store/branch.store"
 import { Sale } from "@/types/schema"
@@ -16,7 +17,6 @@ import { useRef, useState } from "react"
 import { useReactToPrint } from "react-to-print"
 import { toast } from "sonner"
 import { TicketTemplate } from "../../sales/ticket-template"
-import { Textarea } from "@/components/ui/textarea"
 
 interface SaleDetailsDialogProps {
     open: boolean
@@ -46,6 +46,10 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
     const handleRefund = async () => {
         if (!refundReason.trim()) {
             toast.error("El motivo de anulación es requerido")
+            return
+        }
+        if (!sale.id) {
+            toast.error("Venta inválida")
             return
         }
         setIsRefunding(true)
