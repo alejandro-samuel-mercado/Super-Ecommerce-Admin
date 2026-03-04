@@ -39,7 +39,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
 
     const [isDownloading, setIsDownloading] = useState(false)
 
-    const canEditPayment = ['PENDING', 'REJECTED'].includes(sale.paymentStatus)
+    const canEditPayment = ['REJECTED'].includes(sale.paymentStatus) 
     const canEditDelivery = sale.deliveryStatus !== 'DELIVERED' && !['CANCELLED', 'REJECTED', 'PENDING'].includes(sale.paymentStatus);
 
     const handleSave = async () => {
