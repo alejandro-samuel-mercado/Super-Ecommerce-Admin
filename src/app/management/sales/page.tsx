@@ -13,9 +13,20 @@ import { useAuthStore } from '@/store/use-auth-store'
 import { Sale } from '@/types/schema'
 import { format } from 'date-fns'
 import { Banknote, Download, Loader2, Plus, RefreshCw } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Suspense, useCallback, useEffect, useState } from 'react'
 
 export default function SalesPage() {
+    return (
+        <Suspense fallback={<div className="p-8 text-center italic opacity-50">Cargando módulo de ventas...</div>}>
+            <SalesPageContent />
+        </Suspense>
+    )
+}
+
+function SalesPageContent() {
+    const searchParams = useSearchParams()
+    const saleIdParam = searchParams.get('saleId')
     const { user } = useAuthStore()
     const { activeBranch } = useBranchStore()
     const userRole = user?.role?.name || ''
@@ -34,6 +45,8 @@ export default function SalesPage() {
             const params: any = { branchId: activeBranch.id }
             if (currentTab === 'abandoned') {
                 params.isAbandoned = 'true'
+            } else if (currentTab === 'pending') {
+                params.isPendingPayment = 'true'
             } else if (currentTab === 'cancelled') {
                 params.isCancelled = 'true'
             } else {
@@ -52,6 +65,28 @@ export default function SalesPage() {
     useEffect(() => {
         loadSales()
     }, [loadSales])
+
+    useEffect(() => {
+        if (saleIdParam && activeBranch) {
+            const fetchOne = async () => {
+                try {
+                    const id = parseInt(saleIdParam)
+                    if (isNaN(id)) return
+                    const sale = await SalesAPI.getOne(id)
+                    if (sale) {
+                        setSelectedSale(sale)
+                        // Limpiar el parámetro de la URL sin recargar para que no se reabra si se cierra
+                        const url = new URL(window.location.href)
+                        url.searchParams.delete('saleId')
+                        window.history.replaceState({}, '', url)
+                    }
+                } catch (error) {
+                    console.error("Error fetching sale from param:", error)
+                }
+            }
+            fetchOne()
+        }
+    }, [saleIdParam, activeBranch])
 
     const handleView = (sale: Sale) => {
         setSelectedSale(sale)
@@ -128,11 +163,11 @@ export default function SalesPage() {
             </div>
 
             <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full  ">
-                <TabsList className="grid w-full sm:grid-cols-3 grid-cols-1 sm:max-w-[600px] max-w-[300px] mx-auto sm:mx-0 rounded-xl gap-6 mb-36 sm:mb-0 ">
-                    <TabsTrigger value="real" className="border-2 border-gray-300 data-[state=active]:bg-secondary/30 data-[state=active]:border-secondary/70  rounded-lg">Confirmadas</TabsTrigger>
-                          <TabsTrigger value="abandoned" className="border-2 border-gray-300 data-[state=active]:bg-secondary/30 data-[state=active]:border-secondary/70 rounded-lg  px-4">Pendientes/Abandonadas</TabsTrigger>
+                <TabsList className="grid w-full sm:grid-cols-4 grid-cols-1 sm:max-w-[800px] max-w-[300px] mx-auto sm:mx-0 rounded-xl gap-4 mb-48 sm:mb-0">
+                    <TabsTrigger value="real" className="border-2 border-gray-300 data-[state=active]:bg-secondary/30 data-[state=active]:border-secondary/70 rounded-lg">Confirmadas</TabsTrigger>
+                    <TabsTrigger value="pending" className="border-2 border-gray-300 data-[state=active]:bg-secondary/30 data-[state=active]:border-secondary/70 rounded-lg px-4">Pendientes Pago</TabsTrigger>
+                    <TabsTrigger value="abandoned" className="border-2 border-gray-300 data-[state=active]:bg-secondary/30 data-[state=active]:border-secondary/70 rounded-lg px-4">Abandonadas</TabsTrigger>
                     <TabsTrigger value="cancelled" className="border-2 border-gray-300 data-[state=active]:bg-secondary/30 data-[state=active]:border-secondary/70 rounded-lg">Canceladas</TabsTrigger>
-              
                 </TabsList>
 
                 <TabsContent value="real" className="mt-4">
@@ -140,6 +175,20 @@ export default function SalesPage() {
                         <div className="flex flex-col items-center justify-center h-64 space-y-4">
                             <Loader2 className="h-8 w-8 animate-spin text-secondary" />
                             <p className="text-muted-foreground">Cargando ventas...</p>
+                        </div>
+                    ) : (
+                        <SalesTable 
+                            data={sales}
+                            onView={handleView}
+                        />
+                    )}
+                </TabsContent>
+
+                <TabsContent value="pending" className="mt-4">
+                    {loading ? (
+                        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+                            <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+                            <p className="text-muted-foreground">Cargando pendientes de pago...</p>
                         </div>
                     ) : (
                         <SalesTable 

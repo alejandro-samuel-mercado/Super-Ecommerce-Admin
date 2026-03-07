@@ -50,7 +50,7 @@ export const TicketTemplate = forwardRef<HTMLDivElement, TicketTemplateProps>(({
                     </tr>
                 </thead>
                 <tbody>
-                    {sale.items.map((item, i) => (
+                    {(sale.items || []).map((item, i) => (
                         <tr key={i}>
                             <td className="pt-1 pr-1 truncate max-w-[40mm]">
                                 <div className="font-bold">{item.productName}</div>

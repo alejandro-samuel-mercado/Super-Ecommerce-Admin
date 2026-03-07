@@ -107,7 +107,7 @@ export function useSocketNotifications() {
                 type: data.type || 'info', 
                 title: data.title,
                 message: data.message,
-                link: data.data?.saleId ? `/management/sales/${data.data.saleId}` : 
+                link: data.data?.saleId ? `/management/sales?saleId=${data.data.saleId}` : 
                       data.data?.skuId ? `/management/stock-control?search=${data.data.skuId}` : undefined,
                 metadata: data.data
             });

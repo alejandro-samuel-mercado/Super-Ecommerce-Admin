@@ -127,7 +127,7 @@ new_end = """        </Dialog>
                         Esta acción cancelará la venta, retornará el stock físico al inventario de la sucursal y revertirá los puntos de fidelidad involucrados en la orden.
                     </p>
                     <div className="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-md border border-amber-200 dark:border-amber-900/50">
-                        <p className="text-xs text-amber-800 dark:text-amber-400 font-bold uppercase mb-1">⚠️ Atención Administrativa</p>
+                        <p className="text-xs text-amber-800 dark:text-amber-400 font-bold uppercase mb-1">  Atención Administrativa</p>
                         <p className="text-xs text-amber-700 dark:text-amber-500">
                             El bloqueo de stock se deshará instantáneamente. El dinero deberá ser devuelto manualmente al cliente mediante el portal de cobro pertinente.
                         </p>

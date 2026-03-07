@@ -212,7 +212,7 @@ export const UsersAPI = {
     },
     getOne: async (id: number) => {
         const { data } = await api.get(`/users/${id}`)
-        return data
+        return data.data
     },
     create: async (data: any) => {
         const { data: res } = await api.post('/users', data)
@@ -234,7 +234,7 @@ export const SalesAPI = {
     },
     getOne: async (id: number) => {
         const { data } = await api.get(`/sales/${id}`)
-        return data
+        return data.data
     },
     create: async (data: any) => {
         const { data: res } = await api.post('/sales/checkout', data)

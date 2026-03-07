@@ -192,7 +192,7 @@ export default function ProductDetailsPage() {
                                 Gestionar Variantes
                             </Button>
                         </CardHeader>
-                        <CardContent className="p-0">
+                        <CardContent className="p-0 overflow-x-auto">
                              <table className="w-full text-sm text-left">
                                 <thead className="bg-muted text-muted-foreground font-medium uppercase text-xs">
                                     <tr>
@@ -294,7 +294,7 @@ export default function ProductDetailsPage() {
                          <CardContent className="p-4">
                             <p className="text-sm text-indigo-800 dark:text-indigo-300 font-medium mb-1">Total Stock (Todas variantes)</p>
                             <p className="text-2xl font-bold text-indigo-900 dark:text-indigo-100">
-                                {product.skus?.reduce((acc, s) => acc + s.stock, 0)} <span className="text-sm font-normal text-indigo-600 dark:text-indigo-400">{product.measurementUnit}</span>
+                                {product.skus?.reduce((acc, s) => acc + Number(s.stock), 0)} <span className="text-sm font-normal text-indigo-600 dark:text-indigo-400">{product.measurementUnit}</span>
                             </p>
                          </CardContent>
                     </Card>
@@ -303,7 +303,7 @@ export default function ProductDetailsPage() {
                          <CardContent className="p-4">
                             <p className="text-sm text-emerald-800 dark:text-emerald-300 font-medium mb-1">Ventas Totales</p>
                             <p className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">
-                                {product.skus?.reduce((acc, s) => acc + s.soldQuantity, 0)} <span className="text-sm font-normal text-emerald-600 dark:text-emerald-400">unid.</span>
+                                {product.skus?.reduce((acc, s) => acc + Number(s.soldQuantity), 0)} <span className="text-sm font-normal text-emerald-600 dark:text-emerald-400">unid.</span>
                             </p>
                          </CardContent>
                     </Card>

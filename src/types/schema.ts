@@ -1,4 +1,4 @@
-export type PaymentStatus = 'PENDING' | 'PAID' | 'CANCELLED' | 'REJECTED';
+export type PaymentStatus = 'PENDING' | 'PAID' | 'CANCELLED' | 'REJECTED' |'SHIPPED';
 export type PaymentType = 'CASH' | 'DEBIT' | 'CARD' | 'TRANSFER' | 'MERCADO_PAGO' | 'POINTS';
 export type DeliveryType = 'PICKUP' | 'DELIVERY';
 export type DeliveryStatus = 'PENDING_DELIVERY' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
@@ -163,9 +163,12 @@ export interface Sale {
   deliveryStatus: DeliveryStatus;
   deliveryAddress?: string | null;
   items: SaleItem[];
-  createdAt?: string; 
+  paymentProofUrl?: string | null;
+  paymentProofUploadedAt?: string | null;
   branch?: Branch;
   receipt?: any; 
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CartItem extends SaleItem {

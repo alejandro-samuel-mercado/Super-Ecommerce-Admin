@@ -19,19 +19,19 @@ export interface InventoryItem {
 
 export function getUnitLabel(unit: string): string {
     const map: Record<string, string> = {
-        UNIDAD: 'u',
-        KG: 'kg',
-        LITRO: 'L',
-        METRO: 'm',
-        GRAMO: 'g',
-        MILILITRO: 'ml',
+        UNIDAD: 'unidades',
+        KG: 'kilogramos',
+        LITRO: 'litros',
+        METRO: 'metros',
+        GRAMO: 'gramos',
+        MILILITRO: 'mililitros',
     }
     return map[unit] ?? unit.toLowerCase()
 }
 
 export function formatStock(stock: number, unit: string): string {
     const label = getUnitLabel(unit)
-    if (unit === 'UNIDAD') return `${stock} u`
+    if (unit === 'UNIDAD') return `${stock} ${label}`
     const formatted = parseFloat(stock.toFixed(3)).toString()
     return `${formatted} ${label}`
 }

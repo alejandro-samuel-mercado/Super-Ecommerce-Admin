@@ -8,6 +8,8 @@ import { useSocket } from "@/hooks/useSocket";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/use-auth-store";
 import axios from "axios";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 import { MessageSquare, Send, User, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -311,8 +313,8 @@ export function AdminChatView() {
                                     {conv.unread ? (
                                         <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">{conv.unread}</Badge>
                                     ) : (
-                                        <span className="text-[10px] text-muted-foreground">
-                                            {new Date(conv.messages[conv.messages.length - 1]?.createdAt || conv.createdAt || new Date()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                                            {formatDistanceToNow(new Date(conv.messages[conv.messages.length - 1]?.createdAt || (conv as any).createdAt || new Date()), { addSuffix: true, locale: es })}
                                         </span>
                                     )}
                                 </div>

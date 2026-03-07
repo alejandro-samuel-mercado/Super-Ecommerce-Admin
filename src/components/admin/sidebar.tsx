@@ -142,7 +142,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                                 <Button
                                     variant="ghost"
                                     className={cn(
-                                        "w-full justify-between font-medium px-3 py-6 text-[0.95rem] rounded-xl transition-all",
+                                        "w-full justify-between font-medium px-3 h-10  text-[0.95rem] rounded-xl    transition-all",
                                         "hover:bg-white/10 hover:cursor-pointer hover:text-white", 
                                         "text-white/70", 
                                         isActive && "text-white bg-white/10" 
@@ -166,7 +166,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                                                     variant="ghost"
                                                     size="sm"
                                                     className={cn(
-                                                        "w-full justify-start font-normal h-10 pl-8 hover:cursor-pointer rounded-lg relative overflow-hidden",
+                                                        "w-full justify-start font-normal h-12 pl-8 hover:cursor-pointer rounded-lg relative overflow-hidden",
                                                         "hover:bg-white/5 hover:text-white text-white/60",
                                                         isChildActive && "text-white font-medium bg-none" 
                                                     )}
@@ -190,12 +190,12 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                             key={item.title}
                             href={item.href || '#'}
                             className={cn(
-                                "flex items-center gap-3 px-3 py-3 rounded-xl transition-all text-[0.95rem] font-medium group relative overflow-hidden",
+                                "flex items-center gap-3  px-3 h-16 py-4 rounded-xl transition-all text-[0.95rem] font-medium group relative overflow-hidden ",
                                 "hover:bg-white/10 hover:text-white",
                                 isActive 
                                     ? "bg-white/20 text-white shadow-sm" 
                                     : "text-white/70",
-                                collapsed && "justify-center px-0 py-4"
+                                collapsed && "justify-center px-0 h-12"
                             )}
                             title={collapsed ? item.title : undefined}
                         >

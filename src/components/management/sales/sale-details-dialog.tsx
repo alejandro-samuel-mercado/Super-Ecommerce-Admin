@@ -12,7 +12,8 @@ import { useBranchStore } from "@/store/branch.store"
 import { Sale } from "@/types/schema"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { AlertCircle, Calendar, CreditCard, Download, FileText, Loader2, MapPin, Package, Printer, Store, User, XCircle } from "lucide-react"
+import { AlertCircle, Calendar, CreditCard, Download, ExternalLink, Eye, FileText, Loader2, MapPin, Package, Printer, Store, User, XCircle } from "lucide-react"
+import Link from "next/link"
 import { useRef, useState } from "react"
 import { useReactToPrint } from "react-to-print"
 import { toast } from "sonner"
@@ -67,8 +68,17 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
         }
     }
 
-    const canEditPayment = ['REJECTED'].includes(sale.paymentStatus) 
-    const canEditDelivery = sale.deliveryStatus !== 'DELIVERED' && !['CANCELLED', 'REJECTED', 'PENDING'].includes(sale.paymentStatus);
+    const isAbandoned = sale.paymentStatus === 'PENDING' && 
+                        sale.paymentType === 'MERCADO_PAGO' && 
+                        !sale.mpPaymentId;
+
+    const canEditPaymentStatus = !isAbandoned && ['REJECTED', 'PENDING'].includes(sale.paymentStatus);
+    const canEditPaymentType = !isAbandoned && sale.paymentStatus === 'REJECTED';
+    
+    const canEditDelivery = !isAbandoned && 
+                            sale.deliveryStatus !== 'DELIVERED' && 
+                            !['CANCELLED', 'REJECTED'].includes(sale.paymentStatus) &&
+                            (sale.paymentStatus === 'PAID' || sale.paymentStatus === 'PENDING' || sale.paymentStatus === 'SHIPPED');
 
     const handleSave = async () => {
         setLoading(true)
@@ -171,14 +181,14 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                 <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                                     <CreditCard size={14} /> Información de Pago
                                 </h3>
-                                {!canEditPayment && <Badge variant="secondary" className="text-[10px] h-5">Bloqueado</Badge>}
+                                 {(!canEditPaymentStatus && !canEditPaymentType) && <Badge variant="secondary" className="text-[10px] h-5">Bloqueado</Badge>}
                              </div>
                              
                             <div className="space-y-3 relative z-10">
                                 <div className="grid grid-cols-2 gap-2">
                                     <div className="space-y-1">
                                         <Label className="text-[10px] uppercase text-muted-foreground/70">Estado</Label>
-                                         <Select disabled={!canEditPayment} value={paymentStatus} onValueChange={(v: any) => setPaymentStatus(v)}>
+                                         <Select disabled={!canEditPaymentStatus} value={paymentStatus} onValueChange={(v: any) => setPaymentStatus(v)}>
                                             <SelectTrigger className="h-8 text-xs bg-muted/50 border-input">
                                                 <SelectValue />
                                             </SelectTrigger>
@@ -191,7 +201,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                     </div>
                                     <div className="space-y-1">
                                         <Label className="text-[10px] uppercase text-muted-foreground/70">Método</Label>
-                                         <Select disabled={!canEditPayment} value={paymentType} onValueChange={(v: any) => setPaymentType(v)}>
+                                         <Select disabled={!canEditPaymentType} value={paymentType} onValueChange={(v: any) => setPaymentType(v)}>
                                             <SelectTrigger className="h-8 text-xs bg-muted/50 border-input">
                                                 <SelectValue />
                                             </SelectTrigger>
@@ -209,7 +219,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                 { /* Aviso de reembolso manual para estados de cancelación */ }
                                 { (paymentStatus === 'CANCELLED' || paymentStatus === 'REJECTED') && (
                                     <div className="mt-2 text-xs p-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded flex gap-2 items-start text-amber-800 dark:text-amber-300">
-                                        <div className="mt-0.5">⚠️</div>
+                                        <div className="mt-0.5"> </div>
                                         <div>
                                             <p className="font-semibold uppercase text-[10px] mb-0.5">Cancelación sin reintegro monetario</p>
                                             <p className="opacity-90 leading-tight">Esta acción devolverá el stock y puntos usados, pero <strong className="font-semibold">no reembolsará el dinero automáticamente</strong>. Debes hacerlo manualmente en la pasarela de pagos.</p>
@@ -227,7 +237,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                 )}
                                 
                                 {['PAID', 'SHIPPED', 'DELIVERED'].includes(sale.paymentStatus) && (
-                                    <div className="pt-4 mt-2">
+                                    <div className="pt-4 mt-2 hover:cursor-pointer">
                                         <Button 
                                             variant="destructive" 
                                             className="w-full font-bold uppercase py-6 flex items-center gap-2 shadow-lg shadow-red-900/20"
@@ -284,6 +294,42 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                             </div>
                         </div>
                     </div>
+                    
+                    {/* Payment Proof Card (Admin View) */}
+                    {sale.paymentProofUrl && (
+                        <div className="bg-card p-4 rounded-lg border border-border shadow-sm mt-4">
+                            <div className="flex items-center justify-between mb-3 text-muted-foreground uppercase tracking-wider text-[10px] font-black">
+                                <h3 className="flex items-center gap-2">
+                                    <FileText size={14} /> Comprobante de Pago
+                                </h3>
+                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-[10px]">
+                                    Recibido
+                                </Badge>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="aspect-video relative rounded-md border-2 border-dashed border-border overflow-hidden bg-muted group">
+                                    <img 
+                                        src={sale.paymentProofUrl} 
+                                        alt="Comprobante de pago" 
+                                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                    />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <Button 
+                                            variant="secondary" 
+                                            size="sm" 
+                                            className="font-bold flex gap-2"
+                                            onClick={() => window.open(sale.paymentProofUrl!, '_blank')}
+                                        >
+                                            <Eye size={14} /> Ampliar
+                                        </Button>
+                                    </div>
+                                </div>
+                                <p className="text-[10px] text-muted-foreground text-center italic">
+                                    Subido el {sale.paymentProofUploadedAt ? format(new Date(sale.paymentProofUploadedAt), "dd/MM/yyyy HH:mm", { locale: es }) : 'desconocido'}
+                                </p>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="p-6 space-y-8">
@@ -296,7 +342,16 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                             <div className="bg-muted/30 p-4 rounded-lg border border-border text-sm">
                                 {sale.user ? (
                                     <>
-                                        <p className="font-bold text-foreground mb-1 text-base">{sale.user.name}</p>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <p className="font-bold text-foreground text-base">{sale.user.name}</p>
+                                            <Link 
+                                                href={`/management/users?search=${sale.user.email}`}
+                                                className="text-secondary hover:text-secondary/80 transition-colors flex items-center gap-1 text-[10px] font-bold uppercase"
+                                                onClick={() => onOpenChange(false)}
+                                            >
+                                                Ver Perfil <ExternalLink size={10} />
+                                            </Link>
+                                        </div>
                                         <p className="text-muted-foreground">{sale.user.email}</p>
                                         <p className="text-muted-foreground mt-2">{sale.user.phone || 'Teléfono no registrado'}</p>
                                     </>
@@ -351,7 +406,14 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                     {sale.items?.map((item: any, index: number) => (
                                         <tr key={index} className="hover:bg-muted/50">
                                             <td className="px-4 py-3">
-                                                <p className="font-medium text-foreground text-sm">{item.productName}</p>
+                                                <Link 
+                                                    href={`/management/inventory?search=${item.productName}`}
+                                                    className="font-medium text-foreground text-sm hover:text-secondary hover:underline transition-colors flex items-center gap-2 group"
+                                                    onClick={() => onOpenChange(false)}
+                                                >
+                                                    {item.productName}
+                                                    <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                </Link>
                                                 {item.skuCode && <span className="inline-block px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-[10px] font-mono border border-border mt-1">SKU: {item.skuCode}</span>}
                                             </td>
                                             <td className="px-4 py-3 text-center text-muted-foreground">{item.quantity}</td>
@@ -422,10 +484,10 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                     <div className="hidden">
                         <TicketTemplate ref={ticketRef} sale={sale} branch={sale.branch || activeBranch} />
                     </div>
-                    <div className="flex gap-2 hidden sm:block">
-                        <Button variant="ghost" className=" text-muted-foreground hover:bg-background flex gap-2 font-bold border-2 border-secondary/50 hover:cursor-pointer hover:bg-secondary hover:text-white" onClick={() => onOpenChange(false)}>Cerrar</Button>
-                        {(canEditPayment || canEditDelivery) && (
-                            <Button onClick={handleSave} disabled={loading} className="bg-secondary hover:bg-secondary/90 text-white shadow-md">
+                    <div className="flex  hidden sm:block">
+                        <Button variant="ghost" className=" text-muted-foreground hover:bg-background flex w-full mb-2  font-bold border-2 border-secondary/50 hover:cursor-pointer hover:bg-secondary hover:text-white" onClick={() => onOpenChange(false)}>Cerrar</Button>
+                        {(canEditPaymentStatus || canEditPaymentType || canEditDelivery) && (
+                            <Button onClick={handleSave} disabled={loading} className="w-full bg-secondary hover:bg-secondary/90 hover:cursor-pointer  text-white shadow-md">
                                 {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                                 Guardar Cambios
                             </Button>
@@ -448,7 +510,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                         Esta acción cancelará la venta, retornará el stock físico al inventario de la sucursal y revertirá los puntos de fidelidad involucrados en la orden.
                     </p>
                     <div className="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-md border border-amber-200 dark:border-amber-900/50">
-                        <p className="text-xs text-amber-800 dark:text-amber-400 font-bold uppercase mb-1">⚠️ Atención Administrativa</p>
+                        <p className="text-xs text-amber-800 dark:text-amber-400 font-bold uppercase mb-1">  Atención Administrativa</p>
                         <p className="text-xs text-amber-700 dark:text-amber-500">
                             El bloqueo de stock se deshará instantáneamente. El dinero deberá ser devuelto manualmente al cliente mediante el portal de cobro pertinente.
                         </p>

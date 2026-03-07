@@ -9,6 +9,8 @@ import { useSocket } from "@/hooks/useSocket";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/use-auth-store";
 import axios from "axios";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 import { MessageSquare, Send, User, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -298,7 +300,9 @@ export function AdminChatWidget() {
                                             {conv.unread ? (
                                                 <Badge variant="destructive" className="rounded-full px-2">{conv.unread}</Badge>
                                             ) : (
-                                                <span className="text-[10px] text-muted-foreground">Hace un momento</span>
+                                                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                                                    {formatDistanceToNow(new Date(conv.messages[conv.messages.length - 1]?.createdAt || (conv as any).createdAt || new Date()), { addSuffix: true, locale: es })}
+                                                </span>
                                             )}
                                         </div>
                                         <p className="text-sm text-foreground/80 line-clamp-1 pl-10">

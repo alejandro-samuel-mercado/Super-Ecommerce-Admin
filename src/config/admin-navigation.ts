@@ -161,7 +161,10 @@ export const adminNavigation: NavItem[] = [
                 href: "/management/discounts",
                 roles: ['SUPER_ADMIN', 'ADMIN']  
             },
-            {
+          
+        ]
+    },
+      {
                 title: "Envíos",
                 icon: Truck,
                 href: "/management/shipping",
@@ -173,8 +176,6 @@ export const adminNavigation: NavItem[] = [
                 href: "/management/settings/gateways",
                 roles: ['SUPER_ADMIN']
             },
-        ]
-    },
     {
         title: "Comentarios",
         icon: MessageSquare,
@@ -187,31 +188,23 @@ export const adminNavigation: NavItem[] = [
         href: "/management/events",
         roles: ['SUPER_ADMIN', 'ADMIN']  
     },
-    {
-        title: "Contenido Web",
-        icon: Globe,
-        roles: ['SUPER_ADMIN', 'ADMIN'], 
-        children: [
-             {
-                title: "General",
-                href: "/management/content",
-                icon: Globe,
-                roles: ['SUPER_ADMIN', 'ADMIN']
-            },
-            {
+      {
                 title: "Asistente Bot",
-                href: "/management/content/bot",
+                href: "/management/bot",
                 icon: Bot,
                 roles: ['SUPER_ADMIN', 'ADMIN']
             },
-            {
+              {
                 title: "Blog",
                 href: "/management/content/blog",
                 icon: FileText,
                 roles: ['SUPER_ADMIN', 'ADMIN']
             },
-          
-        ]
+    {
+        title: "Contenido Web",
+        href: "/management/content",
+                icon: Globe,
+                roles: ['SUPER_ADMIN', 'ADMIN']
     },
     {
         title: "Configuración",
