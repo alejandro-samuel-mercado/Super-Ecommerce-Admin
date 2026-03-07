@@ -264,8 +264,8 @@ export const CouponsAPI = {
     delete: async (id: number) => {
         await api.delete(`/coupons/${id}`)
     },
-    validate: async (code: string, amount: number) => {
-        const { data } = await api.post('/coupons/validate', { code, amount })
+    validate: async (code: string, amount: number, userId?: number) => {
+        const { data } = await api.post('/coupons/validate', { code, amount, userId })
         return data
     }
 }

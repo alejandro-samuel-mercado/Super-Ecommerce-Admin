@@ -537,7 +537,7 @@ export function RegistrationTab() {
         if (!couponCode) return;
         setIsValidatingCoupon(true);
         try {
-            const res = await CouponsAPI.validate(couponCode, getSubtotal());
+            const res = await CouponsAPI.validate(couponCode, getSubtotal(), client?.id);
             if (res.success) {
                 setAppliedCoupon(res.data);
                 toast.success(`✅ Cupón "${couponCode}" aplicado con éxito`);
