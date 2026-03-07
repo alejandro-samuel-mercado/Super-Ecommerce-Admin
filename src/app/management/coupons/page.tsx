@@ -197,15 +197,30 @@ export default function CouponsPage() {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="grid gap-2">
-                                <Label>Límite de Usos</Label>
+                                <Label>Límite Usos Total</Label>
                                 <Input type="number" inputMode="numeric" value={formData.maxUses || ''} onChange={(e) => setFormData({...formData, maxUses: e.target.value ? parseInt(e.target.value) : null})} placeholder="Sin límite" className="bg-background border-input" />
                             </div>
+                            <div className="grid gap-2">
+                                <Label>Límite por Cliente</Label>
+                                <Input type="number" inputMode="numeric" value={formData.maxUsesPerUser || ''} onChange={(e) => setFormData({...formData, maxUsesPerUser: e.target.value ? parseInt(e.target.value) : null})} placeholder="Sin límite" className="bg-background border-input" />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
                             <div className="grid gap-2">
                                 <Label>Válido Desde</Label>
                                 <Input 
                                     type="date" 
                                     value={formData.validFrom ? formData.validFrom.split('T')[0] : ''} 
                                     onChange={(e) => setFormData({...formData, validFrom: e.target.value ? new Date(e.target.value + 'T12:00:00').toISOString() : null})} 
+                                    className="bg-background border-input block" 
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label>Expira (Opcional)</Label>
+                                <Input 
+                                    type="date" 
+                                    value={formData.validUntil ? formData.validUntil.split('T')[0] : ''} 
+                                    onChange={(e) => setFormData({...formData, validUntil: e.target.value ? new Date(e.target.value + 'T12:00:00').toISOString() : null})} 
                                     className="bg-background border-input block" 
                                 />
                             </div>

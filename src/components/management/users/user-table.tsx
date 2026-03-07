@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { User, UserRole } from "@/types/schema"
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
-import { ArrowUpDown, Edit, Search, Settings2, Trash, UserPlus } from "lucide-react"
+import { ArrowUpDown, Edit, Search, Settings2, ShoppingCart, Trash, UserPlus } from "lucide-react"
 import { useState } from "react"
 
 
@@ -137,6 +137,15 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
                                         className="hover:bg-secondary/5 cursor-pointer p-3 text-sm font-medium transition-colors text-secondary"
                                     >
                                         <Edit className="mr-3 h-5 w-5" /> Editar
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            window.open(`/management/cart-preview?userId=${user.id}`, '_blank')
+                                        }} 
+                                        className="hover:bg-blue-500/5 cursor-pointer p-3 text-sm font-medium transition-colors text-blue-500"
+                                    >
+                                        <ShoppingCart className="mr-3 h-5 w-5" /> Ver Carrito
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator className="bg-border" />
                                     <DropdownMenuItem 
