@@ -67,6 +67,7 @@ export interface StoreConfig {
     enableCoupons?: boolean
     maintenanceMode: boolean
     baseCurrency?: string
+    country?: string
     
     storeName?: string
     contactEmail?: string

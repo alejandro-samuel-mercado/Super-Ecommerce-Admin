@@ -11,7 +11,8 @@ export interface GatewayCurrencySupport {
     id: number;
     currencyCode: string;
     gatewayId: number;
-    issecondary: boolean;
+    isSecondary: boolean;
+    isPrimary: boolean;
     gateway?: PaymentGateway;
 }
 

@@ -211,26 +211,26 @@ const router=useRouter()
                                 <div className="space-y-2">
                                     <Label>País del Negocio</Label>
                                     <Select 
-                                        value={config.country || 'Argentina'} 
+                                        value={config.country || 'AR'} 
                                         onValueChange={(val) => setConfig({...config, country: val})}
                                     >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Seleccionar país" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="Argentina">Argentina</SelectItem>
-                                            <SelectItem value="Uruguay">Uruguay</SelectItem>
-                                            <SelectItem value="Chile">Chile</SelectItem>
-                                            <SelectItem value="Paraguay">Paraguay</SelectItem>
-                                            <SelectItem value="Bolivia">Bolivia</SelectItem>
-                                            <SelectItem value="Brasil">Brasil</SelectItem>
-                                            <SelectItem value="Colombia">Colombia</SelectItem>
-                                            <SelectItem value="Peru">Perú</SelectItem>
-                                            <SelectItem value="Ecuador">Ecuador</SelectItem>
-                                            <SelectItem value="Venezuela">Venezuela</SelectItem>
-                                            <SelectItem value="Mexico">México</SelectItem>
-                                            <SelectItem value="España">España</SelectItem>
-                                            <SelectItem value="Estados Unidos">Estados Unidos</SelectItem>
+                                            <SelectItem value="AR">Argentina</SelectItem>
+                                            <SelectItem value="UY">Uruguay</SelectItem>
+                                            <SelectItem value="CL">Chile</SelectItem>
+                                            <SelectItem value="PY">Paraguay</SelectItem>
+                                            <SelectItem value="BO">Bolivia</SelectItem>
+                                            <SelectItem value="BR">Brasil</SelectItem>
+                                            <SelectItem value="CO">Colombia</SelectItem>
+                                            <SelectItem value="PE">Perú</SelectItem>
+                                            <SelectItem value="EC">Ecuador</SelectItem>
+                                            <SelectItem value="VE">Venezuela</SelectItem>
+                                            <SelectItem value="MX">México</SelectItem>
+                                            <SelectItem value="ES">España</SelectItem>
+                                            <SelectItem value="US">Estados Unidos</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <p className="text-[10px] text-muted-foreground">Usado para determinar qué pasarela es Local vs Internacional.</p>
