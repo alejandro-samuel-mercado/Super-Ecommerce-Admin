@@ -4,12 +4,12 @@ import React from 'react'
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuLabel,
+   DropdownMenuSeparator,
+   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -18,8 +18,6 @@ import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginat
 import { ArrowUpDown, Edit, Search, Settings2, ShoppingCart, Trash, UserPlus } from "lucide-react"
 import { useState } from "react"
 
-
-
 interface UserTableProps {
     data: User[]
     currentUserRole: UserRole
@@ -27,12 +25,12 @@ interface UserTableProps {
     onView: (user: User) => void
     onEdit: (user: User) => void
     onDelete: (user: User) => void
+    onViewCart: (user: User) => void
 }
 
-export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit, onDelete }: UserTableProps) {
+export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit, onDelete, onViewCart }: UserTableProps) {
     const [sorting, setSorting] = useState<any>([])
     const [columnFilters, setColumnFilters] = useState<any>([])
-    
     const rawColumns: ColumnDef<User>[] = [
         {
             accessorKey: "name",
@@ -141,7 +139,7 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
                                     <DropdownMenuItem 
                                         onClick={(e) => {
                                             e.stopPropagation()
-                                            window.open(`/management/cart-preview?userId=${user.id}`, '_blank')
+                                            onViewCart(user)
                                         }} 
                                         className="hover:bg-blue-500/5 cursor-pointer p-3 text-sm font-medium transition-colors text-blue-500"
                                     >

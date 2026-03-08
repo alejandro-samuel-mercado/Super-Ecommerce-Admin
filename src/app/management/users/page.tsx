@@ -1,5 +1,6 @@
 "use client"
 
+import { CartPreviewDialog } from '@/components/management/users/cart-preview-dialog'
 import { UserDetails } from '@/components/management/users/user-details'
 import { UserForm } from '@/components/management/users/user-form'
 import { UserTable } from '@/components/management/users/user-table'
@@ -23,6 +24,8 @@ export default function UsersPage() {
     const [selectedUser, setSelectedUser] = useState<User | null>(null)
     const [isDetailsOpen, setIsDetailsOpen] = useState(false)
     const [isFormOpen, setIsFormOpen] = useState(false)
+    const [isCartOpen, setIsCartOpen] = useState(false)
+    const [cartUserId, setCartUserId] = useState<number | null>(null)
     const [editingUser, setEditingUser] = useState<User | undefined>(undefined)
     const [loading, setLoading] = useState(true)
     const { toast } = useToast()
@@ -96,6 +99,11 @@ export default function UsersPage() {
     const handleEdit = (user: User) => {
         setEditingUser(user && user.id ? user : undefined) 
         setIsFormOpen(true)
+    }
+
+    const handleViewCart = (user: User) => {
+        setCartUserId(user.id)
+        setIsCartOpen(true)
     }
 
     const handleDelete = async (user: User) => {
@@ -202,6 +210,7 @@ export default function UsersPage() {
                         onView={handleView}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
+                        onViewCart={handleViewCart}
                     />
                 )}
 
@@ -220,6 +229,12 @@ export default function UsersPage() {
                     user={editingUser}
                     currentUserRole={currentUserRole}
                     onSave={handleSaveUser}
+                />
+
+                <CartPreviewDialog 
+                    userId={cartUserId}
+                    open={isCartOpen}
+                    onOpenChange={setIsCartOpen}
                 />
              </div>
     )

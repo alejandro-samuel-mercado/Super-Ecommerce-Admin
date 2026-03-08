@@ -208,6 +208,33 @@ const router=useRouter()
                                     <Label>Dirección Física</Label>
                                     <Input value={config.address || ''} onChange={(e) => setConfig({...config, address: e.target.value})} placeholder="Av. Siempre Viva 123" />
                                 </div>
+                                <div className="space-y-2">
+                                    <Label>País del Negocio</Label>
+                                    <Select 
+                                        value={config.country || 'Argentina'} 
+                                        onValueChange={(val) => setConfig({...config, country: val})}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Seleccionar país" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Argentina">Argentina</SelectItem>
+                                            <SelectItem value="Uruguay">Uruguay</SelectItem>
+                                            <SelectItem value="Chile">Chile</SelectItem>
+                                            <SelectItem value="Paraguay">Paraguay</SelectItem>
+                                            <SelectItem value="Bolivia">Bolivia</SelectItem>
+                                            <SelectItem value="Brasil">Brasil</SelectItem>
+                                            <SelectItem value="Colombia">Colombia</SelectItem>
+                                            <SelectItem value="Peru">Perú</SelectItem>
+                                            <SelectItem value="Ecuador">Ecuador</SelectItem>
+                                            <SelectItem value="Venezuela">Venezuela</SelectItem>
+                                            <SelectItem value="Mexico">México</SelectItem>
+                                            <SelectItem value="España">España</SelectItem>
+                                            <SelectItem value="Estados Unidos">Estados Unidos</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <p className="text-[10px] text-muted-foreground">Usado para determinar qué pasarela es Local vs Internacional.</p>
+                                </div>
                             </div>
                             <Separator />
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

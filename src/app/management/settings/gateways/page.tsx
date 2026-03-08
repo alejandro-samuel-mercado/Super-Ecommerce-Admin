@@ -88,9 +88,9 @@ export default function GatewayManagementPage() {
         }
     }
 
-    const handlesecondaryChange = async (currency: string, gatewayId: string) => {
+    const handlePrimaryChange = async (currency: string, gatewayId: string) => {
         try {
-            const newsecondary = await PaymentGatewaysAPI.updateCurrencySupport({
+            await PaymentGatewaysAPI.updateCurrencySupport({
                 currencyCode: currency,
                 gatewayId: parseInt(gatewayId)
             })
@@ -160,7 +160,7 @@ export default function GatewayManagementPage() {
                                         <TableRow key={gateway.id}>
                                             <TableCell className="font-medium flex items-center gap-2">
                                                 {gateway.name}
-                                                {gateway.isGlobalFallback && <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">Fallback</span>}
+                                                {gateway.isGlobalFallback && <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">Principal (Local)</span>}
                                             </TableCell>
                                             <TableCell className="text-muted-foreground font-mono text-xs">{gateway.slug}</TableCell>
                                             <TableCell className="text-center">
@@ -205,7 +205,7 @@ export default function GatewayManagementPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {currencies.map(currency => {
                                   
-                                    const secondary = currencySupport.find(cs => cs.currencyCode === currency && cs.issecondary);
+                                    const primarySupport = currencySupport.find(cs => cs.currencyCode === currency && cs.isPrimary);
                                     
                                     return (
                                         <div key={currency} className="p-4 border rounded-xl bg-card shadow-sm space-y-4">
@@ -221,8 +221,8 @@ export default function GatewayManagementPage() {
                                             <div className="space-y-2">
                                                 <Label className="text-xs text-muted-foreground uppercase">Pasarela Principal</Label>
                                                 <Select 
-                                                    value={secondary?.gatewayId.toString() || ''} 
-                                                    onValueChange={(val) => handlesecondaryChange(currency, val)}
+                                                    value={primarySupport?.gatewayId.toString() || ''} 
+                                                    onValueChange={(val) => handlePrimaryChange(currency, val)}
                                                 >
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Seleccionar..." />
@@ -238,7 +238,7 @@ export default function GatewayManagementPage() {
                                             </div>
                                             
                                             <div className="text-xs text-muted-foreground">
-                                                <p>Si la principal falla, se usará el Fallback Global.</p>
+                                                <p>Los clientes fuera del país del negocio verán las pasarelas Internacionales.</p>
                                             </div>
                                         </div>
                                     )

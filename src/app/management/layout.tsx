@@ -22,7 +22,7 @@ export default function ManagementLayout({
                     <div className="flex-1 overflow-hidden p-0 relative">
                        
                         <div className="h-full w-full bg-slate-100 dark:bg-zinc-950 md:rounded-tl-3xl shadow-inner overflow-hidden flex flex-col relative z-0 transition-colors duration-300 ">
-                             <div className="flex-1 overflow-y-auto p-1 sm:p-4 md:p-8 custom-scrollbar">
+                             <div className="flex-1 overflow-y-auto p-1 sm:p-4 md:p-8 md:pt-0 custom-scrollbar">
                                 {children}
                             </div>
                         </div>
