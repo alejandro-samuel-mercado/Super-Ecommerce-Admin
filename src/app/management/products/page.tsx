@@ -9,7 +9,8 @@ import { useToast } from "@/components/ui/use-toast"
 import { exportToCSV } from '@/lib/export-utils'
 import { ProductsAPI } from '@/services/api'
 import { useBranchStore } from '@/store/branch.store'
-import { Product } from '@/types/schema'
+import { useAuthStore } from '@/store/use-auth-store'
+import { Product, UserRole } from '@/types/schema'
 import { Barcode, ChevronDown, Download, Loader2, Package, Plus, QrCode, RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -21,8 +22,9 @@ export default function ProductsPage() {
     const [isExporting, setIsExporting] = useState(false)
     const [selectedIds, setSelectedIds] = useState<number[]>([])
     const { activeBranch } = useBranchStore()
-
+    const { user } = useAuthStore()
     const { toast } = useToast()
+    const currentUserRole = (user?.role?.name || 'EMPLOYEE') as UserRole
 
 
 
@@ -54,7 +56,7 @@ export default function ProductsPage() {
     const handleDelete = async (product: Product) => {
         if(confirm(`¿Eliminar ${product.name}?`)) {
             try {
-                await ProductsAPI.delete(product.id)
+                await ProductsAPI.delete(product.id, activeBranch?.id)
                 toast({ title: "Producto eliminado", description: `El producto ${product.name} ha sido eliminado.` })
                 loadProducts()
             } catch (error: any) {
@@ -129,10 +131,10 @@ export default function ProductsPage() {
         try {
             let savedProduct;
             if (editingProduct) {
-                 savedProduct = await ProductsAPI.update(editingProduct.id, data)
+                 savedProduct = await ProductsAPI.update(editingProduct.id, data, activeBranch?.id)
                  toast({ title: "Producto actualizado", description: "Los cambios se guardaron correctamente." })
             } else {
-                 savedProduct = await ProductsAPI.create(data)
+                 savedProduct = await ProductsAPI.create(data, activeBranch?.id)
                  toast({ title: "Producto creado", description: "El nuevo producto se ha creado." })
             }
 
@@ -199,9 +201,11 @@ export default function ProductsPage() {
                     <Button variant="outline" size="icon" onClick={loadProducts} disabled={loading} className="rounded-xl border-slate-300 dark:border-zinc-800 hover:cursor-pointer">
                         <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                     </Button>
-                    <Button onClick={() => { setEditingProduct(undefined); setIsFormOpen(true) }} className="bg-secondary hover:bg-secondary/80 shadow-sm text-white hover:cursor-pointer">
-                        <Plus className="mr-2 h-4 w-4" /> Nuevo Producto
-                    </Button>
+                    {currentUserRole !== 'EMPLOYEE' && (
+                        <Button onClick={() => { setEditingProduct(undefined); setIsFormOpen(true) }} className="bg-secondary hover:bg-secondary/80 shadow-sm text-white hover:cursor-pointer">
+                            <Plus className="mr-2 h-4 w-4" /> Nuevo Producto
+                        </Button>
+                    )}
                 </div>
             </div>
 
@@ -216,6 +220,7 @@ export default function ProductsPage() {
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onSelectionChange={setSelectedIds}
+                    currentUserRole={currentUserRole}
                 />
             )}
 

@@ -214,9 +214,12 @@ export function UserDetails({ user: initialUser, onClose }: UserDetailsProps) {
 
                     {(() => {
                         const sessionRole = currentUserSession?.role?.name || ''
+                        const targetRole = currentUser.role?.name || ''
+                        
                         const canEdit = sessionRole === 'SUPER_ADMIN' ||
-                            (sessionRole === 'ADMIN' && currentUser.roleId !== 5) ||
-                            (sessionRole === 'EMPLOYEE' && (currentUser.roleId === 8 || currentUser.roleId === 99 || !currentUser.roleId))
+                            (sessionRole === 'ADMIN' && targetRole !== 'ADMIN' && targetRole !== 'SUPER_ADMIN') ||
+                            (sessionRole === 'EMPLOYEE' && targetRole === 'CUSTOMER')
+                            
                         return canEdit ? (
                             <Button
                                 className="sm:mr-20   shrink-0 bg-secondary/70 border border-white/10 text-white  hover:bg-secondary backdrop-blur-md rounded-xl hover:cursor-pointer"

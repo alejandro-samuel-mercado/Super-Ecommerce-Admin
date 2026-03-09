@@ -3,38 +3,38 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-   Dialog,
-   DialogContent,
-   DialogDescription,
-   DialogHeader,
-   DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog"
 import {
-   Table,
-   TableBody,
-   TableCell,
-   TableHead,
-   TableHeader,
-   TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import {
-   Activity,
-   ArrowRightCircle,
-   Calendar,
-   Database,
-   ExternalLink,
-   Layers,
-   Package,
-   Percent,
-   Settings,
-   ShoppingCart,
-   Tag,
-   Terminal,
-   Truck,
-   User,
-   UserCircle
+    Activity,
+    ArrowRightCircle,
+    Calendar,
+    Database,
+    ExternalLink,
+    Layers,
+    Package,
+    Percent,
+    Settings,
+    ShoppingCart,
+    Tag,
+    Terminal,
+    Truck,
+    User,
+    UserCircle
 } from "lucide-react"
 import { useState } from "react"
 
@@ -57,15 +57,84 @@ interface AuditLogTableProps {
   logs: AuditLog[]
 }
 
+export const ACTION_LABELS: Record<string, string> = {
+  // Productos
+  CREATE_PRODUCT: "Crear Producto",
+  UPDATE_PRODUCT: "Actualizar Producto",
+  DELETE_PRODUCT: "Eliminar Producto",
+
+  // Usuarios
+  UPDATE_USER_PROFILE: "Actualizar Perfil",
+  DELETE_USER: "Eliminar Usuario",
+  CHANGE_STATUS: "Cambiar Estado",
+  VERIFY_IDENTITY: "Verificar Identidad",
+  ADJUST_POINTS: "Ajustar Puntos",
+
+  // Categorías
+  CREATE_CATEGORY: "Crear Categoría",
+  UPDATE_CATEGORY: "Actualizar Categoría",
+  DELETE_CATEGORY: "Eliminar Categoría",
+
+  // Ventas
+  CREATE_SALE: "Crear Venta",
+  CREATE_SALE_POS: "Venta Cliente (POS)",
+  UPDATE_DELIVERY_STATUS: "Actualizar Entrega",
+  UPDATE_PAYMENT_STATUS: "Actualizar Pago",
+  REFUND_SALE: "Reembolsar Venta",
+  AUTO_CANCEL_EXPIRED_SALE: "Cancelación Automática",
+
+  // Marketing
+  CREATE_EVENT: "Crear Evento",
+  UPDATE_EVENT: "Actualizar Evento",
+  DELETE_EVENT: "Eliminar Evento",
+  CREATE_DISCOUNT: "Crear Descuento",
+  UPDATE_DISCOUNT: "Actualizar Descuento",
+  DELETE_DISCOUNT: "Eliminar Descuento",
+  CREATE_COUPON: "Crear Cupón",
+  UPDATE_COUPON: "Actualizar Cupón",
+  DELETE_COUPON: "Eliminar Cupón",
+
+  // Stock y Proveedores
+  UPDATE_INVENTORY: "Actualizar Stock",
+  CREATE_SUPPLIER: "Crear Proveedor",
+  UPDATE_SUPPLIER: "Actualizar Proveedor",
+  DELETE_SUPPLIER: "Eliminar Proveedor",
+  LINK_SKU_SUPPLIER: "Vincular SKU",
+  UNLINK_SKU_SUPPLIER: "Desvincular SKU",
+
+  // Configuración
+  UPDATE_CONFIG: "Actualizar Configuración",
+};
+
+const ENTITY_LABELS: Record<string, string> = {
+  PRODUCT: "Producto",
+  USER: "Usuario",
+  SALE: "Venta",
+  CATEGORY: "Categoría",
+  STOCK: "Stock",
+  STORE_CONFIG: "Configuración",
+  SUPPLIER: "Proveedor",
+  COUPON: "Cupón",
+  PROMO_EVENT: "Evento",
+  DISCOUNT: "Descuento",
+  PURCHASE: "Compra",
+};
+
 export function AuditLogTable({ logs }: AuditLogTableProps) {
-  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null)
+  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
+
+  const getActionLabel = (action: string) => ACTION_LABELS[action] || action;
+  const getEntityLabel = (type: string) => ENTITY_LABELS[type] || type;
 
   const getActionColor = (action: string) => {
-    if (action.includes("CREATE")) return "bg-emerald-100 text-emerald-800 border-emerald-200"
-    if (action.includes("DELETE")) return "bg-rose-100 text-rose-800 border-rose-200"
-    if (action.includes("UPDATE")) return "bg-blue-100 text-blue-800 border-blue-200"
-    return "bg-slate-100 text-slate-800 border-slate-200"
-  }
+    if (action.includes("CREATE"))
+      return "bg-emerald-100 text-emerald-800 border-emerald-200";
+    if (action.includes("DELETE"))
+      return "bg-rose-100 text-rose-800 border-rose-200";
+    if (action.includes("UPDATE"))
+      return "bg-blue-100 text-blue-800 border-blue-200";
+    return "bg-slate-100 text-slate-800 border-slate-200";
+  };
 
   const getEntityIcon = (type: string) => {
     switch (type.toUpperCase()) {
@@ -140,19 +209,23 @@ export function AuditLogTable({ logs }: AuditLogTableProps) {
                   </TableCell>
                   <TableCell>
                       <div className="flex items-center gap-3">
-                         <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-indigo-500 border border-indigo-100 dark:border-indigo-800 shadow-sm">
-                            {getEntityIcon(log.entityType)}
-                         </div>
-                         <div className="flex flex-col">
-                            <span className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-tight leading-none">{log.entityType}</span>
-                            <span className="text-[10px] font-black text-secondary mt-1">ID: #{log.entityId}</span>
-                         </div>
+                        <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-indigo-500 border border-indigo-100 dark:border-indigo-800 shadow-sm">
+                          {getEntityIcon(log.entityType)}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-tight leading-none">
+                            {getEntityLabel(log.entityType)}
+                          </span>
+                          <span className="text-[10px] font-black text-secondary mt-1">
+                            ID: #{log.entityId}
+                          </span>
+                        </div>
                       </div>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={`px-3 py-1 text-[11px] font-black rounded-lg border-2 shadow-sm transition-all group-hover:shadow-md ${getActionColor(log.action)} uppercase tracking-tight`}>
                       <Terminal className="h-3.5 w-3.5 mr-2" />
-                      {log.action}
+                      {getActionLabel(log.action)}
                     </Badge>
                   </TableCell>
                   <TableCell className="px-6 text-right">
@@ -225,7 +298,7 @@ export function AuditLogTable({ logs }: AuditLogTableProps) {
                 selectedLog.action
               )}`}
             >
-              {selectedLog.action}
+              {getActionLabel(selectedLog.action)}
             </Badge>
           </div>
 
@@ -238,7 +311,7 @@ export function AuditLogTable({ logs }: AuditLogTableProps) {
                 {getEntityIcon(selectedLog.entityType)}
               </div>
               <p className="text-sm font-black text-slate-800 dark:text-zinc-100 uppercase break-words">
-                {selectedLog.entityType}{" "}
+                {getEntityLabel(selectedLog.entityType)}{" "}
                 <span className="text-secondary">
                   #{selectedLog.entityId}
                 </span>

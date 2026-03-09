@@ -4,18 +4,18 @@ import React from 'react'
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuItem,
-   DropdownMenuLabel,
-   DropdownMenuSeparator,
-   DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { User, UserRole } from "@/types/schema"
-import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
-import { ArrowUpDown, Edit, Search, Settings2, ShoppingCart, Trash, UserPlus } from "lucide-react"
+import { CellContext, ColumnDef, ColumnFiltersState, HeaderContext, SortingState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
+import { ArrowUpDown, Edit, Search, Settings2, ShoppingCart, Trash } from "lucide-react"
 import { useState } from "react"
 
 interface UserTableProps {
@@ -29,12 +29,12 @@ interface UserTableProps {
 }
 
 export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit, onDelete, onViewCart }: UserTableProps) {
-    const [sorting, setSorting] = useState<any>([])
-    const [columnFilters, setColumnFilters] = useState<any>([])
+    const [sorting, setSorting] = useState<SortingState>([])
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const rawColumns: ColumnDef<User>[] = [
         {
             accessorKey: "name",
-            header: ({ column }) => {
+            header: ({ column }: HeaderContext<User, unknown>) => {
                 return (
                     <Button className="hover:cursor-pointer" variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
                         Nombre
@@ -50,18 +50,18 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
         {
             accessorKey: "dni",
             header: "DNI",
-            cell: ({ row }) => <span className="font-mono text-muted-foreground">{row.getValue("dni") || "-"}</span>
+            cell: ({ row }: CellContext<User, unknown>) => <span className="font-mono text-muted-foreground">{row.getValue("dni") || "-"}</span>
         },
         {
             accessorKey: "phone",
             header: "Teléfono",
-            cell: ({ row }) => <span className="text-muted-foreground">{row.getValue("phone") || "-"}</span>
+            cell: ({ row }: CellContext<User, unknown>) => <span className="text-muted-foreground">{row.getValue("phone") || "-"}</span>
         },
  
         {
             id: "branches",
             header: "Branch(es)",
-            cell: ({ row }) => {
+            cell: ({ row }: CellContext<User, unknown>) => {
                 const user = row.original;
                 if (user.roleId === 5 || user.roleId === 6) {
                     if (user.roleId === 5 && (!user.adminBranches || user.adminBranches.length === 0)) {
@@ -70,7 +70,7 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
                     if (user.adminBranches && user.adminBranches.length > 0) {
                         return (
                             <div className="flex flex-wrap gap-1 max-w-[200px]">
-                                {user.adminBranches.map((as: any) => (
+                                {user.adminBranches.map((as: { branchId: number; branch?: { name: string } }) => (
                                     <Badge key={as.branchId} variant="outline" className="text-[10px] bg-muted border-border text-muted-foreground">
                                         {as.branch?.name || `#${as.branchId}`}
                                     </Badge>
@@ -94,7 +94,7 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
         {
             accessorKey: "status",
             header: "Estado",
-            cell: ({ row }) => {
+            cell: ({ row }: CellContext<User, unknown>) => {
                 const status = row.getValue("status") as string
                 return (
                      <Badge variant={status === 'ACTIVE' ? 'outline' : 'destructive'} 
@@ -104,15 +104,16 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
                 )
             }
         },
-        
         {
             id: "actions",
-            cell: ({ row }) => {
+            cell: ({ row }: CellContext<User, unknown>) => {
                 const user = row.original
                 
+                const targetIsAdmin = user.role?.name === 'ADMIN' || user.role?.name === 'SUPER_ADMIN'
+                
                 const canEdit = currentUserRole === 'SUPER_ADMIN' || 
-                               (currentUserRole === 'ADMIN' && user.roleId !== 5) || 
-                               (currentUserRole === 'EMPLOYEE' && user.roleId === 8)
+                               (currentUserRole === 'ADMIN' && !targetIsAdmin) || 
+                               (currentUserRole === 'EMPLOYEE' && (user.role?.name === 'CUSTOMER'))
 
                 return (
                     <DropdownMenu>
@@ -136,25 +137,30 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
                                     >
                                         <Edit className="mr-3 h-5 w-5" /> Editar
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            onViewCart(user)
-                                        }} 
-                                        className="hover:bg-blue-500/5 cursor-pointer p-3 text-sm font-medium transition-colors text-blue-500"
-                                    >
-                                        <ShoppingCart className="mr-3 h-5 w-5" /> Ver Carrito
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator className="bg-border" />
-                                    <DropdownMenuItem 
-                                        className="hover:bg-destructive/5 text-destructive cursor-pointer p-3 text-sm font-medium transition-colors" 
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            onDelete(user)
-                                        }}
-                                    >
-                                        <Trash className="mr-3 h-5 w-5" /> Eliminar
-                                    </DropdownMenuItem>
+                                    
+                                    {(currentUserRole !== 'EMPLOYEE' || user.roleId === 8) && (
+                                        <>
+                                            <DropdownMenuItem 
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    onViewCart(user)
+                                                }} 
+                                                className="hover:bg-blue-500/5 cursor-pointer p-3 text-sm font-medium transition-colors text-blue-500"
+                                            >
+                                                <ShoppingCart className="mr-3 h-5 w-5" /> Ver Carrito
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator className="bg-border" />
+                                            <DropdownMenuItem 
+                                                className="hover:bg-destructive/5 text-destructive cursor-pointer p-3 text-sm font-medium transition-colors" 
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    onDelete(user)
+                                                }}
+                                            >
+                                                <Trash className="mr-3 h-5 w-5" /> Eliminar
+                                            </DropdownMenuItem>
+                                        </>
+                                    )}
                                 </>
                             )}
                         </DropdownMenuContent>
@@ -211,11 +217,7 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
                     />
                 </div>
                 
-                {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'ADMIN' || currentUserRole === 'EMPLOYEE') && (
-                    <Button onClick={() => onEdit({} as User)} className="bg-indigo-600 hover:bg-indigo-700 shadow-sm text-white hover:cursor-pointer">
-                        <UserPlus className="mr-2 h-4 w-4" /> Nuevo Usuario
-                    </Button>
-                )}
+                {/* Removed duplicate button, handled in parent page */}
             </div>
             
             <div className="sm:rounded-3xl rounded-none border-4 border-zinc-300 dark:border-zinc-600 shadow-[0_0_20px_rgba(0,0,0,0.2)] hover:shadow-[0_0_30px_rgba(0,0,0,0.2)] hover:border-borderH hover:ring-4 hover:ring-zinc-500/10 transition-all duration-300 bg-card  overflow-hidden">

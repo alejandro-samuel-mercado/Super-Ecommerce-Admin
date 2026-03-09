@@ -11,9 +11,10 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { useToast } from "@/components/ui/use-toast"
 import { UsersAPI } from '@/services/api'
 import branchService from '@/services/branch.service'
+import { useBranchStore } from '@/store/branch.store'
 import { useAuthStore } from '@/store/use-auth-store'
 import { Branch, User, UserRole } from '@/types/schema'
-import { Filter, Loader2, RefreshCw, UsersIcon } from 'lucide-react'
+import { Filter, Loader2, Plus, RefreshCw, UsersIcon } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -32,6 +33,7 @@ export default function UsersPage() {
 
   
     const { user } = useAuthStore()
+    const { activeBranch } = useBranchStore()
     const currentUserRole = (user?.role?.name || 'EMPLOYEE') as UserRole
     const [branches, setBranches] = useState<Branch[]>([])
     const [selectedBranchId, setSelectedBranchId] = useState<string>("all")
@@ -63,8 +65,18 @@ export default function UsersPage() {
         loadBranches()
     }, [loadUsers, loadBranches])
 
+    useEffect(() => {
+        if (activeBranch) {
+            setSelectedBranchId(activeBranch.id.toString())
+        } else {
+            setSelectedBranchId("all")
+        }
+    }, [activeBranch])
+
     const filteredUsers = useMemo(() => {
         let result = users
+
+        // Employees can see everyone
 
         if (roleFilter) {
             result = result.filter(u => u.role?.name === roleFilter)
@@ -73,17 +85,10 @@ export default function UsersPage() {
         if (selectedBranchId && selectedBranchId !== "all") {
             const sId = parseInt(selectedBranchId)
             result = result.filter(u => {
-               
                 if (u.role?.name === 'SUPER_ADMIN' && (!u.adminBranches || u.adminBranches.length === 0)) return true;
-
-               
                 if (u.branchId === sId) return true
-                
-                if (u.adminBranches?.some((as: any) => as.branchId === sId)) return true
-                
-             
+                if (u.adminBranches?.some((as: { branchId: number }) => as.branchId === sId)) return true
                 if (u.role?.name === 'CUSTOMER' && u.sales?.some(s => s.branchId === sId)) return true
-
                 return false
             })
         }
@@ -108,6 +113,10 @@ export default function UsersPage() {
 
     const handleDelete = async (user: User) => {
         if(confirm(`¿Estás seguro de eliminar a ${user.name}?`)) {
+            if (currentUserRole === 'EMPLOYEE' && user.role?.name !== 'CUSTOMER') {
+                toast({ title: "Acceso denegado", description: "No tienes permisos para eliminar este tipo de usuario.", variant: "destructive" })
+                return
+            }
             try {
                 await UsersAPI.delete(user.id)
                 toast({ title: "Usuario eliminado", description: `El usuario ${user.name} ha sido eliminado.` })
@@ -130,8 +139,8 @@ export default function UsersPage() {
             }
             setIsFormOpen(false)
             loadUsers()
-        } catch (error: any) {
-             const message = error.response?.data?.message || "Error al guardar usuario"
+        } catch (error: unknown) {
+             const message = error instanceof Error ? (error as any).response?.data?.message || error.message : "Error al guardar usuario"
              toast({ title: "Error", description: message, variant: "destructive" })
         }
     }
@@ -190,6 +199,15 @@ export default function UsersPage() {
                                 ))}
                             </SelectContent>
                         </Select>
+
+                        {/* Botón Nuevo Usuario - Solo permitido para empleados si están en el filtro de Clientes, y para ADMINs si no están viendo otros admins */}
+                        {((currentUserRole === 'SUPER_ADMIN') || 
+                          (currentUserRole === 'ADMIN' && roleFilter !== 'ADMIN' && roleFilter !== 'SUPER_ADMIN') || 
+                          (currentUserRole === 'EMPLOYEE' && roleFilter === 'CUSTOMER')) && (
+                             <Button onClick={() => handleEdit({} as User)} className="bg-indigo-600 hover:bg-indigo-700 shadow-sm text-white hover:cursor-pointer">
+                                <Plus className="mr-2 h-4 w-4" /> Nuevo Usuario
+                            </Button>
+                        )}
 
                         <Button variant="outline" onClick={loadUsers} disabled={loading} title="Recargar" className="bg-background hover:bg-muted border-input text-foreground hover:cursor-pointer">
                             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />

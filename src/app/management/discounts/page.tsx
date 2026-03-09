@@ -235,13 +235,15 @@ export default function DiscountsPage() {
                         <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                         <span className="ml-2 hidden sm:inline">Actualizar</span>
                     </Button>
-                    <Button 
-                        onClick={handleOpenCreate} 
-                        className="bg-indigo-600 hover:bg-indigo-700 hover:cursor-pointer"
-                        disabled={!!activeEvent}
-                    >
-                        <Plus className="mr-2 h-4 w-4" /> Nuevo Descuento
-                    </Button>
+                    {userRole !== 'EMPLOYEE' && (
+                        <Button 
+                            onClick={handleOpenCreate} 
+                            className="bg-indigo-600 hover:bg-indigo-700 hover:cursor-pointer"
+                            disabled={!!activeEvent}
+                        >
+                            <Plus className="mr-2 h-4 w-4" /> Nuevo Descuento
+                        </Button>
+                    )}
                 </div>
             </div>
 

@@ -84,16 +84,24 @@ export function UserForm({ open, onOpenChange, user, currentUserRole, onSave }: 
         )
     }
 
+    const isAuthorized = currentUserRole === 'SUPER_ADMIN' ||
+        (currentUserRole === 'ADMIN' && user?.role?.name !== 'ADMIN' && user?.role?.name !== 'SUPER_ADMIN') ||
+        (currentUserRole === 'EMPLOYEE' && (user?.role?.name === 'CUSTOMER' || !user?.id))
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[700px] bg-background border-4 border-secondary/60 text-foreground max-h-[90vh] overflow-y-auto shadow-2xl">
                 <DialogHeader>
                     <DialogTitle>{user?.id ? 'Editar Usuario' : 'Crear Usuario'}</DialogTitle>
                     <DialogDescription className="text-muted-foreground">
-                        {user?.id ? 'Modifica los datos del usuario existente.' : 'Registra un nuevo usuario en el sistema.'}
+                        {!isAuthorized 
+                            ? 'No tienes permisos para modificar este perfil.' 
+                            : user?.id ? 'Modifica los datos del usuario existente.' : 'Registra un nuevo usuario en el sistema.'}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6 py-4">
+                    
+                    <fieldset disabled={!isAuthorized} className="space-y-6">
                     
                     {/* Información Personal */}
                     <div className="space-y-4">
@@ -263,9 +271,13 @@ export function UserForm({ open, onOpenChange, user, currentUserRole, onSave }: 
                          </div>
                     </div>
                     
+                    </fieldset>
+                    
                     <DialogFooter className="pt-4 sticky bottom-0 bg-background pb-2 border-t border-border">
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-border text-muted-foreground hover:bg-muted hover:cursor-pointer">Cancelar</Button>
-                        <Button type="submit" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground min-w-[150px] shadow-lg shadow-secondary/20 hover:cursor-pointer">Guardar Cambios</Button>
+                        {isAuthorized && (
+                            <Button type="submit" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground min-w-[150px] shadow-lg shadow-secondary/20 hover:cursor-pointer">Guardar Cambios</Button>
+                        )}
                     </DialogFooter>
                 </form>
             </DialogContent>

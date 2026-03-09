@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { InventoryItem, formatPrice, formatStock } from "@/services/stock-control.service"
+import { useAuthStore } from "@/store/use-auth-store"
+import { UserRole } from "@/types/schema"
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
 import { Edit3, Settings2, X } from "lucide-react"
 import { useState } from "react"
@@ -24,6 +26,8 @@ export function StockTable({
     lowThreshold,
     criticalThreshold
 }: StockTableProps) {
+    const { user } = useAuthStore()
+    const currentUserRole = (user?.role?.name || 'EMPLOYEE') as UserRole
     const [sorting, setSorting] = useState<any>([])
     const [columnFilters, setColumnFilters] = useState<any>([])
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
@@ -34,14 +38,14 @@ export function StockTable({
     const columns: ColumnDef<InventoryItem>[] = [
         {
             id: "select",
-            header: ({ table }) => (
+            header: ({ table }: { table: any }) => (
                 <Checkbox
                     checked={table.getIsAllPageRowsSelected()}
-                    onCheckedChange={(value:any) => table.toggleAllPageRowsSelected(!!value)}
+                    onCheckedChange={(value: any) => table.toggleAllPageRowsSelected(!!value)}
                     aria-label="Seleccionar todos"
                 />
             ),
-            cell: ({ row }) => (
+            cell: ({ row }: { row: any }) => (
                 <Checkbox
                     checked={row.getIsSelected()}
                     onCheckedChange={(value:any) => row.toggleSelected(!!value)}
@@ -55,12 +59,12 @@ export function StockTable({
         {
             accessorKey: "skuCode",
             header: "SKU",
-            cell: ({ row }) => <span className="font-mono text-xs">{row.getValue("skuCode")}</span>
+            cell: ({ row }: { row: any }) => <span className="font-mono text-xs">{row.getValue("skuCode")}</span>
         },
         {
             accessorKey: "productName",
             header: "Producto",
-            cell: ({ row }) => {
+            cell: ({ row }: { row: any }) => {
                 const variant = row.original.variant;
                 return (
                     <div className="flex flex-col">
@@ -76,7 +80,7 @@ export function StockTable({
         {
             accessorKey: "stock",
             header: "Stock",
-            cell: ({ row }) => {
+            cell: ({ row }: { row: any }) => {
                 const item = row.original
                 const low = lowThreshold ?? item.minStock ?? 10
                 const critical = criticalThreshold ?? 5
@@ -102,7 +106,7 @@ export function StockTable({
         {
             accessorKey: "price",
             header: "Precio",
-            cell: ({ row }) => {
+            cell: ({ row }: { row: any }) => {
                 const item = row.original
                 return (
                     <span className="font-mono">{formatPrice(parseFloat(item.price), item.measurementUnit)}</span>
@@ -112,7 +116,7 @@ export function StockTable({
         {
             id: "actions",
             header: "Acciones",
-            cell: ({ row }) => {
+            cell: ({ row }: { row: any }) => {
                 const item = row.original
                 return (
                     <Button 
@@ -130,7 +134,10 @@ export function StockTable({
                 )
             }
         }
-    ]
+    ].filter(col => {
+        if (col.id === 'actions' && currentUserRole === 'EMPLOYEE') return false;
+        return true;
+    })
 
     const table = useReactTable({
         data,
@@ -161,14 +168,16 @@ export function StockTable({
                         <span className="text-sm font-semibold text-secondary">
                             {selectedCount} producto(s) seleccionado(s)
                         </span>
-                        <Button
-                            size="sm"
-                            onClick={() => setBulkEditOpen(true)}
-                            className="h-8 gap-1.5 hover:cursor-pointer"
-                        >
-                            <Edit3 className="h-3.5 w-3.5" />
-                            Edición Masiva
-                        </Button>
+                        {currentUserRole !== 'EMPLOYEE' && (
+                            <Button
+                                size="sm"
+                                onClick={() => setBulkEditOpen(true)}
+                                className="h-8 gap-1.5 hover:cursor-pointer"
+                            >
+                                <Edit3 className="h-3.5 w-3.5" />
+                                Edición Masiva
+                            </Button>
+                        )}
                     </div>
                     <Button
                         variant="ghost"

@@ -2,12 +2,12 @@
 
 import { Button } from "@/components/ui/button"
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+   Dialog,
+   DialogContent,
+   DialogDescription,
+   DialogFooter,
+   DialogHeader,
+   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -462,15 +462,19 @@ export function BranchDialog({ open, onOpenChange, branch, onSuccess }: BranchDi
                                                 <div className="text-xs text-muted-foreground">{user.email}</div>
                                             </div>
                                         </div>
-                                        <Button 
-                                            variant="ghost" 
-                                            size="icon" 
-                                            className="text-destructive hover:cursor-pointer hover:text-destructive hover:bg-destructive/10"
-                                            onClick={() => handleRemoveUser(user.id)}
-                                            disabled={usersLoading}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+                                        {currentUser?.role?.name === 'SUPER_ADMIN' || (currentUser?.role?.name === 'ADMIN' && user.role?.name !== 'ADMIN' && user.role?.name !== 'SUPER_ADMIN') ? (
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                className="text-destructive hover:cursor-pointer hover:text-destructive hover:bg-destructive/10"
+                                                onClick={() => handleRemoveUser(user.id)}
+                                                disabled={usersLoading}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        ) : (
+                                            <div className="w-10" /> // Spacer to maintain layout
+                                        )}
                                     </div>
                                 ))}
                                 {branchUsers.length > 0 && branchUsers.filter(u => {

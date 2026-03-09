@@ -141,25 +141,25 @@ export const adminNavigation: NavItem[] = [
      {
         title: "Administración",
         icon: Settings, 
-        roles: ['SUPER_ADMIN', 'ADMIN'], 
+        roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'], 
         children: [
             {
                 title: "Categorías",
                 icon: Tags,
                 href: "/management/categories",
-                roles: ['SUPER_ADMIN', 'ADMIN']
+                roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE']
             },
             {
                 title: "Cupones",
                 icon: TicketPercent,
                 href: "/management/coupons",
-                roles: ['SUPER_ADMIN', 'ADMIN'] 
+                roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'] 
             },
             {
                 title: "Descuentos",
                 icon: CirclePercent,
                 href: "/management/discounts",
-                roles: ['SUPER_ADMIN', 'ADMIN']  
+                roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE']  
             },
           
         ]
@@ -168,7 +168,7 @@ export const adminNavigation: NavItem[] = [
                 title: "Envíos",
                 icon: Truck,
                 href: "/management/shipping",
-                roles: ['SUPER_ADMIN', 'ADMIN'],
+                roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE']  
             },
             {
                 title: "Pasarelas de Pago",
@@ -180,13 +180,13 @@ export const adminNavigation: NavItem[] = [
         title: "Comentarios",
         icon: MessageSquare,
         href: "/management/comments",
-        roles: ['SUPER_ADMIN', 'ADMIN']  
+        roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE']  
     },
     {
         title: "Eventos",
         icon: Calendar,
         href: "/management/events",
-        roles: ['SUPER_ADMIN', 'ADMIN']  
+        roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE']  
     },
       {
                 title: "Asistente Bot",
@@ -198,13 +198,13 @@ export const adminNavigation: NavItem[] = [
                 title: "Blog",
                 href: "/management/content/blog",
                 icon: FileText,
-                roles: ['SUPER_ADMIN', 'ADMIN']
+                roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE']
             },
     {
         title: "Contenido Web",
         href: "/management/content",
                 icon: Globe,
-                roles: ['SUPER_ADMIN', 'ADMIN']
+                roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE']
     },
     {
         title: "Configuración",

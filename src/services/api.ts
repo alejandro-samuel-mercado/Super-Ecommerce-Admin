@@ -9,7 +9,13 @@ const TOAST_THROTTLE = 4000;
 function throttledToastError(message: string, description?: string) {
     const now = Date.now();
     
-    const isConnectionError = message.toLowerCase().includes('conectar') || message.toLowerCase().includes('network');
+    // Suppress unwanted messages as requested by user
+    const lowerMessage = message.toLowerCase();
+    if (lowerMessage.includes('insuficiente') || lowerMessage.includes('permiso') || lowerMessage.includes('denegado')) {
+        return;
+    }
+
+    const isConnectionError = lowerMessage.includes('conectar') || lowerMessage.includes('network');
     
     if (isConnectionError) {
         if (now - lastToastTime < TOAST_THROTTLE) return;
@@ -124,16 +130,16 @@ export const ProductsAPI = {
         const { data } = await api.get(`/products/${id}`)
         return data.data
     },
-    create: async (product: Partial<Product>) => {
-        const { data } = await api.post('/products', product)
+    create: async (product: Partial<Product>, branchId?: number) => {
+        const { data } = await api.post('/products', product, { params: { branchId } })
         return data.data
     },
-    update: async (id: number, product: Partial<Product>) => {
-        const { data } = await api.put(`/products/${id}`, product)
+    update: async (id: number, product: Partial<Product>, branchId?: number) => {
+        const { data } = await api.put(`/products/${id}`, product, { params: { branchId } })
         return data.data
     },
-    delete: async (id: number) => {
-        const { data } = await api.delete(`/products/${id}`)
+    delete: async (id: number, branchId?: number) => {
+        const { data } = await api.delete(`/products/${id}`, { params: { branchId } })
         return data
     },
     updatePrices: async (id: number, prices: any[]) => {
@@ -192,16 +198,16 @@ export const CategoriesAPI = {
         const { data } = await api.get('/categories')
         return data.data || data
     },
-    create: async (data: any) => {
-        const { data: res } = await api.post('/categories', data)
+    create: async (data: any, branchId?: number) => {
+        const { data: res } = await api.post('/categories', data, { params: { branchId } })
         return res
     },
-    update: async (id: number, data: any) => {
-        const { data: res } = await api.put(`/categories/${id}`, data)
+    update: async (id: number, data: any, branchId?: number) => {
+        const { data: res } = await api.put(`/categories/${id}`, data, { params: { branchId } })
         return res
     },
-    delete: async (id: number) => {
-        await api.delete(`/categories/${id}`)
+    delete: async (id: number, branchId?: number) => {
+        await api.delete(`/categories/${id}`, { params: { branchId } })
     }
 }
 

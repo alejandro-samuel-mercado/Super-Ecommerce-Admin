@@ -71,15 +71,17 @@ export function Header() {
                          </div>
                      </div>
                 <div className="flex items-center gap-1 sm:gap-2">
-                     <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="text-white/70 hover:cursor-pointer hover:text-white hover:bg-white/10 rounded-full"
-                        onClick={() => router.push('/management/system/audit')}
-                        title="Logs de Auditoría"
-                     >
-                        <ShieldCheck className="h-5 w-5" />
-                     </Button>
+                     {userRole !== 'EMPLOYEE' && (
+                         <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-white/70 hover:cursor-pointer hover:text-white hover:bg-white/10 rounded-full"
+                            onClick={() => router.push('/management/system/audit')}
+                            title="Logs de Auditoría"
+                         >
+                            <ShieldCheck className="h-5 w-5" />
+                         </Button>
+                     )}
                      <ModeToggle title="Temas" />
                      <NotificationBell title="Notificaciones" />
                 </div>

@@ -109,6 +109,34 @@ export function GenericTable<T>({ data, columns, searchKey, onEdit, onDelete, on
                     </TableBody>
                 </Table>
             </div>
+            
+            {/* Paginación */}
+            <div className="flex items-center justify-between px-4 py-4 bg-muted/30 sm:rounded-2xl border-2 border-zinc-200 dark:border-zinc-800">
+                <div className="flex-1 text-sm text-muted-foreground">
+                    Página {table.getState().pagination.pageIndex + 1} de{" "}
+                    {table.getPageCount()}
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                        className="hover:cursor-pointer disabled:cursor-not-allowed"
+                    >
+                        Anterior
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                        className="hover:cursor-pointer disabled:cursor-not-allowed"
+                    >
+                        Siguiente
+                    </Button>
+                </div>
+            </div>
         </div>
     )
 }

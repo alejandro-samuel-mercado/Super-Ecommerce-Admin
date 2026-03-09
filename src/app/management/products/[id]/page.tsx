@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { ProductsAPI } from "@/services/api"
-import { Product } from "@/types/schema"
+import { useAuthStore } from "@/store/use-auth-store"
+import { Product, UserRole } from "@/types/schema"
 import { ArrowLeft, Boxes, Calendar, Edit, Package, QrCode, Tag, Trash, TrendingUp } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
@@ -19,6 +20,8 @@ export default function ProductDetailsPage() {
     const router = useRouter()
     const [product, setProduct] = useState<Product | null>(null)
     const [loading, setLoading] = useState(true)
+    const { user } = useAuthStore()
+    const currentUserRole = (user?.role?.name || 'EMPLOYEE') as UserRole
     
     const [showEdit, setShowEdit] = useState(false)
     const [showSkuManager, setShowSkuManager] = useState(false)
@@ -96,14 +99,16 @@ export default function ProductDetailsPage() {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <Button variant="outline" onClick={() => setShowEdit(true)} className="bg-background hover:bg-muted border-border text-foreground shadow-sm hover:cursor-pointer">
-                        <Edit className="h-4 w-4 mr-2" /> Editar
-                    </Button>
-                    <Button variant="destructive" onClick={handleDeleteProduct} className="shadow-sm hover:cursor-pointer">
-                        <Trash className="h-4 w-4 mr-2" /> Eliminar
-                    </Button>
-                </div>
+                {currentUserRole !== 'EMPLOYEE' && (
+                    <div className="flex items-center gap-3">
+                        <Button variant="outline" onClick={() => setShowEdit(true)} className="bg-background hover:bg-muted border-border text-foreground shadow-sm hover:cursor-pointer">
+                            <Edit className="h-4 w-4 mr-2" /> Editar
+                        </Button>
+                        <Button variant="destructive" onClick={handleDeleteProduct} className="shadow-sm hover:cursor-pointer">
+                            <Trash className="h-4 w-4 mr-2" /> Eliminar
+                        </Button>
+                    </div>
+                )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -188,9 +193,11 @@ export default function ProductDetailsPage() {
                                 </CardTitle>
                                 <CardDescription className="text-muted-foreground">Gestiona el inventario por SKU</CardDescription>
                             </div>
-                            <Button onClick={() => setShowSkuManager(true)} className="bg-indigo-600 hover:bg-indigo-700 text-white hover:cursor-pointer">
-                                Gestionar Variantes
-                            </Button>
+                            {currentUserRole !== 'EMPLOYEE' && (
+                                <Button onClick={() => setShowSkuManager(true)} className="bg-indigo-600 hover:bg-indigo-700 text-white hover:cursor-pointer">
+                                    Gestionar Variantes
+                                </Button>
+                            )}
                         </CardHeader>
                         <CardContent className="p-0 overflow-x-auto">
                              <table className="w-full text-sm text-left">

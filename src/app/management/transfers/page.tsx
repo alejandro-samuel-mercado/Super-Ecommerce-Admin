@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/lib/utils"
 import stockTransferService from "@/services/stock-transfer.service"
 import { useBranchStore } from "@/store/branch.store"
+import { useAuthStore } from '@/store/use-auth-store'
 import { StockTransfer } from "@/types/schema"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -22,6 +23,8 @@ export default function TransfersPage() {
     const [transfers, setTransfers] = useState<StockTransfer[]>([])
     const [loading, setLoading] = useState(true)
     const { activeBranch } = useBranchStore()
+    const { user } = useAuthStore()
+    const currentUserRole = user?.role?.name || 'EMPLOYEE'
     
     const [createOpen, setCreateOpen] = useState(false)
     const [selectedTransfer, setSelectedTransfer] = useState<StockTransfer | null>(null)
@@ -87,10 +90,12 @@ export default function TransfersPage() {
                     <Button variant="outline" onClick={loadTransfers} disabled={loading} className="hover:cursor-pointer">
                         <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                     </Button>
-                    <Button onClick={() => setCreateOpen(true)} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 hover:cursor-pointer">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Nueva Transferencia
-                    </Button>
+                    {currentUserRole !== 'EMPLOYEE' && (
+                        <Button onClick={() => setCreateOpen(true)} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 hover:cursor-pointer">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Nueva Transferencia
+                        </Button>
+                    )}
                 </div>
             </div>
 

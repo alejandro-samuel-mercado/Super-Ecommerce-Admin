@@ -99,7 +99,7 @@ export function BranchSelector({ trigger }: BranchSelectorProps) {
         >
           <div className="flex items-center gap-2 truncate">
             <span className="truncate max-w-[120px]">
-               {activeBranch ? activeBranch.name : "Cargando..."}
+               {activeBranch ? activeBranch.name : (hasHydrated ? "Todas las sucursales" : "Cargando...")}
             </span>
           </div>
           <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
@@ -112,6 +112,24 @@ export function BranchSelector({ trigger }: BranchSelectorProps) {
           <CommandList>  
             <CommandEmpty>No se encontraron branches.</CommandEmpty>
             <CommandGroup>
+              {user?.role?.name === 'SUPER_ADMIN' && (
+                <CommandItem
+                  value="all-branches"
+                  className="!opacity-100 !pointer-events-auto cursor-pointer dark:aria-selected:bg-slate-900 data-[highlighted]:bg-slate-100 dark:data-[highlighted]:bg-slate-900"
+                  onSelect={() => {
+                    setActiveBranch(null)
+                    setOpen(false)
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      activeBranch === null ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  <span>Todas las sucursales</span>
+                </CommandItem>
+              )}
               {branches.map((branch) => (
                 <CommandItem
                   key={branch.id}

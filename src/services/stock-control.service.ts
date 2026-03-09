@@ -70,8 +70,8 @@ export const StockControlService = {
     },
 
     
-    updateInventory: async (id: number, updates: { stock?: number, minStock?: number, price?: number }) => {
-        const { data } = await api.put(`/admin/stock/inventory/${id}`, updates)
+    updateInventory: async (id: number, updates: { stock?: number, minStock?: number, price?: number }, branchId?: number) => {
+        const { data } = await api.put(`/admin/stock/inventory/${id}`, updates, { params: { branchId } })
         return data.data
     }
 }

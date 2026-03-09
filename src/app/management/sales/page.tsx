@@ -81,7 +81,7 @@ function SalesPageContent() {
                         window.history.replaceState({}, '', url)
                     }
                 } catch (error) {
-                    console.error("Error fetching sale from param:", error)
+                   
                 }
             }
             fetchOne()

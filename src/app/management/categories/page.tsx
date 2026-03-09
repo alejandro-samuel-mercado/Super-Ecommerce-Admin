@@ -13,10 +13,12 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from '@/components/ui/use-toast'
 import { CategoriesAPI } from '@/services/api'
+import { useBranchStore } from '@/store/branch.store'
 import { useAuthStore } from '@/store/use-auth-store'
 import { useCallback, useEffect, useState } from 'react'
 export default function CategoriesPage() {
     const { user } = useAuthStore()
+    const { activeBranch } = useBranchStore()
     const userRole = user?.role?.name || ''
     const [categories, setCategories] = useState<Category[]>([])
     const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -54,10 +56,10 @@ export default function CategoriesPage() {
     const handleSave = async () => {
         try {
             if (editingCategory) {
-                await CategoriesAPI.update(editingCategory.id, formData)
+                await CategoriesAPI.update(editingCategory.id, formData, activeBranch?.id)
                 toast({ title: "Categoría actualizada", description: "Los cambios se guardaron correctamente." })
             } else {
-                await CategoriesAPI.create(formData)
+                await CategoriesAPI.create(formData, activeBranch?.id)
                 toast({ title: "Categoría creada", description: "La nueva categoría se ha creado." })
             }
             setIsDialogOpen(false)
@@ -70,7 +72,7 @@ export default function CategoriesPage() {
     const handleDelete = async (category: Category) => {
         if(confirm(`¿Eliminar ${category.name}?`)) {
             try {
-                await CategoriesAPI.delete(category.id)
+                await CategoriesAPI.delete(category.id, activeBranch?.id)
                 toast({ title: "Categoría eliminada", description: `La categoría ${category.name} ha sido eliminada.` })
                 loadCategories()
             } catch (error: any) {

@@ -1,6 +1,6 @@
 "use client"
 
-import { AuditLog, AuditLogTable } from "@/components/management/system/audit-log-table"
+import { ACTION_LABELS, AuditLog, AuditLogTable } from "@/components/management/system/audit-log-table"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -11,6 +11,8 @@ import { useToast } from "@/components/ui/use-toast"
 import { exportToCSV } from "@/lib/export-utils"
 import { cn } from "@/lib/utils"
 import { AdminAPI } from "@/services/api"
+import { useBranchStore } from "@/store/branch.store"
+import { useAuthStore } from "@/store/use-auth-store"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import {
@@ -22,6 +24,7 @@ import {
     Shield,
     X
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 
 export default function AuditPage() {
@@ -38,6 +41,16 @@ export default function AuditPage() {
   const [totalItems, setTotalItems] = useState(0)
   
   const { toast } = useToast()
+  const { user } = useAuthStore()
+  const { activeBranch } = useBranchStore()
+  const router = useRouter()
+  const currentUserRole = (user?.role?.name || 'EMPLOYEE')
+
+  useEffect(() => {
+    if (currentUserRole === 'EMPLOYEE') {
+      router.push('/management')
+    }
+  }, [currentUserRole, router])
 
   const loadAuditLogs = useCallback(async () => {
     setLoading(true)
@@ -55,6 +68,10 @@ export default function AuditPage() {
       params.page = page
       params.limit = 20
       
+      if (activeBranch) {
+        params.branchId = activeBranch.id
+      }
+      
       const data = await AdminAPI.getAuditLogs(params)
       setLogs(data.logs || [])
       setTotalPages(data.totalPages || 1)
@@ -68,7 +85,7 @@ export default function AuditPage() {
     } finally {
       setLoading(false)
     }
-  }, [search, entityType, startDate, endDate, page, toast])
+  }, [search, entityType, startDate, endDate, page, activeBranch, toast])
 
   useEffect(() => {
     setPage(1)
@@ -103,7 +120,7 @@ export default function AuditPage() {
     const dataToExport = logs.map(log => ({
         Fecha: format(new Date(log.createdAt), "dd/MM/yyyy HH:mm:ss"),
         Admin: log.admin?.name || "System",
-        Accion: log.action,
+        Accion: ACTION_LABELS[log.action] || log.action,
         Entidad: log.entityType,
         ID_Entidad: log.entityId,
         IP: log.ip || "N/A",

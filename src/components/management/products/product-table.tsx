@@ -6,9 +6,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Product } from "@/types/schema"
-import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
-import { ArrowUpDown, Boxes, Edit, Search, Settings2 } from "lucide-react"
+import { Product, UserRole } from "@/types/schema"
+import { CellContext, ColumnDef, ColumnFiltersState, HeaderContext, SortingState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
+import { ArrowUpDown, Boxes, Edit, Search, Settings2, Trash } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { SkuManager } from "./sku-manager"
@@ -18,32 +18,32 @@ interface ProductTableProps {
     onEdit: (product: Product) => void
     onDelete: (product: Product) => void
     onSelectionChange?: (selectedIds: number[]) => void
+    currentUserRole: UserRole
 }
 
-export function ProductTable({ data, onEdit, onDelete, onSelectionChange }: ProductTableProps) {
+export function ProductTable({ data, onEdit, onDelete, onSelectionChange, currentUserRole }: ProductTableProps) {
     const router = useRouter()
-    const [sorting, setSorting] = useState<any>([])
-    const [columnFilters, setColumnFilters] = useState<any>([])
-    const [rowSelection, setRowSelection] = useState({})
+    const [sorting, setSorting] = useState<SortingState>([])
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
     
     const columns: ColumnDef<Product>[] = [
         {
             id: "select",
-            header: ({ table }) => (
+            header: ({ table }: HeaderContext<Product, unknown>) => (
                 <Checkbox
                     checked={table.getIsAllPageRowsSelected()}
                     onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                    aria-label="Select all"
+                    aria-label="Seleccionar todos"
                 />
             ),
-            cell: ({ row }) => (
-                <div onClick={(e) => e.stopPropagation()}>
-                    <Checkbox
-                        checked={row.getIsSelected()}
-                        onCheckedChange={(value) => row.toggleSelected(!!value)}
-                        aria-label="Select row"
-                    />
-                </div>
+            cell: ({ row }: CellContext<Product, unknown>) => (
+                <Checkbox
+                    checked={row.getIsSelected()}
+                    onCheckedChange={(value) => row.toggleSelected(!!value)}
+                    aria-label="Seleccionar fila"
+                    onClick={(e) => e.stopPropagation()}
+                />
             ),
             enableSorting: false,
             enableHiding: false,
@@ -51,7 +51,7 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange }: Prod
         {
             accessorKey: "images",
             header: "Imagen",
-            cell: ({ row }) => {
+            cell: ({ row }: CellContext<Product, unknown>) => {
                 const img = row.original.images?.[0]
                 return (
                     <div className="h-10 w-10 rounded-md overflow-hidden bg-muted border border-border flex items-center justify-center">
@@ -66,7 +66,7 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange }: Prod
         },
         {
             accessorKey: "name",
-            header: ({ column }) => {
+            header: ({ column }: HeaderContext<Product, unknown>) => {
                 return (
                     <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="hover:cursor-pointer">
                         Producto
@@ -74,7 +74,7 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange }: Prod
                     </Button>
                 )
             },
-            cell: ({ row }) => (
+            cell: ({ row }: CellContext<Product, unknown>) => (
                 <div>
                     <div className="font-bold text-foreground">{row.getValue("name")}</div>
                     <div className="text-xs text-muted-foreground">SKU: {row.original.skus?.[0]?.code || 'N/A'}</div>
@@ -84,7 +84,7 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange }: Prod
         {
             accessorKey: "brand",
             header: "Marca/Modelo",
-            cell: ({ row }) => (
+            cell: ({ row }: CellContext<Product, unknown>) => (
                 <div className="text-sm">
                     <span className="font-medium text-foreground">{row.original.brand || '-'}</span>
                     {row.original.model && <span className="text-muted-foreground ml-1">/ {row.original.model}</span>}
@@ -94,14 +94,14 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange }: Prod
         {
             accessorKey: "basePrice",
             header: "Precio Base",
-            cell: ({ row }) => <span className="font-medium text-foreground">${row.getValue<number>("basePrice").toLocaleString()}</span>
+            cell: ({ row }: CellContext<Product, unknown>) => <span className="font-medium text-foreground">${(row.getValue("basePrice") as number).toLocaleString()}</span>
         },
         {
             accessorKey: "stock",
             header: "Stock",
-            cell: ({ row }) => {
+            cell: ({ row }: CellContext<Product, unknown>) => {
                
-                const stock = row.original.skus?.reduce((acc, sku) => acc + Number(sku.stock), 0) ?? 0
+                const stock = row.original.skus?.reduce((acc: number, sku: { stock: number | string }) => acc + Number(sku.stock), 0) ?? 0
                 const unit = row.original.measurementUnit?.toLowerCase() || 'unid.'
                 const displayStock = row.original.allowFractional ? stock.toFixed(3).replace(/\.?0+$/, '') : Math.floor(stock)
                 
@@ -112,19 +112,19 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange }: Prod
                 )
             }
         },
-         {
+        {
             accessorKey: "category",
             header: "Categoría",
-            cell: ({ row }) => (
+            cell: ({ row }: CellContext<Product, unknown>) => (
                 <Badge variant="secondary" className="bg-muted text-muted-foreground hover:bg-muted/80">
-                    {(row.getValue("category") as any)?.name}
+                    {row.original.category?.name || 'Sin Categoría'}
                 </Badge>
             )
         },
         {
             accessorKey: "isActive",
             header: "Estado",
-            cell: ({ row }) => {
+            cell: ({ row }: CellContext<Product, unknown>) => {
                 const isActive = row.getValue("isActive")
                 return (
                     <Badge variant={isActive ? 'default' : 'secondary'} className={isActive ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-muted text-muted-foreground'}>
@@ -135,7 +135,7 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange }: Prod
         },
         {
             id: "actions",
-            cell: ({ row }) => {
+            cell: ({ row }: CellContext<Product, unknown>) => {
                 const product = row.original
                 return (
                     <div onClick={(e) => e.stopPropagation()}>
@@ -154,17 +154,28 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange }: Prod
                                 <DropdownMenuItem onClick={() => {
                                     setSelectedSkuProduct(product)
                                     setSkuManagerOpen(true)
-                                }} className="hover:bg-secondary/5 cursor-pointer p-3 text-sm font-medium transition-colors">
+                                }} className="hover:bg-secondary/5 cursor-pointer p-3 text-sm font-medium transition-colors border-b border-border">
                                     <Boxes className="mr-3 h-5 w-5 text-secondary" /> Gestionar Variantes
                                 </DropdownMenuItem>
-                                
+                                <DropdownMenuItem 
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        onDelete(product)
+                                    }} 
+                                    className="hover:bg-red-500/5 cursor-pointer p-3 text-sm font-medium transition-colors text-red-600 focus:text-red-700"
+                                >
+                                    <Trash className="mr-3 h-5 w-5" /> Eliminar Producto
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
                 )
             },
         },
-    ]
+    ].filter(col => {
+        if (col.id === 'actions' && currentUserRole === 'EMPLOYEE') return false;
+        return true;
+    })
 
     const table = useReactTable({
         data,

@@ -84,7 +84,7 @@ export default function ShippingPage() {
             header: "Estado",
             cell: ({ row }) => <Badge variant={row.original.active ? 'default' : 'secondary'}>{row.original.active ? 'Activo' : 'Inactivo'}</Badge>
         },
-        ...(userRole !== 'EMPLOYEE' ? [{
+        {
             id: "actions",
             cell: ({ row }: any) => (
                 <div className="flex items-center gap-2">
@@ -96,7 +96,7 @@ export default function ShippingPage() {
                     </Button>
                 </div>
             ),
-        }] : [])
+        }
     ]
 
     return (
