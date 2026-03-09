@@ -253,6 +253,10 @@ export const SalesAPI = {
     refund: async (id: number, data: { reason: string }) => {
         const { data: res } = await api.post(`/sales/${id}/refund`, data)
         return res.data
+    },
+    getInvoice: async (id: number) => {
+        const response = await api.get(`/sales/${id}/invoice`, { responseType: 'blob' })
+        return response.data
     }
 }
 

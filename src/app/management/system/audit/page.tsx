@@ -184,8 +184,8 @@ export default function AuditPage() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 px-6">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end  p-4 rounded-2xl ">
+      <div className="flex flex-col gap-4 px-6 sm:px-0">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end  p-4 rounded-2xl sm:px-0 ">
             {/* Search */}
             <div className="md:col-span-4 space-y-1.5">
                 <label className="text-[10px] font-bold uppercase text-muted-foreground ml-1">Buscar Acción / ID</label>
@@ -304,8 +304,8 @@ export default function AuditPage() {
           <AuditLogTable logs={logs} />
           
           <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-zinc-950 rounded-2xl border-4 border-zinc-200 dark:border-zinc-800 shadow-sm">
-             <div className="flex items-center gap-4 text-[11px] font-black text-slate-500 uppercase tracking-wider">
-                <p>Resultados: {totalItems}</p>
+             <div className="flex items-center text-[11px] font-black text-slate-500 uppercase tracking-wider">
+             
                 <div className="h-4 w-[1px] bg-slate-200 mx-2" />
                 <p>Página {page} de {totalPages}</p>
              </div>

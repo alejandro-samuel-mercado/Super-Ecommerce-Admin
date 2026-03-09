@@ -18,7 +18,7 @@ import {
     Tags,
     TicketPercent,
     Truck,
-    Users
+    Users, BadgeDollarSign, Wrench
 } from "lucide-react"
 
 export interface NavItem {
@@ -109,7 +109,7 @@ export const adminNavigation: NavItem[] = [
     },
     {
         title: "Compras",
-        icon: Truck,
+        icon: BadgeDollarSign,
         roles: ['SUPER_ADMIN', 'ADMIN'], 
         children: [
             {
@@ -140,7 +140,7 @@ export const adminNavigation: NavItem[] = [
     },
      {
         title: "Administración",
-        icon: Settings, 
+        icon:  Wrench, 
         roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'], 
         children: [
             {

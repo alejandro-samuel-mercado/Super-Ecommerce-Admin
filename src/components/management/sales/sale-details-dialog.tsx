@@ -107,16 +107,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
     const handleDownloadInvoice = async () => {
         setIsDownloading(true);
         try {
-            const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-            const response = await fetch(`${baseUrl}/api/sales/${sale.id}/invoice`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-                }
-            });
-
-            if (!response.ok) throw new Error("Failed to download invoice");
-
-            const blob = await response.blob();
+            const blob = await SalesAPI.getInvoice(sale.id as number);
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -124,6 +115,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
             toast.success("Factura descargada");
         } catch (error) {
             toast.error("Error al descargar factura");

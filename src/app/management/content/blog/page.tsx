@@ -1,6 +1,7 @@
 "use client"
 
 import { Badge } from "@/components/ui/badge"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import {
    Dialog,
@@ -134,7 +135,14 @@ export default function BlogManagementPage() {
     )
 
     return (
-        <div className="space-y-6 sm:p-6 pb-40 sm:pb-20">
+        <div className="space-y-6 sm:p-6 pb-40 sm:pb-20 pt-2">
+               <Breadcrumb   className="px-2">
+                            <BreadcrumbList>
+                                <BreadcrumbItem><BreadcrumbLink href="/management">Inicio</BreadcrumbLink></BreadcrumbItem>
+                                <BreadcrumbSeparator />
+                                <BreadcrumbItem><BreadcrumbLink>Blog</BreadcrumbLink></BreadcrumbItem>
+                            </BreadcrumbList>
+                        </Breadcrumb>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4">
                 <div>
                     <h1 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">Gestión de Blog</h1>
