@@ -599,7 +599,7 @@ export default function SettingsPage() {
                   </div>
                   <Separator />
                   <div className="flex flex-wrap gap-2">
-                    {/* Unidades personalizadas */}
+                    {/* Custom Units */}
                     {config.customMeasurementUnits?.map((unit) => (
                       <div
                         key={unit}
@@ -659,7 +659,7 @@ export default function SettingsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid gap-4 md:grid-cols-3">
-                {/* Sucursales */}
+                {/* Branches */}
                 <div
                   className={`p-4 rounded-lg border-4 flex flex-col justify-between ${config.enableBranches ? "border-gray-300/80 dark:bg-blue-900/10" : "bg-slate-50 border-red-500/20 dark:bg-slate-900/50"}`}
                 >
@@ -694,7 +694,7 @@ export default function SettingsPage() {
                   )}
                 </div>
 
-                {/* Movimientos de stock */}
+                {/* Stock Movements */}
                 <div
                   className={`p-4 rounded-lg border-4 flex flex-col justify-between ${config.enableStockMovements ? "border-gray-300/80 dark:bg-blue-900/10" : "bg-slate-50 border-red-500/20 dark:bg-slate-900/50"}`}
                 >
@@ -719,7 +719,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                {/* Control de stock */}
+                {/* Stock Control */}
                 <div
                   className={`p-4 rounded-lg border-4 flex flex-col justify-between ${config.enableStockControl ? "border-gray-300/80 dark:bg-blue-900/10" : "bg-slate-50 border-red-500/20 dark:bg-slate-900/50"}`}
                 >
@@ -924,7 +924,7 @@ export default function SettingsPage() {
 
                         <div className="space-y-1">
                           <Label className="text-xs font-bold dark:text-indigo-200">
-                            Puntos por $1 (productos sin puntos propios)
+                            Tasa de obtención (Puntos por $1)
                           </Label>
                           <div className="relative">
                             <Award className="absolute left-2 top-1.5 h-3 w-3 text-amber-500" />
@@ -943,8 +943,7 @@ export default function SettingsPage() {
                             />
                           </div>
                           <p className="text-[10px] text-muted-foreground">
-                            Solo aplica a productos sin "Puntos por compra"
-                            configurado. Ej: 0.001 = $1000 → 1 punto.
+                            Ej: 0.001 significa que $1000 = 1 punto.
                           </p>
                         </div>
                       </div>
