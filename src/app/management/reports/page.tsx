@@ -101,7 +101,6 @@ export default function ReportsPage() {
         endDate: end.toISOString(),
         branchId: activeBranch?.id,
       });
-      console.log("Financial stats response:", data);
       setFinancialStats(data);
     } catch (error) {
     } finally {
@@ -115,7 +114,6 @@ export default function ReportsPage() {
       const data = await reportService.getStockValuation({
         branchId: activeBranch?.id,
       });
-      console.log("Stock valuation response:", data);
       setStockValuation(data);
     } catch (error) {
     } finally {

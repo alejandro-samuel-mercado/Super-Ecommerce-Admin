@@ -69,7 +69,7 @@ export default function ManagementPage() {
         params.branchId = activeBranch.id;
       }
       const data = await AdminAPI.getStats(params);
-      console.log("API Response:", data);
+    
       setStats(data);
     } catch (error) {
     } finally {
@@ -125,14 +125,8 @@ export default function ManagementPage() {
     };
   }, [stats, displayCurrency, availableCurrencies]);
 
-  // Debug payment methods
-  console.log("Payment Methods:", stats?.paymentMethods);
-  console.log("Converted Payment Methods:", convertedStats?.paymentMethodsData);
-  console.log(
-    "Rate:",
-    availableCurrencies.find((c) => c.code === displayCurrency)
-      ?.exchangeRateToBase,
-  );
+
+
 
   return (
     <div className="p-1 sm:p-4 md:p-8 pt-2 mb-20 space-y-4 md:space-y-8 ">

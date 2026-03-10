@@ -101,12 +101,10 @@ export function BranchDialog({
       const response = await UsersAPI.getAll();
       let users = response.data;
 
-      // Filter out customers by role name
       users = users.filter(
         (u: { role?: { name: string } }) => u.role?.name !== "CUSTOMER",
       );
 
-      // Role-based filtering
       if (currentUser?.role?.name === "ADMIN") {
         users = users.filter(
           (u: { role?: { name: string } }) => u.role?.name === "EMPLOYEE",
@@ -117,7 +115,7 @@ export function BranchDialog({
             u.role?.name === "ADMIN" || u.role?.name === "EMPLOYEE",
         );
       } else {
-        // Default: show employees only
+        
         users = users.filter(
           (u: { role?: { name: string } }) => u.role?.name === "EMPLOYEE",
         );
@@ -139,7 +137,7 @@ export function BranchDialog({
 
   const filteredCandidates = candidateUsers
     .filter((user) => {
-      if (!searchQuery) return true; // Show all candidates when no search
+      if (!searchQuery) return true; 
       const query = searchQuery.toLowerCase();
       return (
         user.name.toLowerCase().includes(query) ||
@@ -585,7 +583,7 @@ export function BranchDialog({
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           ) : (
-                            <div className="w-10" /> // Spacer to maintain layout
+                            <div className="w-10" /> 
                           )}
                         </div>
                       ))}
