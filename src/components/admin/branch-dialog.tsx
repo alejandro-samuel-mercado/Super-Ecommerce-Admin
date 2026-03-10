@@ -124,9 +124,9 @@ export function BranchDialog({
       }
 
       setCandidateUsers(users);
-      console.log("Candidate users loaded:", users); // Debug log
+     
     } catch (error) {
-      console.error("Error loading candidate users:", error);
+     
     }
   }, [currentUser]);
 
