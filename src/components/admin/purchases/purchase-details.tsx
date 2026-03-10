@@ -65,7 +65,7 @@ export function PurchaseDetails({ id, onClose, onUpdate }: PurchaseDetailsProps)
         setConfirmConfig({
             open: true,
             title: "Confirmar Orden",
-            description: "¿Confirmar orden? Esto notificará (simulado) al proveedor.",
+            description: "¿Confirmar orden? ",
             onConfirm: async () => {
                 try {
                     setProcessing(true)
@@ -229,7 +229,7 @@ export function PurchaseDetails({ id, onClose, onUpdate }: PurchaseDetailsProps)
             )}
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Info Cards */}
+                {/* Información de la orden */}
                 <div className="md:col-span-2 space-y-6">
                     <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
                         <Table>

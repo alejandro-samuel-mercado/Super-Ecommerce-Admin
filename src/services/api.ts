@@ -9,7 +9,6 @@ const TOAST_THROTTLE = 4000;
 function throttledToastError(message: string, description?: string) {
     const now = Date.now();
     
-    // Suppress unwanted messages as requested by user
     const lowerMessage = message.toLowerCase();
     if (lowerMessage.includes('insuficiente') || lowerMessage.includes('permiso') || lowerMessage.includes('denegado')) {
         return;

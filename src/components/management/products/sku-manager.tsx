@@ -132,7 +132,7 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
                 </DialogHeader>
 
                 <div className="space-y-6 py-4  ">
-                    {/* Form */}
+                    {/* Formulario */}
                     <div className={`sm:p-4 sm:w-full   w-[80%] p-1 rounded-lg border transition-colors max-h-[60vh] overflow-y-auto ${editingSkuId ? 'bg-secondary/5 border-secondary/20' : 'bg-muted/30 border-border'}`}>
                         <div className="flex items-center justify-between mb-4">
                             <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
@@ -193,7 +193,7 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
                                 />
                             </div>
 
-                            {/* Barcode Section */}
+                            {/* Código de barras*/}
                             <div className="md:col-span-4 p-4 border rounded-lg bg-muted/20 space-y-4">
                                 <h4 className="font-semibold text-sm flex items-center gap-2 text-foreground">
                                     <ScanLine className="w-4 h-4" /> Configuración de Código de Barras
@@ -250,7 +250,7 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
                         </div>
                     </div>
 
-                    {/* List */}
+                    {/* Lista */}
                     <div className="border border-border rounded-lg sm:overflow-hidden overflow-x-auto shadow-sm sm:w-full w-[80%] ">
                         <table className="w-full text-sm text-left">
                             <thead className="bg-muted/50 text-muted-foreground font-semibold border-b border-border">

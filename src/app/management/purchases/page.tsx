@@ -256,7 +256,7 @@ export default function PurchasesPage() {
                 </div>
             </div>
 
-            {/* Strict Sales Filter Row Pattern */}
+            {/* Patrón estricto de filtros */}
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col sm:flex-row items-center justify-between py-4 px-4 gap-6">
                     <div className="relative w-full max-w-sm">
@@ -405,7 +405,7 @@ export default function PurchasesPage() {
                         </Table>
                     </div>
 
-                    {/* Strict Sales Pagination Pattern */}
+                    {/* Patrón estricto de paginación */}
                     <div className="flex items-center justify-end space-x-2 py-4">
                         <Button
                             variant="outline"

@@ -151,7 +151,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                 </div>
                             </div>
                             
-                            {/* Employee Info - Prominently displayed */}
+                            {/* Empleado Info  */}
                             <div className="flex items-center justify-between mt-2 pt-2 border-t border-border border-dashed">
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Vendedor:</span>
@@ -164,7 +164,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                     </DialogHeader>
 
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Payment Card */}
+                        {/* Pago */}
                         <div className="bg-card p-4 rounded-lg border border-border shadow-sm relative overflow-hidden">
                              <div className="absolute top-0 right-0 p-2 opacity-5 pointer-events-none">
                                 <CreditCard size={64} />
@@ -243,7 +243,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                             </div>
                         </div>
 
-                        {/* Delivery Card */}
+                        {/* Entrega */}
                         <div className="bg-card p-4 rounded-lg border border-border shadow-sm relative overflow-hidden">
                              <div className="absolute top-0 right-0 p-2 opacity-5 pointer-events-none">
                                 {deliveryType === 'DELIVERY' ? <MapPin size={64} /> : <Store size={64} />}
@@ -287,7 +287,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                         </div>
                     </div>
                     
-                    {/* Payment Proof Card (Admin View) */}
+                    {/* Comprobante de Pago */}
                     {sale.paymentProofUrl && (
                         <div className="bg-card p-4 rounded-lg border border-border shadow-sm mt-4">
                             <div className="flex items-center justify-between mb-3 text-muted-foreground uppercase tracking-wider text-[10px] font-black">
@@ -325,7 +325,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                 </div>
 
                 <div className="p-6 space-y-8">
-                     {/* Customer & Address */}
+                     {/* Cliente & Direccion */}
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -365,7 +365,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                         )}
                     </div>
                     
-                    {/* Observations */}
+                    {/* Observaciones */}
                     {sale.observations && (
                         <div className="mt-6">
                             <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-2">
@@ -418,14 +418,14 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                         </div>
                     </div>
 
-                    {/* Totals Breakdown */}
+                    {/* Resumen de Totales */}
                     <div className="flex flex-col gap-2 ml-auto w-full md:w-1/2">
                         <div className="flex justify-between text-zinc-500 text-sm">
                             <span>Subtotal Productos</span>
                              <span>{sale.currencyCode} {(Number(sale.subtotal) || 0).toLocaleString()}</span>
                         </div>
                         
-                        {/* Discount */}
+                        {/* Descuento */}
                         {(Number(sale.discount) > 0 || (sale.coupon && sale.coupon !== null)) ? (
                             <div className="flex justify-between text-emerald-600 text-sm font-medium bg-emerald-50 px-2 py-1 rounded">
                                 <span>
@@ -435,7 +435,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                             </div>
                         ) : null}
 
-                         {/* Shipping */}
+                         {/* Envio */}
                          {Number(sale.shippingCost) > 0 ? (
                             <div className="flex justify-between text-zinc-600 dark:text-zinc-400 text-sm bg-zinc-50 px-2 py-1 rounded">
                                 <span>Costo de Envío</span>

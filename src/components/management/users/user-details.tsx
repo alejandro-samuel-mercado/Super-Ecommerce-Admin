@@ -233,7 +233,7 @@ export function UserDetails({ user: initialUser, onClose }: UserDetailsProps) {
                 </div>
             </div>
 
-            {/* Main Content Grid */}
+            {/* Main Content*/}
             <div className="flex-1 sm:p-6 pt-6 px-0 grid grid-cols-1 xl:grid-cols-3 gap-6">
                 
                 <div className="xl:col-span-1 space-y-6 px-4">
@@ -306,7 +306,7 @@ export function UserDetails({ user: initialUser, onClose }: UserDetailsProps) {
                         </div>
                     )}
 
-                    {/* Personal & Location Info */}
+                    {/* Información Personal & Ubicación */}
                     <div className="bg-card border border-border rounded-3xl p-6 shadow-sm space-y-6">
                         <div>
                             <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
@@ -383,7 +383,7 @@ export function UserDetails({ user: initialUser, onClose }: UserDetailsProps) {
                     </div>
                 </div>
 
-                {/*  Activity Tabs */}
+                {/*  Actividad del Usuario */}
                 <div className="xl:col-span-2 flex flex-col h-full bg-card border border-border rounded-3xl overflow-hidden shadow-sm sm:mx-auto mx-2 sm:px-6 px-2 ">
                 <div className="p-8 pb-0 shrink-0">
                     <div className="flex items-center justify-between mb-6">

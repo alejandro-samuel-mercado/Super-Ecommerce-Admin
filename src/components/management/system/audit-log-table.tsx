@@ -181,7 +181,7 @@ export function AuditLogTable({ logs }: AuditLogTableProps) {
               logs.map((log) => (
                 <TableRow 
                   key={log.id} 
-                  className="group hover:bg-gray-200   hover:cursor-pointer dark:hover:bg-zinc-800/40 transition-all duration-300 border-b border-slate-100 dark:border-zinc-800/50"
+                  className="group hover:bg-gray-200   hover:cursor-pointer dark:hover:bg-zinc-800/40 transition-all duration-300 border-b border-border  dark:border-zinc-800/50"
                 >
                   <TableCell className="px-6 font-black text-slate-400 group-hover:text-secondary transition-colors">
                     #{log.id}

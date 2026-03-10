@@ -265,7 +265,7 @@ export function AdminChatWidget() {
         </SheetTrigger>
         <SheetContent side="right" className="w-[100%] sm:w-[540px] p-0 flex flex-col bg-card border-l">
             {!activeConversation ? (
-                // Conversation List
+              
                 <div className="flex flex-col h-full">
                     <SheetHeader className="p-6 border-b bg-muted/40">
                         <SheetTitle className="flex items-center gap-2">

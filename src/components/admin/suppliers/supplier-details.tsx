@@ -55,7 +55,7 @@ export default function SupplierDetailsClient({ id, onClose }: Props) {
             </div>
 
             <div className="flex flex-col xl:flex-row gap-6">
-                {/* Details Form */}
+                {/* Formulario de datos del proveedor */}
                 <div className="w-full xl:w-1/3 flex-shrink-0 space-y-6">
                    <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
                         <h2 className="text-lg font-medium mb-4 text-foreground">Datos del Proveedor</h2>
@@ -63,7 +63,7 @@ export default function SupplierDetailsClient({ id, onClose }: Props) {
                    </div>
                 </div>
 
-                {/* SKU Catalog */}
+                {/* Catalogo de SKU */}
                 <div className="w-full xl:w-2/3 flex-grow space-y-6">
                     <div className="bg-card border border-border rounded-xl p-6 shadow-sm overflow-x-auto">
                         <SupplierSkuManager supplierId={supplier.id} initialSkus={supplier.skus || []} />

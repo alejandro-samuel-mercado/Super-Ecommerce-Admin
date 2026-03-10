@@ -76,7 +76,7 @@ export default function UsersPage() {
     const filteredUsers = useMemo(() => {
         let result = users
 
-        // Employees can see everyone
+      
 
         if (roleFilter) {
             result = result.filter(u => u.role?.name === roleFilter)

@@ -175,7 +175,6 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
             return rawColumns.filter(col => col.id !== 'branches');
         }
         return rawColumns;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentFilter]);
 
     const [globalFilter, setGlobalFilter] = useState("")
@@ -217,7 +216,6 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
                     />
                 </div>
                 
-                {/* Removed duplicate button, handled in parent page */}
             </div>
             
             <div className="sm:rounded-3xl rounded-none border-4 border-zinc-300 dark:border-zinc-600 shadow-[0_0_20px_rgba(0,0,0,0.2)] hover:shadow-[0_0_30px_rgba(0,0,0,0.2)] hover:border-borderH hover:ring-4 hover:ring-zinc-500/10 transition-all duration-300 bg-card  overflow-hidden">

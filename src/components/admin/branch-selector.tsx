@@ -84,7 +84,7 @@ export function BranchSelector({ trigger }: BranchSelectorProps) {
     }
     
     fetchBranches()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   }, [hasHydrated, isAuthenticated]) 
 
   return (

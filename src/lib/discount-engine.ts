@@ -34,7 +34,7 @@ export class DiscountEngine {
             // Verificar Condiciones
             if (this.checkConditions(config.conditions, matchedItems, context)) {
                 
-                // Calcular Monto
+               
                 const amount = this.calculateAmount(config.action, matchedItems);
                 
                 if (amount > 0) {

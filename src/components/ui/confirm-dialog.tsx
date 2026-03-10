@@ -57,7 +57,7 @@ export function ConfirmDialog({
             onClick={onConfirm}
             disabled={loading}
             className={cn(
-              "rounded-xl font-bold hover:cursor-pointer",
+              "bg-primary/80 text-white rounded-xl font-bold hover:cursor-pointer",
               variant === "default" && "bg-[var(--primary)] hover:bg-secondary/90"
             )}
           >

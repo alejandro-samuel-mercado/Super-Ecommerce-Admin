@@ -277,7 +277,7 @@ export function AdminChatView() {
 
   return (
     <div className="flex flex-col md:flex-row h-[calc(100vh-140px)] gap-6 bg-transparent">
-        {/* Sidebar List */}
+        {/* Sidebar */}
         <div className={cn(
             "w-full md:w-1/3 bg-card p-2 rounded-2xl border-4 border-borderH/30 backdrop-blur-sm   shadow-lg shadow-borderH/20 flex flex-col transition-all",
             activeConversationId ? "hidden md:flex" : "flex"
@@ -331,7 +331,7 @@ export function AdminChatView() {
             </ScrollArea>
         </div>
 
-        {/* Chat Area */}
+        {/* Chat */}
         <div className={cn(
             "flex-1 bg-card rounded-2xl border-4 border-borderH/30 backdrop-blur-sm shadow-lg shadow-borderH/20 flex flex-col overflow-hidden",
             !activeConversationId ? "hidden md:flex" : "flex"

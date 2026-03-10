@@ -32,7 +32,7 @@ export const TicketTemplate = forwardRef<HTMLDivElement, TicketTemplateProps>(({
                 </div>
             </div>
 
-            {/* Customer (Optional) */}
+            {/* Cliente */}
             {sale.user && (
                 <div className="mb-2 border-b border-dashed border-black pb-2">
                     <p>Cliente: {sale.user.name}</p>
@@ -67,7 +67,7 @@ export const TicketTemplate = forwardRef<HTMLDivElement, TicketTemplateProps>(({
                 </tbody>
             </table>
 
-            {/* Totals */}
+            {/* Totales */}
             <div className="border-t border-black pt-2 space-y-1 text-right">
                 <div className="flex justify-between">
                     <span>Subtotal:</span>
@@ -94,7 +94,7 @@ export const TicketTemplate = forwardRef<HTMLDivElement, TicketTemplateProps>(({
                 </div>
             </div>
 
-            {/* Payment Info */}
+            {/* Información de Pago */}
             <div className="mt-4 pt-2 border-t border-dashed border-black text-center">
                 <p className="font-bold">FORMA DE PAGO: {sale.paymentType}</p>
                 <p>Estado: {sale.paymentStatus}</p>

@@ -49,7 +49,7 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
     
     const [products, setProducts] = useState<any[]>([])
     const [categories, setCategories] = useState<any[]>([])
-    const [dataLoaded, setDataLoaded] = useState(false)
+    const [hasAnotherActiveEvent, setHasAnotherActiveEvent] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
 
     useEffect(() => {
@@ -82,13 +82,17 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
 
     const loadDependencies = async () => {
         try {
-            const [prods, cats] = await Promise.all([
+            const [prods, cats, eventsRes] = await Promise.all([
                 ProductsAPI.getAll(),
-                CategoriesAPI.getAll()
+                CategoriesAPI.getAll(),
+                PromosAPI.getEvents()
             ])
             setProducts(prods.data?.data || prods.data || prods || [])
             setCategories(cats.data || cats || [])
-            setDataLoaded(true)
+            
+            const events = eventsRes.data || eventsRes || []
+            const anotherActive = events.some((e: any) => e.active && e.id !== initialData?.id)
+            setHasAnotherActiveEvent(anotherActive)
         } catch (error) {
         }
     }
@@ -130,9 +134,7 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
                 eventId = res.data?.id || res.id
             }
 
- 
             for (const disc of eventDiscounts) {
-                
                 const updatedRules = { ...(disc.rules || {}) };
                 updatedRules.action = {
                     type: disc.type || updatedRules.action?.type || 'PERCENTAGE',
@@ -213,8 +215,14 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
                         <Input value={name} onChange={e => setName(e.target.value)} required placeholder="Ej: Hot Sale 2024" className="bg-background border-input" />
                     </div>
                     <div className="flex items-center space-x-2 pt-8">
-                        <Switch checked={active} onCheckedChange={setActive} />
-                        <Label>Evento Activo</Label>
+                        <Switch 
+                            checked={active} 
+                            onCheckedChange={setActive} 
+                            disabled={hasAnotherActiveEvent && !initialData?.active}
+                        />
+                        <Label className={hasAnotherActiveEvent && !initialData?.active ? "text-muted-foreground" : ""}>
+                            Evento Activo {hasAnotherActiveEvent && !initialData?.active && "(Ya existe uno activo)"}
+                        </Label>
                     </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -337,7 +345,6 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
                                                 </div>
                                             </div>
 
-                                            {/* Resultados de búsqueda */}
                                             {searchQuery.length > 0 && (
                                                 <div className="border rounded-md bg-background shadow-sm max-h-[150px] overflow-y-auto divide-y">
                                                     {(disc.scope === 'CATEGORY' ? categories : products)
@@ -367,7 +374,6 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
                                                 </div>
                                             )}
 
-                                            {/* Elementos seleccionados */}
                                             <div className="space-y-2">
                                                 <Label className="text-[10px] uppercase">Seleccionados ({disc.targetIds?.length || 0})</Label>
                                                 <div className="flex flex-wrap gap-1.5 p-2 bg-secondary/5 border border-secondary/10 rounded-md min-h-[45px]">

@@ -39,7 +39,7 @@ export default function SalesPage() {
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden ">
-      {/* Main Tabs Container */}
+     
       <Tabs defaultValue="registro" className="flex-1 flex flex-col overflow-hidden">
          <div className="bg-background border-b border-border shadow-sm relative z-30">
             <TabsList className="w-full justify-start h-auto md:h-12 rounded-none bg-transparent p-0 overflow-x-auto flex-wrap md:flex-nowrap">

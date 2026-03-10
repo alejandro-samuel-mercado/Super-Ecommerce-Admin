@@ -54,7 +54,7 @@ export function Header() {
                 </div>
             </div>
 
-            {/* Right Side: Actions */}
+            {/* Acciones */}
             <div className="flex items-center gap-6 text-white max-lg:gap-4 ">
                 {(config?.enableBranches ?? true) && (
                      <div className="hidden md:flex flex-col items-end">

@@ -154,7 +154,6 @@ export function RegistrationTab() {
         }
         
         loadPOSData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // --- LÓGICA DEL ESCÁNER DE CÓDIGO DE BARRAS ---
@@ -515,7 +514,8 @@ export function RegistrationTab() {
         // "allDiscounts" = itemEventDiscounts + couponDiscount + manualDiscountAmount
         let taxAmount = 0;
         if (storeConfig?.taxRate && Number(storeConfig.taxRate) > 0) {
-            const totalAllDiscounts = totalItemEventDiscounts + couponDiscount + manualDiscountAmount;
+            const pointsDiscountAmount = (pointsToUse > 0 && storeConfig?.enablePointsRedemption) ? (pointsToUse * (Number(storeConfig.moneyPerPoint) || 0)) : 0;
+            const totalAllDiscounts = totalItemEventDiscounts + couponDiscount + manualDiscountAmount + pointsDiscountAmount;
             const taxBase = Math.max(0, grossSubtotal - totalAllDiscounts);
             taxAmount = parseFloat((taxBase * (Number(storeConfig.taxRate) / 100)).toFixed(2));
         }
@@ -579,9 +579,9 @@ export function RegistrationTab() {
     };
 
     // Estado de UI Derivado
-    const allowedPaymentMethods = (storeConfig && Array.isArray(storeConfig.enabledPaymentMethods) && storeConfig.enabledPaymentMethods.length > 0) 
+    const allowedPaymentMethods = ((storeConfig && Array.isArray(storeConfig.enabledPaymentMethods) && storeConfig.enabledPaymentMethods.length > 0) 
         ? storeConfig.enabledPaymentMethods 
-        : ['CASH', 'CARD', 'DEBIT', 'TRANSFER', 'MERCADO_PAGO'];
+        : ['CASH', 'CARD', 'DEBIT', 'TRANSFER', 'MERCADO_PAGO']).filter((m: string) => !['STRIPE', 'PAYPAL'].includes(m.toUpperCase()));
     const shippingEnabled = storeConfig?.enableShipping ?? true;
 
     const total = isQuickSale && manualTotal ? parseFloat(manualTotal) : getTotal();
@@ -658,7 +658,7 @@ export function RegistrationTab() {
                                                 }
                                             }}
                                         >
-                                            {/* Stock Indicator Line */}
+                                            {/* Linea de Stock */}
                                             <div className={cn("absolute left-0 top-0 bottom-0 w-2", totalStock > 0 ? "bg-emerald-600" : "bg-red-600")} />
                                             
                                             <div className="flex-1 pl-4">
@@ -723,7 +723,7 @@ export function RegistrationTab() {
 
             {/* COL CENTRAL: Formulario y Configuración */}
             <div className="flex flex-col gap-4 h-auto lg:h-full ">
-                {/* Client Section */}
+                {/* Cliente */}
                 <Card className="border-2 border-border shadow-md bg-card rounded-xl">
                     <CardHeader className="p-3 py-2 bg-muted/50 border-b-2 border-border flex flex-row items-center justify-between rounded-t-xl">
                         <h3 className="font-bold text-sm flex items-center gap-2 text-foreground uppercase">
@@ -985,7 +985,7 @@ export function RegistrationTab() {
                                 <span className="font-mono text-sm">${getSubtotal().toLocaleString()}</span>
                              </div>
                              
-                             {/* Shipping */}
+                             {/* Envío */}
                              <div className="flex justify-between items-center text-muted-foreground">
                                 <span className="text-xs font-bold uppercase">Envío</span>
                                 {shippingCost === 0 && deliveryType === 'DELIVERY' ? (
@@ -1008,8 +1008,7 @@ export function RegistrationTab() {
                                                     const { amount } = getItemDiscount(item);
                                                     netItemsTotal += Math.max(0, item.unitPrice * item.quantity - amount);
                                                 });
-                                                
-                                                let finalPreTax = netItemsTotal + (shippingCost === 0 && deliveryType === 'DELIVERY' && storeConfig?.freeShippingThreshold && getSubtotal() >= storeConfig?.freeShippingThreshold ? 0 : (deliveryType === 'DELIVERY' ? shippingCost : 0));
+                                                                                                let finalPreTax = netItemsTotal;
                                                 
                                                 if (appliedCoupon) {
                                                     const couponValue = Number(appliedCoupon.value) || 0;
@@ -1017,9 +1016,10 @@ export function RegistrationTab() {
                                                     else finalPreTax -= couponValue;
                                                 }
                                                  if (manualDiscount > 0) finalPreTax -= (finalPreTax * (manualDiscount / 100));
+                                                 const pointsDiscountAmount = (pointsToUse > 0 && storeConfig?.enablePointsRedemption) ? (pointsToUse * (Number(storeConfig.moneyPerPoint) || 0)) : 0;
+                                                 finalPreTax -= pointsDiscountAmount;
                                                  
-                                                 // TAX BASE: Subtotal - Coupons - Manual Discount (EXCLUDING POINTS)
-                                                 return finalPreTax * (Number(storeConfig.taxRate) / 100);
+                                                 return Math.max(0, finalPreTax) * (Number(storeConfig.taxRate) / 100);
                                              })()
                                         ).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
@@ -1028,7 +1028,7 @@ export function RegistrationTab() {
 
                             <div className="space-y-4 pt-4 border-t border-border">
                                 {/* ENTRADA DE CUPÓN */}
-                                {storeConfig?.enableCoupons && (
+                                {storeConfig?.enableCoupons !== false && (
                                     <div className="flex gap-2">
                                         <Input 
                                             value={couponCode}
@@ -1091,7 +1091,7 @@ export function RegistrationTab() {
                                                      value={pointsToUse > 0 ? pointsToUse : ''}
                                                      onChange={(e) => {
                                                          const val = parseInt(e.target.value) || 0;
-                                                         // Max validation
+                                                       
                                                          const max = client.points || 0;
                                                          setPointsToUse(Math.min(val, max));
                                                      }}
@@ -1118,8 +1118,7 @@ export function RegistrationTab() {
 
                             </div>
 
-                             {/* TOTAL FINAL */}
-
+                        
 
                              {/* TOTAL FINAL */}
                              <div className="flex justify-between items-end border-t border-border pt-4">
@@ -1223,8 +1222,7 @@ export function RegistrationTab() {
                                                         value={item.quantity === 0 ? "" : item.quantity}
                                                         onChange={(e) => {
                                                             const raw = e.target.value;
-                                                            // No actualizar el store con valores intermedios como "." o ""
-                                                            // para evitar que quantity=0 elimine el item
+                                                           
                                                             if (raw === '' || raw === '.') return;
                                                             const val = parseFloat(raw);
                                                             if (!isNaN(val) && val >= 0) {

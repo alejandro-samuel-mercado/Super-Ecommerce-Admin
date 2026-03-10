@@ -110,7 +110,7 @@ export function TransferDetails({ transfer, open, onOpenChange, onUpdate }: Tran
                                         <TableRow key={item.id}>
                                             <TableCell>
                                                 <div className="font-medium text-sm">{item.sku?.product?.name || `SKU #${item.skuId}`}</div>
-                                                {/* Variants info could vary */}
+                                                {/* Informacion de variantes */}
                                             </TableCell>
                                             <TableCell className="text-right">{item.quantity}</TableCell>
                                         </TableRow>

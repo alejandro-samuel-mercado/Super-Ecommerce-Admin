@@ -187,7 +187,7 @@ export default function BotManagementPage() {
                                     </TableRow>
                                 ) : (
                                     filteredResponses.map((item) => (
-                                        <TableRow key={item.id} className="hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-zinc-900/40 transition-all duration-200 border-b border-slate-100 dark:border-zinc-800/50">
+                                        <TableRow key={item.id} className="hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-zinc-900/40 transition-all duration-200 border-b border-border  dark:border-zinc-800/50">
                                             <TableCell className="font-semibold">
                                                 <Badge variant="outline" className="px-2 py-0.5 bg-secondary/5 text-secondary border-secondary/20">
                                                     {item.trigger}

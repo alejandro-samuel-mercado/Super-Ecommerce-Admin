@@ -109,7 +109,7 @@ export function AlertDetailsDialog({ alert, open, onOpenChange }: AlertDetailsDi
               </div>
             )}
 
-            {/* Stack Trace */}
+            {/* Seguimiento de Ejecución (Stack Trace) */}
             <div>
               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                  Flujo de Ejecución (Stack Trace)

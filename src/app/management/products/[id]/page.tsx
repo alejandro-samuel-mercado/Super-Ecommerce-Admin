@@ -269,7 +269,7 @@ export default function ProductDetailsPage() {
 
                 {/* Sidebar (Right) */}
                 <div className="space-y-6">
-                    {/* Metadata Card */}
+                 
                     <Card className="border-border shadow-sm bg-card">
                         <CardHeader>
                             <CardTitle className="text-sm font-bold text-foreground uppercase tracking-wide">Detalles Adicionales</CardTitle>
@@ -296,7 +296,7 @@ export default function ProductDetailsPage() {
                         </CardContent>
                     </Card>
 
-                    {/* Quick Stats */}
+                  
                     <Card className="bg-indigo-50 dark:bg-indigo-950/30 border-indigo-100 dark:border-indigo-900">
                          <CardContent className="p-4">
                             <p className="text-sm text-indigo-800 dark:text-indigo-300 font-medium mb-1">Total Stock (Todas variantes)</p>

@@ -599,7 +599,7 @@ export default function SettingsPage() {
                   </div>
                   <Separator />
                   <div className="flex flex-wrap gap-2">
-                    {/* Custom Units */}
+                    {/* Unidades personalizadas */}
                     {config.customMeasurementUnits?.map((unit) => (
                       <div
                         key={unit}
@@ -659,7 +659,7 @@ export default function SettingsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid gap-4 md:grid-cols-3">
-                {/* Branches */}
+                {/* Sucursales */}
                 <div
                   className={`p-4 rounded-lg border-4 flex flex-col justify-between ${config.enableBranches ? "border-gray-300/80 dark:bg-blue-900/10" : "bg-slate-50 border-red-500/20 dark:bg-slate-900/50"}`}
                 >
@@ -694,7 +694,7 @@ export default function SettingsPage() {
                   )}
                 </div>
 
-                {/* Stock Movements */}
+                {/* Movimientos de stock */}
                 <div
                   className={`p-4 rounded-lg border-4 flex flex-col justify-between ${config.enableStockMovements ? "border-gray-300/80 dark:bg-blue-900/10" : "bg-slate-50 border-red-500/20 dark:bg-slate-900/50"}`}
                 >
@@ -719,7 +719,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                {/* Stock Control */}
+                {/* Control de stock */}
                 <div
                   className={`p-4 rounded-lg border-4 flex flex-col justify-between ${config.enableStockControl ? "border-gray-300/80 dark:bg-blue-900/10" : "bg-slate-50 border-red-500/20 dark:bg-slate-900/50"}`}
                 >
