@@ -98,8 +98,6 @@ export default function ManagementPage() {
     );
     const rate = currency ? Number(currency.exchangeRateToBase) : 1;
 
-    if (rate === 1) return stats;
-
     return {
       ...stats,
       totalRevenue: (stats.totalRevenue || 0) * rate,
@@ -108,7 +106,7 @@ export default function ManagementPage() {
         ...d,
         total: (d.total || 0) * rate,
       })),
-      paymentMethodsData: stats.paymentMethodsData?.map((m: any) => ({
+      paymentMethodsData: stats.paymentMethods?.map((m: any) => ({
         ...m,
         value: (m.value || 0) * rate,
       })),
@@ -126,6 +124,15 @@ export default function ManagementPage() {
       })),
     };
   }, [stats, displayCurrency, availableCurrencies]);
+
+  // Debug payment methods
+  console.log("Payment Methods:", stats?.paymentMethods);
+  console.log("Converted Payment Methods:", convertedStats?.paymentMethodsData);
+  console.log(
+    "Rate:",
+    availableCurrencies.find((c) => c.code === displayCurrency)
+      ?.exchangeRateToBase,
+  );
 
   return (
     <div className="p-1 sm:p-4 md:p-8 pt-2 mb-20 space-y-4 md:space-y-8 ">
@@ -249,7 +256,7 @@ export default function ManagementPage() {
                     Ventas
                   </p>
                   <h3 className="text-3xl font-bold tracking-tight">
-                    {stats?.salesCount || 0}
+                    {stats?.totalSalesCount || 0}
                   </h3>
                 </div>
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
@@ -274,7 +281,7 @@ export default function ManagementPage() {
                     Clientes
                   </p>
                   <h3 className="text-3xl font-bold tracking-tight">
-                    {stats?.newUsers || 0}
+                    {stats?.newUsersPeriod || 0}
                   </h3>
                 </div>
                 <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400">
@@ -526,15 +533,18 @@ export default function ManagementPage() {
                             {user.name}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {user.salesCount} orders •
+                            {user.orders} orders •
                             <span className="text-blue-500 font-medium ml-1">
                               {displayCurrency === "USD" ? "U$D " : "$"}
-                              {(user.revenue || 0).toLocaleString(undefined, {
-                                minimumFractionDigits:
-                                  displayCurrency === "USD" ? 2 : 0,
-                                maximumFractionDigits:
-                                  displayCurrency === "USD" ? 2 : 0,
-                              })}
+                              {(user.totalSpent || 0).toLocaleString(
+                                undefined,
+                                {
+                                  minimumFractionDigits:
+                                    displayCurrency === "USD" ? 2 : 0,
+                                  maximumFractionDigits:
+                                    displayCurrency === "USD" ? 2 : 0,
+                                },
+                              )}
                             </span>
                           </p>
                         </div>
