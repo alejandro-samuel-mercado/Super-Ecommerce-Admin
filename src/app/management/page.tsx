@@ -71,13 +71,13 @@ export default function ManagementPage() {
 
         return {
             ...stats,
-            totalRevenue: stats.totalRevenue * rate,
-            avgTicket: stats.avgTicket * rate,
-            chartData: stats.chartData?.map((d: any) => ({ ...d, total: d.total * rate })),
-            paymentMethodsData: stats.paymentMethodsData?.map((m: any) => ({ ...m, value: m.value * rate })),
-            topProducts: stats.topProducts?.map((p: any) => ({ ...p, revenue: p.revenue * rate })),
-            topUsers: stats.topUsers?.map((u: any) => ({ ...u, revenue: u.revenue * rate })),
-            topEmployees: stats.topEmployees?.map((e: any) => ({ ...e, revenue: e.revenue * rate }))
+            totalRevenue: (stats.totalRevenue || 0) * rate,
+            avgTicket: (stats.avgTicket || 0) * rate,
+            chartData: stats.chartData?.map((d: any) => ({ ...d, total: (d.total || 0) * rate })),
+            paymentMethodsData: stats.paymentMethodsData?.map((m: any) => ({ ...m, value: (m.value || 0) * rate })),
+            topProducts: stats.topProducts?.map((p: any) => ({ ...p, revenue: (p.revenue || 0) * rate })),
+            topUsers: stats.topUsers?.map((u: any) => ({ ...u, revenue: (u.revenue || 0) * rate })),
+            topEmployees: stats.topEmployees?.map((e: any) => ({ ...e, revenue: (e.revenue || 0) * rate }))
         }
     }, [stats, displayCurrency, availableCurrencies])
 
@@ -326,7 +326,7 @@ export default function ManagementPage() {
                                                         {product.sales} sales •
                                                         <span className="text-emerald-500 font-medium ml-1">
                                                             {displayCurrency === 'USD' ? 'U$D ' : '$'}
-                                                            {product.revenue.toLocaleString(undefined, { minimumFractionDigits: displayCurrency === 'USD' ? 2 : 0, maximumFractionDigits: displayCurrency === 'USD' ? 2 : 0 })}
+                                                            {(product.revenue || 0).toLocaleString(undefined, { minimumFractionDigits: displayCurrency === 'USD' ? 2 : 0, maximumFractionDigits: displayCurrency === 'USD' ? 2 : 0 })}
                                                         </span>
                                                     </p>
                                                 </div>
@@ -359,7 +359,7 @@ export default function ManagementPage() {
                                                         {user.salesCount} orders •
                                                         <span className="text-blue-500 font-medium ml-1">
                                                             {displayCurrency === 'USD' ? 'U$D ' : '$'}
-                                                            {user.revenue.toLocaleString(undefined, { minimumFractionDigits: displayCurrency === 'USD' ? 2 : 0, maximumFractionDigits: displayCurrency === 'USD' ? 2 : 0 })}
+                                                            {(user.revenue || 0).toLocaleString(undefined, { minimumFractionDigits: displayCurrency === 'USD' ? 2 : 0, maximumFractionDigits: displayCurrency === 'USD' ? 2 : 0 })}
                                                         </span>
                                                     </p>
                                                 </div>
