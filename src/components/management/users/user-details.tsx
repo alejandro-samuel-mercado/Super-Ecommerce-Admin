@@ -216,7 +216,7 @@ export function UserDetails({ user: initialUser, onClose }: UserDetailsProps) {
                         const sessionRole = currentUserSession?.role?.name || ''
                         const targetRole = currentUser.role?.name || ''
                         
-                        const canEdit = sessionRole === 'SUPER_ADMIN' ||
+                        const canEdit = (sessionRole === 'SUPER_ADMIN' && (targetRole !== 'SUPER_ADMIN' || currentUser.id === currentUserSession?.id)) ||
                             (sessionRole === 'ADMIN' && targetRole !== 'ADMIN' && targetRole !== 'SUPER_ADMIN') ||
                             (sessionRole === 'EMPLOYEE' && targetRole === 'CUSTOMER')
                             
