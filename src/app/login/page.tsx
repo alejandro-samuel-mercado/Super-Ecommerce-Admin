@@ -37,7 +37,6 @@ export default function LoginPage() {
         e.preventDefault()
         setError("")
         setLoading(true)
-
         try {
             const { data } = await api.post('/auth/login', { email, password })
             
@@ -127,7 +126,9 @@ export default function LoginPage() {
             </Card>
 
             <div className="absolute bottom-6 text-center">
-                <p className="text-[10px] text-zinc-600 font-mono tracking-widest">SISTEMA SEGURO v2.0</p>
+                <p className="text-[10px] text-zinc-600 font-mono tracking-widest">SISTEMA SEGURO por UnixxTech
+
+                </p>
             </div>
         </div>
     )

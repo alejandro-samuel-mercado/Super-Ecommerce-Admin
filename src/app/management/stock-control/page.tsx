@@ -51,7 +51,7 @@ export default function StockControlPage() {
         const fetchSuppliers = async () => {
             try {
                 const { data } = await api.get('/suppliers')
-                setSuppliers(data.data || data || [])
+                setSuppliers(data?.data?.data || data?.data || data || [])
             } catch {
                 
             }

@@ -64,8 +64,9 @@ export default function CategoriesPage() {
             }
             setIsDialogOpen(false)
             loadCategories()
-        } catch (error) {
-            toast({ title: "Error", description: "No se pudo guardar la categoría.", variant: "destructive" })
+        } catch (error: any) {
+            const message = error.response?.data?.message || "No se pudo guardar la categoría."
+            toast({ title: "Error", description: message, variant: "destructive" })
         }
     }
 

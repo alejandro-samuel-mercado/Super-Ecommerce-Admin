@@ -252,7 +252,7 @@ export function TransferDialog({ open, onOpenChange, onSuccess }: TransferDialog
                                     </Button>
                                   </PopoverTrigger>
                                   <PopoverContent 
-                                    className="w-[400px] p-0 z-[100]" 
+                                    className="w-[300px] sm:w-[400px] p-0 z-[100] max-h-[40vh] overflow-y-auto overflow-x-hidden" 
                                     align="start"
                                   >
                                     <Command>

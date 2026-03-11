@@ -57,8 +57,7 @@ export function ConfirmDialog({
             onClick={onConfirm}
             disabled={loading}
             className={cn(
-              "bg-primary/80 text-white rounded-xl font-bold hover:cursor-pointer",
-              variant === "default" && "bg-[var(--primary)] hover:bg-secondary/90"
+              "bg-primary/80 text-white rounded-xl font-bold hover:cursor-pointer  hover:bg-secondary/90"
             )}
           >
             {loading ? "Procesando..." : confirmText}

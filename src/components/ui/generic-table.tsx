@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ColumnDef, ColumnFiltersState, SortingState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
-import { Plus, Search } from "lucide-react"
-import { useState } from "react"
+import { Plus, Search, Settings, Trash2 } from "lucide-react"
+import { useMemo, useState } from "react"
 
 interface GenericTableProps<T> {
     data: T[]
@@ -39,9 +39,37 @@ export function GenericTable<T>({
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
+    const tableColumns = useMemo(() => {
+        const cols = [...columns]
+        if (onEdit || onDelete) {
+            cols.push({
+                id: "actions",
+                header: "Acciones",
+                cell: ({ row }) => {
+                    const item = row.original
+                    return (
+                        <div className="flex items-center gap-2">
+                            {onEdit && (
+                                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onEdit(item); }} className="hover:cursor-pointer" title="Configurar / Editar">
+                                    <Settings className="h-4 w-4 text-blue-500" />
+                                </Button>
+                            )}
+                            {onDelete && (
+                                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onDelete(item); }} className="hover:cursor-pointer hover:bg-red-500/10 hover:text-red-500" title="Eliminar">
+                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                </Button>
+                            )}
+                        </div>
+                    )
+                }
+            })
+        }
+        return cols
+    }, [columns, onEdit, onDelete])
+
     const table = useReactTable({
         data,
-        columns,
+        columns: tableColumns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         onSortingChange: setSorting,
@@ -106,6 +134,8 @@ export function GenericTable<T>({
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
+                                    onClick={onEdit ? () => onEdit(row.original) : undefined}
+                                    className={onEdit ? "cursor-pointer hover:bg-muted/50 transition-colors" : ""}
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>

@@ -5,7 +5,7 @@ import api from './api';
 const stockTransferService = {
   getAll: async (params?: any): Promise<any> => {
     const { data } = await api.get<{ success: boolean; data: any }>('/stock-transfers', { params });
-    return data.data;
+    return data?.data?.data || data?.data || data || [];
   },
 
   getById: async (id: number): Promise<StockTransfer> => {

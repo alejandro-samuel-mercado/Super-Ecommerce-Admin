@@ -244,6 +244,9 @@ export function SalesTable({ data, onView, hideSearch = false, search, onSearchC
                                     <SelectItem value="MERCADO_PAGO">Mercado Pago</SelectItem>
                                     <SelectItem value="CASH">Efectivo</SelectItem>
                                     <SelectItem value="TRANSFER">Transferencia</SelectItem>
+                                    <SelectItem value="DEBIT">Tarjeta Débito</SelectItem>
+                                    <SelectItem value="CARD">Tarjeta Crédito</SelectItem>
+                                    <SelectItem value="CHECK">Cheque</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

@@ -2,12 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -99,7 +99,13 @@ export function BranchDialog({
   const loadCandidateUsers = useCallback(async () => {
     try {
       const response = await UsersAPI.getAll();
-      let users = response.data;
+      let users = Array.isArray(response) 
+          ? response 
+          : Array.isArray(response?.data) 
+              ? response.data 
+              : Array.isArray(response?.data?.data) 
+                  ? response.data.data 
+                  : [];
 
       users = users.filter(
         (u: { role?: { name: string } }) => u.role?.name !== "CUSTOMER",
@@ -140,8 +146,8 @@ export function BranchDialog({
       if (!searchQuery) return true; 
       const query = searchQuery.toLowerCase();
       return (
-        user.name.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query) ||
+        (user.name && user.name.toLowerCase().includes(query)) ||
+        (user.email && user.email.toLowerCase().includes(query)) ||
         (user.dni && user.dni.includes(query))
       );
     })
@@ -540,8 +546,8 @@ export function BranchDialog({
                         if (!assignedSearchQuery) return true;
                         const q = assignedSearchQuery.toLowerCase();
                         return (
-                          u.name.toLowerCase().includes(q) ||
-                          u.email.toLowerCase().includes(q) ||
+                          (u.name && u.name.toLowerCase().includes(q)) ||
+                          (u.email && u.email.toLowerCase().includes(q)) ||
                           (u.dni && u.dni.includes(q))
                         );
                       })
@@ -592,8 +598,8 @@ export function BranchDialog({
                         if (!assignedSearchQuery) return true;
                         const q = assignedSearchQuery.toLowerCase();
                         return (
-                          u.name.toLowerCase().includes(q) ||
-                          u.email.toLowerCase().includes(q) ||
+                          (u.name && u.name.toLowerCase().includes(q)) ||
+                          (u.email && u.email.toLowerCase().includes(q)) ||
                           (u.dni && u.dni.includes(q))
                         );
                       }).length === 0 && (

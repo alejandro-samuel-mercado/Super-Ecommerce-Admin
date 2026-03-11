@@ -160,7 +160,7 @@ export function PurchaseDetails({ id, onClose, onUpdate }: PurchaseDetailsProps)
                             size="sm" 
                             onClick={handleConfirm} 
                             disabled={processing}
-                            className="bg-primary hover:bg-primary/90 hover:cursor-pointer text-white font-bold"
+                            className="bg-primary/80  hover:bg-primary/90 hover:cursor-pointer text-white font-bold"
                         >
                             <CheckCircle className="h-4 w-4 mr-2" /> Confirmar Orden
                         </Button>

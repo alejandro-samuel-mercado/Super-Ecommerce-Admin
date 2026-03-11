@@ -189,7 +189,7 @@ export function SupplierForm({ initialData, onSuccess }: SupplierFormProps) {
                         name="isActive"
                         render={({ field }) => (
                             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm mt-8">
-                                <FormLabel>Estado del Proveedor</FormLabel>
+                                <FormLabel>Activo</FormLabel>
                                 <FormControl>
                                     <Switch
                                         checked={field.value}

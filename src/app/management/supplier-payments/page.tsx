@@ -80,10 +80,11 @@ function SupplierPaymentsContent() {
             if (endDate) params.endDate = endDate.toISOString()
 
             const response = await supplierPaymentService.getAll(params)
-            const paginatedData = response.data
-            setPayments(paginatedData?.data || [])
-            setTotalPages(paginatedData?.totalPages || 1)
-            setPage(paginatedData?.page || 1)
+            
+            const paymentsArray = response?.data?.data || response?.data || response || []
+            setPayments(Array.isArray(paymentsArray) ? paymentsArray : [])
+            setTotalPages(response?.data?.totalPages || response?.totalPages || 1)
+            setPage(response?.data?.page || response?.page || 1)
         } catch (error) {
         } finally {
             setLoading(false)
