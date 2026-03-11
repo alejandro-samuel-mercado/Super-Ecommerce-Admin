@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useToast } from '@/components/ui/use-toast'
+import { formatCurrency } from '@/lib/utils'
 import api from '@/services/api'
 import { Loader2, ShoppingCart, User as UserIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -109,10 +110,10 @@ export function CartPreviewDialog({ userId, open, onOpenChange }: CartPreviewDia
                                                         {parseFloat(item.quantity)}
                                                     </TableCell>
                                                     <TableCell className="text-right font-mono text-sm">
-                                                        ${parseFloat(item.sku.price).toLocaleString()}
+                                                        {formatCurrency(item.sku.price)}
                                                     </TableCell>
                                                     <TableCell className="text-right font-black text-secondary">
-                                                        ${(parseFloat(item.sku.price) * parseFloat(item.quantity)).toLocaleString()}
+                                                        {formatCurrency(parseFloat(item.sku.price) * parseFloat(item.quantity))}
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
@@ -126,7 +127,7 @@ export function CartPreviewDialog({ userId, open, onOpenChange }: CartPreviewDia
                                     <CardContent className="p-5">
                                         <div className="flex justify-between items-center">
                                             <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total Carrito</span>
-                                            <span className="text-3xl font-black text-secondary">${total.toLocaleString()}</span>
+                                            <span className="text-3xl font-black text-secondary">{formatCurrency(total)}</span>
                                         </div>
                                     </CardContent>
                                 </Card>

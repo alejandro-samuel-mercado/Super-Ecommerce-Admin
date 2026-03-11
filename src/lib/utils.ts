@@ -7,15 +7,19 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatCurrency(amount: number | string, currencyCode: string = 'USD') {
   const value = typeof amount === 'string' ? parseFloat(amount) : amount;
-  if (isNaN(value)) return '$0.00';
+  if (isNaN(value)) return formatCurrency(0, currencyCode);
 
   const locales: Record<string, string> = { 
     ARS: 'es-AR', MXN: 'es-MX', USD: 'en-US', EUR: 'es-ES', 
-    CLP: 'es-CL', COP: 'es-CO', UYU: 'es-UY', BRL: 'pt-BR'
+    CLP: 'es-CL', COP: 'es-CO', UYU: 'es-UY', BRL: 'pt-BR',
+    PEN: 'es-PE', BOB: 'es-BO', PYG: 'es-PY', GBP: 'en-GB',
+    VES: 'es-VE', CRC: 'es-CR', DOP: 'es-DO', GTQ: 'es-GT',
+    HNL: 'es-HN', NIO: 'es-NI', PAB: 'es-PA', CAD: 'en-CA',
+    CHF: 'de-CH'
   };
   const locale = locales[currencyCode] || 'en-US';
 
-  const zeroDecimalCurrencies = ['ARS', 'CLP', 'COP', 'PYG', 'JPY'];
+  const zeroDecimalCurrencies = ['ARS', 'CLP', 'COP', 'PYG', 'JPY', 'VES'];
   const hasDecimals = !zeroDecimalCurrencies.includes(currencyCode);
 
   return new Intl.NumberFormat(locale, {

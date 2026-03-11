@@ -21,6 +21,9 @@ export default function ProductsPage() {
     const [loading, setLoading] = useState(true)
     const [isExporting, setIsExporting] = useState(false)
     const [selectedIds, setSelectedIds] = useState<number[]>([])
+    const [page, setPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+    const [limit] = useState(25) // Aumentar un poco el default si se desea
     const { activeBranch } = useBranchStore()
     const { user } = useAuthStore()
     const { toast } = useToast()
@@ -28,25 +31,34 @@ export default function ProductsPage() {
 
 
 
-    const loadProducts = useCallback(async () => {
+    const loadProducts = useCallback(async (pageNum = page) => {
         if (!activeBranch) {
             return
         }
         
         setLoading(true)
         try {
-            const response = await ProductsAPI.getAll({ branchId: activeBranch.id })
-            setProducts(response.data?.data || [])
+            const response = await ProductsAPI.getAll({ 
+                branchId: activeBranch.id, 
+                page: pageNum, 
+                limit,
+                adminView: 'true' 
+            })
+            const paginatedData = response.data 
+            setProducts(paginatedData?.data || [])
+            setTotalPages(paginatedData?.totalPages || 1)
+            setPage(paginatedData?.page || 1)
         } catch (error) {
             toast({ title: "Error", description: "No se pudieron cargar los productos.", variant: "destructive" })
         } finally {
             setLoading(false)
         }
-    }, [activeBranch, toast])
+    }, [activeBranch, limit, toast])
 
     useEffect(() => {
-        loadProducts()
-    }, [loadProducts])
+        setPage(1)
+        loadProducts(1)
+    }, [activeBranch])
 
     const handleEdit = (product: Product) => {
         setEditingProduct(product)
@@ -198,7 +210,7 @@ export default function ProductsPage() {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <Button variant="outline" size="icon" onClick={loadProducts} disabled={loading} className="rounded-xl border-slate-300 dark:border-zinc-800 hover:cursor-pointer">
+                    <Button variant="outline" size="icon" onClick={() => loadProducts()} disabled={loading} className="rounded-xl border-slate-300 dark:border-zinc-800 hover:cursor-pointer">
                         <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                     </Button>
                     {currentUserRole !== 'EMPLOYEE' && (
@@ -221,6 +233,14 @@ export default function ProductsPage() {
                     onDelete={handleDelete}
                     onSelectionChange={setSelectedIds}
                     currentUserRole={currentUserRole}
+                    pagination={{
+                        page,
+                        totalPages,
+                        onPageChange: (newPage: number) => {
+                            setPage(newPage)
+                            loadProducts(newPage)
+                        }
+                    }}
                 />
             )}
 

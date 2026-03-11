@@ -62,11 +62,16 @@ export function convertToBaseUnit(qty: number, displayUnit: string): number {
 
 export const StockControlService = {
    
-    getInventory: async (branchId: number, params?: { search?: string, categoryId?: number, supplierId?: number, brand?: string, stockLevel?: string }) => {
+    getInventory: async (branchId: number, params?: { search?: string, categoryId?: number, supplierId?: number, brand?: string, stockLevel?: string, page?: number, limit?: number }) => {
         const { data } = await api.get('/admin/stock/inventory', {
             params: { ...params, branchId }
         })
-        return data.data as InventoryItem[]
+        return {
+            data: (data.data?.data || []) as InventoryItem[],
+            total: data.data?.total || 0,
+            totalPages: data.data?.totalPages || 1,
+            page: data.data?.page || 1
+        }
     },
 
     

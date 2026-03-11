@@ -43,7 +43,7 @@ export default function TransfersPage() {
             if (endDate) params.endDate = endDate.toISOString()
             
             const data = await stockTransferService.getAll(params)
-            setTransfers(data)
+            setTransfers(data.data || [])
         } catch (error) {
         } finally {
             setLoading(false)

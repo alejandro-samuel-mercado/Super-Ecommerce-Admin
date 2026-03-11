@@ -8,7 +8,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { formatCurrency } from "@/lib/utils"
 import { ProductsAPI } from "@/services/api"
+import { useBranchStore } from "@/store/branch.store"
 import { useAuthStore } from "@/store/use-auth-store"
 import { Product, UserRole } from "@/types/schema"
 import { ArrowLeft, Boxes, Calendar, Edit, Package, QrCode, Tag, Trash, TrendingUp } from "lucide-react"
@@ -21,6 +23,7 @@ export default function ProductDetailsPage() {
     const [product, setProduct] = useState<Product | null>(null)
     const [loading, setLoading] = useState(true)
     const { user } = useAuthStore()
+    const { activeBranch } = useBranchStore()
     const currentUserRole = (user?.role?.name || 'EMPLOYEE') as UserRole
     
     const [showEdit, setShowEdit] = useState(false)
@@ -31,13 +34,13 @@ export default function ProductDetailsPage() {
     const loadProduct = useCallback(async () => {
         try {
             setLoading(true)
-            const data = await ProductsAPI.getOne(Number(params.id))
+            const data = await ProductsAPI.getOne(Number(params.id), activeBranch?.id)
             setProduct(data)
         } catch (error) {
         } finally {
             setLoading(false)
         }
-    }, [params.id])
+    }, [params.id, activeBranch?.id])
 
     useEffect(() => {
         if (params.id) {
@@ -127,7 +130,7 @@ export default function ProductDetailsPage() {
                                 <div>
                                     <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Precio Base</h3>
                                     <div className="text-3xl font-bold text-foreground mt-1">
-                                        ${product.basePrice.toLocaleString()} 
+                                        {formatCurrency(product.basePrice)} 
                                         <span className="text-lg font-normal text-muted-foreground ml-1">/ {product.measurementUnit}</span>
                                     </div>
                                     <p className="text-sm text-muted-foreground mt-1">
@@ -183,6 +186,45 @@ export default function ProductDetailsPage() {
                         </CardContent>
                     </Card>
 
+                    {product.characteristics && product.characteristics.length > 0 && (
+                        <Card className="border-border shadow-sm bg-card">
+                            <CardHeader>
+                                <CardTitle className="text-lg text-foreground">Características</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <table className="w-full">
+                                    <tbody className="divide-y divide-border">
+                                        {product.characteristics.map((item: any, idx: number) => (
+                                            <tr key={idx}>
+                                                <td className="py-2 font-medium text-muted-foreground w-1/3">{item.key}</td>
+                                                <td className="py-2 text-foreground">{item.value}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {product.specifications && product.specifications.length > 0 && (
+                        <Card className="border-border shadow-sm bg-card">
+                            <CardHeader>
+                                <CardTitle className="text-lg text-foreground">Especificaciones</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <table className="w-full">
+                                    <tbody className="divide-y divide-border">
+                                        {product.specifications.map((item: any, idx: number) => (
+                                            <tr key={idx}>
+                                                <td className="py-2 font-medium text-muted-foreground w-1/3">{item.key}</td>
+                                                <td className="py-2 text-foreground">{item.value}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </CardContent>
+                        </Card>
+                    )}
                     {/* SKUs / Variants */}
                     <Card className="border-border shadow-sm bg-card overflow-hidden">
                         <CardHeader className="flex flex-row items-center justify-between border-b border-border bg-muted/30 py-4">

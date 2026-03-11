@@ -4,12 +4,12 @@ import React from 'react'
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-     DropdownMenu,
-     DropdownMenuContent,
-     DropdownMenuItem,
-     DropdownMenuLabel,
-     DropdownMenuSeparator,
-     DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -27,9 +27,16 @@ interface UserTableProps {
    onEdit: (user: User) => void
    onDelete: (user: User) => void
    onViewCart: (user: User) => void
+   search?: string
+   onSearchChange?: (val: string) => void
+   pagination?: {
+       page: number
+       totalPages: number
+       onPageChange: (page: number) => void
+   }
 }
 
-export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit, onDelete, onViewCart }: UserTableProps) {
+export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit, onDelete, onViewCart, search, onSearchChange, pagination }: UserTableProps) {
    const [sorting, setSorting] = useState<SortingState>([])
    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
    const rawColumns: ColumnDef<User>[] = [
@@ -180,26 +187,20 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
    // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [currentFilter]);
 
-   const [globalFilter, setGlobalFilter] = useState("")
-
-   const filteredData = React.useMemo(() => {
-        return data
-   }, [data])
-
    const table = useReactTable({
-       data: filteredData,
+       data,
        columns,
        getCoreRowModel: getCoreRowModel(),
        getPaginationRowModel: getPaginationRowModel(),
        onSortingChange: setSorting,
        getSortedRowModel: getSortedRowModel(),
        onColumnFiltersChange: setColumnFilters,
-       onGlobalFilterChange: setGlobalFilter,
        getFilteredRowModel: getFilteredRowModel(),
+       manualPagination: !!pagination,
+       pageCount: pagination?.totalPages,
        state: {
            sorting,
            columnFilters,
-           globalFilter,
        },
    })
 
@@ -211,12 +212,12 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
                    <div className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary">
                        <Search className="h-4 w-4" />
                    </div>
-                   <Input
-                       placeholder="Buscar por Nombre, DNI, Email o Teléfono..."
-                       value={globalFilter ?? ""}
-                       onChange={(event) => setGlobalFilter(event.target.value)}
-                        className="pl-10 pr-4 rounded-full shadow-sm w-full bg-gray-200 border-3 border-gray-400/20"
-                   />
+                    <Input
+                        placeholder="Buscar por Nombre, DNI, Email o Teléfono..."
+                        value={search ?? ""}
+                        onChange={(event) => onSearchChange?.(event.target.value)}
+                         className="pl-10 pr-4 rounded-full shadow-sm w-full bg-gray-200 border-3 border-gray-400/20 text-foreground"
+                    />
                </div>
               
                {/* Removed duplicate button, handled in parent page */}
@@ -268,27 +269,35 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
                    </TableBody>
                </Table>
            </div>
-           <div className="flex items-center justify-end space-x-2 py-4">
-               <Button
-                   variant="outline"
-                   size="sm"
-                   className="hover:cursor-pointer"
-                   onClick={() => table.previousPage()}
-                   disabled={!table.getCanPreviousPage()}
-               >
-                   Anterior
-               </Button>
-               <Button
-                   variant="outline"
-                   size="sm"
-                   className="hover:cursor-pointer"
-                   onClick={() => table.nextPage()}
-                   disabled={!table.getCanNextPage()}
-               >
-                   Siguiente
-               </Button>
-           </div>
+            <div className="flex items-center justify-between py-4 px-2">
+                <div className="text-sm text-muted-foreground font-medium uppercase tracking-tighter">
+                    {pagination ? (
+                        <span>Página {pagination.page} de {pagination.totalPages}</span>
+                    ) : (
+                        <span>{table.getFilteredRowModel().rows.length} resultados</span>
+                    )}
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="hover:cursor-pointer rounded-xl font-bold uppercase text-[10px] h-9 border-2"
+                        onClick={() => pagination ? pagination.onPageChange(pagination.page - 1) : table.previousPage()}
+                        disabled={pagination ? pagination.page <= 1 : !table.getCanPreviousPage()}
+                    >
+                        Anterior
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="hover:cursor-pointer rounded-xl font-bold uppercase text-[10px] h-9 border-2"
+                        onClick={() => pagination ? pagination.onPageChange(pagination.page + 1) : table.nextPage()}
+                        disabled={pagination ? pagination.page >= pagination.totalPages : !table.getCanNextPage()}
+                    >
+                        Siguiente
+                    </Button>
+                </div>
+            </div>
        </div>
    )
 }
-

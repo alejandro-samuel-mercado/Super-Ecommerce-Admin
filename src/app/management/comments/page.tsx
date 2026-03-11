@@ -15,6 +15,10 @@ import { useCallback, useEffect, useState } from "react"
 export default function CommentsPage() {
     const [comments, setComments] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
+    const [page, setPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+    const [limit] = useState(20)
+    const [search, setSearch] = useState("")
     const { toast } = useToast()
 
     const [viewOpen, setViewOpen] = useState(false)
@@ -22,21 +26,35 @@ export default function CommentsPage() {
 
 
 
-    const loadComments = useCallback(async () => {
+    const loadComments = useCallback(async (pageNum = page) => {
         setLoading(true)
         try {
-            const data = await CommentsAPI.getAll()
-            setComments(data)
+            const response = await CommentsAPI.getAll({
+                page: pageNum,
+                limit,
+                search
+            })
+            const paginatedData = response.data
+            setComments(paginatedData?.data || [])
+            setTotalPages(paginatedData?.totalPages || 1)
+            setPage(paginatedData?.page || 1)
         } catch (error) {
             toast({ title: "Error", description: "No se pudieron cargar los comentarios.", variant: "destructive" })
         } finally {
             setLoading(false)
         }
-    }, [toast])
+    }, [toast, page, limit, search])
 
     useEffect(() => {
-        loadComments()
-    }, [loadComments])
+        loadComments(1)
+    }, [])
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            loadComments(1)
+        }, 500)
+        return () => clearTimeout(timer)
+    }, [search])
 
     const handleModerate = async (id: number, approved: boolean) => {
         try {
@@ -132,7 +150,7 @@ export default function CommentsPage() {
                     </h1>
                     <p className="text-muted-foreground">Modera las opiniones de los usuarios.</p>
                 </div>
-                <Button variant="outline" className="hover:cursor-pointer" onClick={loadComments} disabled={loading} title="Recargar">
+                <Button variant="outline" className="hover:cursor-pointer" onClick={() => loadComments()} disabled={loading} title="Recargar">
                     <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                     <span className="ml-2 hidden sm:inline">Actualizar</span>
                 </Button>
@@ -146,8 +164,18 @@ export default function CommentsPage() {
                 <GenericTable 
                     data={comments}
                     columns={columns}
-                    searchKey="userName"
+                    searchKey="content"
                     onEdit={handleView}
+                    search={search}
+                    onSearchChange={setSearch}
+                    pagination={{
+                        page,
+                        totalPages,
+                        onPageChange: (newPage: number) => {
+                            setPage(newPage)
+                            loadComments(newPage)
+                        }
+                    }}
                 />
             )}
 

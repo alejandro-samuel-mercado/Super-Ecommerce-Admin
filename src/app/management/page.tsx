@@ -3,42 +3,42 @@
 import { DashboardCurrencyToggle } from "@/components/features/dashboard/DashboardCurrencyToggle";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/utils";
 import { AdminAPI, CurrenciesAPI } from "@/services/api";
 import { useBranchStore } from "@/store/branch.store";
 import {
-  DollarSign,
-  LayoutDashboard,
-  RefreshCcw,
-  ShoppingBag,
-  TrendingUp,
-  Users,
+    DollarSign,
+    LayoutDashboard,
+    RefreshCcw,
+    ShoppingBag,
+    TrendingUp,
+    Users,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
 } from "recharts";
 
 export default function ManagementPage() {
@@ -218,7 +218,6 @@ export default function ManagementPage() {
                     className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight truncate"
                     title={formatValue(stats?.totalRevenue || 0)}
                   >
-                    {currency?.code}
                     {formatValue(stats?.totalRevenue || 0)}
                   </h3>
                 </div>
@@ -298,7 +297,6 @@ export default function ManagementPage() {
                     Ticket Promedio
                   </p>
                   <h3 className="text-3xl font-bold tracking-tight">
-                    {currency?.code || displayCurrency}
                     {formatValue(stats?.avgTicket || 0)}
                   </h3>
                 </div>
@@ -349,9 +347,11 @@ export default function ManagementPage() {
                       <YAxis
                         axisLine={false}
                         tickLine={false}
-                        tickFormatter={(value) =>
-                          `${currency?.symbol || displayCurrency}${value > 1000 ? (value / 1000).toFixed(1) + "k" : value}`
-                        }
+                        tickFormatter={(value) => {
+                          if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+                          if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
+                          return String(value);
+                        }}
                         fontSize={12}
                         stroke="#71717a"
                       />
@@ -365,7 +365,7 @@ export default function ManagementPage() {
                           color: "hsl(var(--card-foreground))",
                         }}
                         formatter={(value: any) => [
-                          `${currency?.symbol || displayCurrency} ${Number(value).toLocaleString()}`,
+                          formatCurrency(Number(value), displayCurrency || 'USD'),
                           "Total",
                         ]}
                       />
@@ -412,7 +412,7 @@ export default function ManagementPage() {
                       </Pie>
                       <Tooltip
                         formatter={(value: any) => [
-                          `${currency?.symbol || displayCurrency} ${Number(value).toLocaleString()}`,
+                          formatCurrency(Number(value), displayCurrency || 'USD'),
                           "Volumen",
                         ]}
                       />
@@ -482,16 +482,7 @@ export default function ManagementPage() {
                           <p className="text-xs text-muted-foreground">
                             {product.sales} sales •
                             <span className="text-emerald-500 font-medium ml-1">
-                              {displayCurrency === "USD" ? "U$D " : "$"}
-                              {(product.revenue || 0).toLocaleString(
-                                undefined,
-                                {
-                                  minimumFractionDigits:
-                                    displayCurrency === "USD" ? 2 : 0,
-                                  maximumFractionDigits:
-                                    displayCurrency === "USD" ? 2 : 0,
-                                },
-                              )}
+                              {formatCurrency(product.revenue || 0, displayCurrency || 'USD')}
                             </span>
                           </p>
                         </div>
@@ -529,16 +520,7 @@ export default function ManagementPage() {
                           <p className="text-xs text-muted-foreground">
                             {user.orders} orders •
                             <span className="text-blue-500 font-medium ml-1">
-                              {displayCurrency === "USD" ? "U$D " : "$"}
-                              {(user.totalSpent || 0).toLocaleString(
-                                undefined,
-                                {
-                                  minimumFractionDigits:
-                                    displayCurrency === "USD" ? 2 : 0,
-                                  maximumFractionDigits:
-                                    displayCurrency === "USD" ? 2 : 0,
-                                },
-                              )}
+                              {formatCurrency(user.totalSpent || 0, displayCurrency || 'USD')}
                             </span>
                           </p>
                         </div>

@@ -58,6 +58,8 @@ export interface Product {
   skus?: SKU[];
   createdAt: string;
   updatedAt: string;
+  characteristics?: { key: string; value: string }[];
+  specifications?: { key: string; value: string }[];
 }
 
 export interface SKU {

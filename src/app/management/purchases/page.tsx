@@ -68,8 +68,8 @@ export default function PurchasesPage() {
                 supplierService.getAll({ active: true }),
                 branchService.getAll()
             ])
-            setSuppliers(suppliersData)
-            setBranches(branchesData)
+            setSuppliers(Array.isArray(suppliersData) ? suppliersData : [])
+            setBranches(Array.isArray(branchesData) ? branchesData : [])
         } catch (error) {
         }
     }
@@ -86,7 +86,7 @@ export default function PurchasesPage() {
             if (endDate) params.endDate = endDate.toISOString()
 
             const data = await purchaseService.getAll(params)
-            setPurchases(data)
+            setPurchases(Array.isArray(data) ? data : data?.data || [])
         } catch (error) {
         } finally {
             setLoading(false)

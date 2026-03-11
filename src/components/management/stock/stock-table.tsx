@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { InventoryItem, formatPrice, formatStock } from "@/services/stock-control.service"
 import { useAuthStore } from "@/store/use-auth-store"
 import { UserRole } from "@/types/schema"
-import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
+import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
 import { Edit3, Settings2, X } from "lucide-react"
 import { useState } from "react"
 import { BulkEditDialog } from "./bulk-edit-dialog"
@@ -18,13 +18,19 @@ interface StockTableProps {
     onRefresh: () => void
     lowThreshold?: number
     criticalThreshold?: number
+    pagination?: {
+        page: number
+        totalPages: number
+        onPageChange: (page: number) => void
+    }
 }
 
 export function StockTable({ 
     data,
     onRefresh,
     lowThreshold,
-    criticalThreshold
+    criticalThreshold,
+    pagination
 }: StockTableProps) {
     const { user } = useAuthStore()
     const currentUserRole = (user?.role?.name || 'EMPLOYEE') as UserRole
@@ -143,7 +149,6 @@ export function StockTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
@@ -154,6 +159,7 @@ export function StockTable({
             columnFilters,
             rowSelection,
         },
+        manualPagination: true,
     })
 
     const selectedRows = table.getSelectedRowModel().rows.map(r => r.original)
@@ -190,7 +196,7 @@ export function StockTable({
                 </div>
             )}
 
-            <div className="sm:rounded-3xl border-4 border-zinc-300 dark:border-zinc-600 shadow-[0_0_20px_rgba(0,0,0,0.2)] hover:shadow-[0_0_30px_rgba(0,0,0,0.2)] hover:border-borderH hover:ring-4 hover:ring-zinc-500/10 transition-all duration-300 bg-card overflow-hidden">
+            <div className="sm:rounded-3xl border-[1px] border-zinc-300 dark:border-zinc-800 shadow-[0_0_20px_rgba(0,0,0,0.02)] hover:shadow-[0_0_30px_rgba(0,0,0,0.04)] hover:border-borderH transition-all duration-300 bg-card overflow-hidden">
                 <Table>
                     <TableHeader className="bg-muted/50">
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -226,7 +232,7 @@ export function StockTable({
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-32 text-center text-muted-foreground">
-                                    No hay productos en esta branch. Asigna stock desde Entrada de Mercadería.
+                                    No hay productos en esta branch.
                                 </TableCell>
                             </TableRow>
                         )}
@@ -251,31 +257,31 @@ export function StockTable({
                 }}
             />
 
-            <div className="flex items-center justify-between space-x-2 py-4">
-                <span className="text-sm text-muted-foreground">
-                    {selectedCount > 0 ? `${selectedCount} seleccionados · ` : ''}{data.length} productos en total
-                </span>
-                <div className="flex gap-2">
-                    <Button
-                        variant="outline" 
-                        className="hover:cursor-pointer"
-                        size="sm"
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                    >
-                        Anterior
-                    </Button>
-                    <Button
-                        variant="outline" 
-                        className="hover:cursor-pointer"
-                        size="sm" 
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                    >
-                        Siguiente
-                    </Button>
+            {pagination && pagination.totalPages > 1 && (
+                <div className="flex items-center justify-between px-2 py-4">
+                    <span className="text-sm text-muted-foreground">
+                        Página {pagination.page} de {pagination.totalPages}
+                    </span>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => pagination.onPageChange(pagination.page - 1)}
+                            disabled={pagination.page <= 1}
+                        >
+                            Anterior
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => pagination.onPageChange(pagination.page + 1)}
+                            disabled={pagination.page >= pagination.totalPages}
+                        >
+                            Siguiente
+                        </Button>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     )
 }

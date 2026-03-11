@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
 import { exportToCSV } from "@/lib/export-utils"
+import { formatCurrency } from "@/lib/utils"
 import api from "@/services/api"
 import { InventoryItem, StockControlService } from "@/services/stock-control.service"
 import { useBranchStore } from "@/store/branch.store"
@@ -31,6 +32,10 @@ export default function StockControlPage() {
     const [brand, setBrand] = useState<string>('ALL')
     const [categories, setCategories] = useState<Category[]>([])
     const [suppliers, setSuppliers] = useState<any[]>([])
+
+    const [page, setPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+    const [limit] = useState(20)
 
     const [config, setConfig] = useState<any>(null)
 
@@ -64,34 +69,45 @@ export default function StockControlPage() {
         fetchConfig()
     }, [])
 
-    const loadInventory = useCallback(async () => {
+    const loadInventory = useCallback(async (pageNum = page) => {
         if (!activeBranch) return
         setLoading(true)
         try {
-            const data = await StockControlService.getInventory(activeBranch.id, { 
+            const response = await StockControlService.getInventory(activeBranch.id, { 
                 search,
                 stockLevel: stockLevel === 'ALL' ? undefined : stockLevel,
                 categoryId: categoryId !== 'ALL' ? parseInt(categoryId) : undefined,
                 supplierId: supplierId !== 'ALL' ? parseInt(supplierId) : undefined,
-                brand: brand !== 'ALL' ? brand : undefined
+                brand: brand !== 'ALL' ? brand : undefined,
+                page: pageNum,
+                limit
             })
-            setInventory(data)
+            setInventory(response.data)
+            setTotalPages(response.totalPages)
+            setPage(response.page)
         } catch (error) {
             toast({ title: "Error", description: "No se pudo cargar el inventario.", variant: "destructive" })
         } finally {
             setLoading(false)
         }
-    }, [activeBranch, search, stockLevel, categoryId, supplierId, brand, toast])
+    }, [activeBranch, search, stockLevel, categoryId, supplierId, brand, limit, toast])
 
     useEffect(() => {
-        loadInventory()
-    }, [loadInventory])
+        loadInventory(1)
+    }, [search, stockLevel, categoryId, supplierId, brand, loadInventory])
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (page > 1) loadInventory(page)
+        }, 100)
+        return () => clearTimeout(timer)
+    }, [page, loadInventory])
 
     const handleExportCSV = () => {
         const low = config?.lowStockThreshold ?? 10
         const critical = config?.criticalStockThreshold ?? 5
 
-        const dataToExport = inventory.map(item => ({
+        const dataToExport = (Array.isArray(inventory) ? inventory : []).map(item => ({
             SKU: item.skuCode,
             Producto: item.productName,
             Marca: (item as any).brand || '-',
@@ -99,7 +115,7 @@ export default function StockControlPage() {
             Variante: item.variant || 'Standard',
             Stock: item.stock,
             Stock_Minimo: item.minStock,
-            Precio: `${config?.baseCurrency || ''} ${Number(item.price).toLocaleString()}`,
+            Precio: formatCurrency(item.price, config?.baseCurrency),
             Estado: item.stock <= 0 ? 'AGOTADO' : item.stock < critical ? 'CRÍTICO' : item.stock < low ? 'BAJO' : 'NORMAL'
         }))
         exportToCSV(dataToExport, `inventario_${activeBranch?.name || 'branch'}`)
@@ -161,7 +177,7 @@ export default function StockControlPage() {
                         <Download className="h-4 w-4 mr-2" />
                         <span className="hidden sm:inline">Exportar CSV</span>
                     </Button>
-                    <Button variant="outline" onClick={loadInventory} disabled={loading} className="rounded-xl border-slate-300 dark:border-zinc-800 hover:cursor-pointer">
+                    <Button variant="outline" onClick={() => loadInventory()} disabled={loading} className="rounded-xl border-slate-300 dark:border-zinc-800 hover:cursor-pointer">
                         <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                         <span className="ml-2">Actualizar</span>
                     </Button>
@@ -190,7 +206,7 @@ export default function StockControlPage() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="ALL">Categorías: Todas</SelectItem>
-                        {categories.map(cat => (
+                        {(Array.isArray(categories) ? categories : []).map(cat => (
                             <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
                         ))}
                     </SelectContent>
@@ -203,7 +219,7 @@ export default function StockControlPage() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="ALL">Proveedores: Todos</SelectItem>
-                        {suppliers.map(sup => (
+                        {(Array.isArray(suppliers) ? suppliers : []).map(sup => (
                             <SelectItem key={sup.id} value={String(sup.id)}>{sup.name || sup.businessName}</SelectItem>
                         ))}
                     </SelectContent>
@@ -216,7 +232,7 @@ export default function StockControlPage() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="ALL">Marcas: Todas</SelectItem>
-                        {Array.from(new Set(inventory.filter(i => (i as any).brand).map(i => (i as any).brand))).sort().map(b => (
+                        {Array.from(new Set((Array.isArray(inventory) ? inventory : []).filter(i => (i as any).brand).map(i => (i as any).brand))).sort().map(b => (
                             <SelectItem key={b as string} value={b as string}>{b as string}</SelectItem>
                         ))}
                     </SelectContent>
@@ -262,6 +278,13 @@ export default function StockControlPage() {
                         onRefresh={loadInventory} 
                         lowThreshold={config?.lowStockThreshold}
                         criticalThreshold={config?.criticalStockThreshold}
+                        pagination={{
+                            page,
+                            totalPages,
+                            onPageChange: (newPage) => {
+                                setPage(newPage)
+                            }
+                        }}
                     />
                 )}
             </div>

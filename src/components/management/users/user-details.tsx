@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { exportToCSV } from "@/lib/export-utils"
+import { formatCurrency } from "@/lib/utils"
 import { SalesAPI, UsersAPI } from "@/services/api"
 import { useAuthStore } from "@/store/use-auth-store"
 import { Sale, User } from "@/types/schema"
@@ -246,7 +247,7 @@ export function UserDetails({ user: initialUser, onClose }: UserDetailsProps) {
                         <div className="bg-primary/80 border border-emerald-500/20 rounded-3xl p-5 flex flex-col items-center justify-center hover:bg-emerald-500/10 transition-all shadow-sm overflow-hidden text-center relative">
                             <p className="text-[10px] font-bold text-gray-300 dark:text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-1.5"><DollarSign size={12} className="text-gray-300"/> Gastado</p>
                             <p className="text-2xl font-black text-gray-300 dark:text-emerald-400 drop-shadow-sm break-all leading-none">
-                                ${sales.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0).toLocaleString()}
+                                {formatCurrency(sales.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0))}
                             </p>
                         </div>
                     </div>
@@ -273,7 +274,7 @@ export function UserDetails({ user: initialUser, onClose }: UserDetailsProps) {
                                         </div>
                                         <span className="text-[10px] font-bold uppercase tracking-wider">Promedio</span>
                                     </div>
-                                    <p className="text-xl font-bold text-foreground pl-1">${stats.avgTicket.toLocaleString('es-AR', { maximumFractionDigits: 0 })}</p>
+                                    <p className="text-xl font-bold text-foreground pl-1">{formatCurrency(stats.avgTicket)}</p>
                                 </div>
                                 <div className="bg-muted/40 rounded-2xl p-4 flex flex-col gap-1.5 col-span-2">
                                     <div className="flex items-center gap-2 text-muted-foreground">
@@ -481,7 +482,7 @@ export function UserDetails({ user: initialUser, onClose }: UserDetailsProps) {
                                                         </Badge>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <p className="text-base font-bold text-foreground">${Number(sale.total).toLocaleString()}</p>
+                                                        <p className="text-base font-bold text-foreground">{formatCurrency(sale.total)}</p>
                                                         {isExpanded
                                                             ? <ChevronUp className="h-4 w-4 text-muted-foreground" />
                                                             : <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -517,8 +518,8 @@ export function UserDetails({ user: initialUser, onClose }: UserDetailsProps) {
                                                                     </div>
                                                                 </div>
                                                                 <div className="text-right shrink-0">
-                                                                    <p className="text-sm font-bold text-foreground">${Number(item.subtotal).toLocaleString()}</p>
-                                                                    <p className="text-xs text-muted-foreground">{item.quantity} × ${Number(item.unitPrice).toLocaleString()}</p>
+                                                                    <p className="text-sm font-bold text-foreground">{formatCurrency(item.subtotal)}</p>
+                                                                    <p className="text-xs text-muted-foreground">{item.quantity} × {formatCurrency(item.unitPrice)}</p>
                                                                 </div>
                                                             </div>
                                                         ))
@@ -531,18 +532,18 @@ export function UserDetails({ user: initialUser, onClose }: UserDetailsProps) {
                                                         {sale.discount > 0 && (
                                                             <div className="flex justify-between text-xs">
                                                                 <span className="text-muted-foreground">Descuento</span>
-                                                                <span className="text-emerald-600 font-medium">-${Number(sale.discount).toLocaleString()}</span>
+                                                                <span className="text-emerald-600 font-medium">-{formatCurrency(sale.discount)}</span>
                                                             </div>
                                                         )}
                                                         {sale.shippingCost > 0 && (
                                                             <div className="flex justify-between text-xs">
                                                                 <span className="text-muted-foreground">Envío</span>
-                                                                <span className="font-medium">${Number(sale.shippingCost).toLocaleString()}</span>
+                                                                <span className="font-medium">{formatCurrency(sale.shippingCost)}</span>
                                                             </div>
                                                         )}
                                                         <div className="flex justify-between text-sm font-bold border-t border-border pt-1 mt-1">
                                                             <span>Total</span>
-                                                            <span>${Number(sale.total).toLocaleString()}</span>
+                                                            <span>{formatCurrency(sale.total)}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -575,7 +576,7 @@ export function UserDetails({ user: initialUser, onClose }: UserDetailsProps) {
                                             <p className="text-xs text-muted-foreground">Venta #{sale.id} • {format(new Date(sale.createdAt || new Date()), "d MMM", { locale: es })}</p>
                                         </div>
                                     </div>
-                                    <p className="font-bold text-emerald-600 dark:text-emerald-400">+ ${Number(sale.total).toLocaleString()}</p>
+                                    <p className="font-bold text-emerald-600 dark:text-emerald-400">+ {formatCurrency(sale.total)}</p>
                                 </div>
                             ))
                         ) : (
@@ -600,7 +601,7 @@ export function UserDetails({ user: initialUser, onClose }: UserDetailsProps) {
                                             <p className="text-xs text-muted-foreground">Venta #{sale.id} • {format(new Date(sale.createdAt || new Date()), "d MMM", { locale: es })}</p>
                                         </div>
                                     </div>
-                                    <p className="font-bold text-foreground">${Number(sale.total).toLocaleString()}</p>
+                                    <p className="font-bold text-foreground">{formatCurrency(sale.total)}</p>
                                 </div>
                             ))
                         ) : (

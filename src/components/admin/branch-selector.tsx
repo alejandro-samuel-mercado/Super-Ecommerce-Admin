@@ -130,7 +130,7 @@ export function BranchSelector({ trigger }: BranchSelectorProps) {
                   <span>Todas las sucursales</span>
                 </CommandItem>
               )}
-              {branches.map((branch) => (
+              {(Array.isArray(branches) ? branches : []).map((branch) => (
                 <CommandItem
                   key={branch.id}
                   value={branch.name}

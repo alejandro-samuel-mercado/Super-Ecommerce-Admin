@@ -3,8 +3,8 @@ import { StockTransfer } from '../types/schema';
 import api from './api';
 
 const stockTransferService = {
-  getAll: async (params?: any): Promise<StockTransfer[]> => {
-    const { data } = await api.get<{ success: boolean; data: StockTransfer[] }>('/stock-transfers', { params });
+  getAll: async (params?: any): Promise<any> => {
+    const { data } = await api.get<{ success: boolean; data: any }>('/stock-transfers', { params });
     return data.data;
   },
 

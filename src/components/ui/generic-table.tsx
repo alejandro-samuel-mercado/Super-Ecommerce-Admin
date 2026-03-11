@@ -3,23 +3,41 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
+import { ColumnDef, ColumnFiltersState, SortingState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
 import { Plus, Search } from "lucide-react"
 import { useState } from "react"
 
 interface GenericTableProps<T> {
     data: T[]
     columns: ColumnDef<T>[]
-    searchKey?: string
+    searchKey: string
     onEdit?: (item: T) => void
     onDelete?: (item: T) => void
     onCreate?: () => void
     createText?: string
+    search?: string
+    onSearchChange?: (val: string) => void
+    pagination?: {
+        page: number
+        totalPages: number
+        onPageChange: (page: number) => void
+    }
 }
 
-export function GenericTable<T>({ data, columns, searchKey, onEdit, onDelete, onCreate, createText = "Crear Nuevo" }: GenericTableProps<T>) {
-    const [sorting, setSorting] = useState<any>([])
-    const [columnFilters, setColumnFilters] = useState<any>([])
+export function GenericTable<T>({ 
+    data, 
+    columns, 
+    searchKey, 
+    onEdit, 
+    onDelete, 
+    onCreate, 
+    createText = "Crear Nuevo",
+    search,
+    onSearchChange,
+    pagination
+}: GenericTableProps<T>) {
+    const [sorting, setSorting] = useState<SortingState>([])
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
     const table = useReactTable({
         data,
@@ -30,6 +48,8 @@ export function GenericTable<T>({ data, columns, searchKey, onEdit, onDelete, on
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
+        manualPagination: !!pagination,
+        pageCount: pagination?.totalPages,
         state: {
             sorting,
             columnFilters,
@@ -38,36 +58,33 @@ export function GenericTable<T>({ data, columns, searchKey, onEdit, onDelete, on
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between py-4 px-4 gap-4 sm:gap-0 ">
-                <div className="relative w-full max-w-sm group">
-                     {searchKey && (
-                        <>
-                             <div className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary">
-                                <Search className="h-4 w-4" />
-                            </div>
-                            <Input
-                                placeholder="Buscar..."
-                                value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
-                                onChange={(event) =>
-                                    table.getColumn(searchKey)?.setFilterValue(event.target.value)
-                                }
-                                className="pl-10 pr-4 rounded-full shadow-sm w-full bg-gray-200 border-3 border-gray-400/20"
-                            />
-                        </>
-                    )}
+            <div className="flex items-center justify-between gap-4">
+                <div className="flex-1 flex items-center gap-2">
+                    <div className="relative w-full max-w-sm">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder={`Buscar por ${searchKey}...`}
+                            value={pagination ? (search ?? "") : (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
+                            onChange={(event) =>
+                                pagination ? onSearchChange?.(event.target.value) : table.getColumn(searchKey)?.setFilterValue(event.target.value)
+                            }
+                            className="pl-10 pr-4 rounded-full shadow-sm w-full bg-background border-2 border-border"
+                        />
+                    </div>
                 </div>
                 {onCreate && (
-                    <Button onClick={onCreate} className="bg-secondary hover:bg-secondary/80 shadow-sm text-white dark:bg-secondary dark:hover:bg-secondary/80 hover:cursor-pointer">
-                         <Plus className="mr-2 h-4 w-4" /> {createText}
+                    <Button onClick={onCreate} className="rounded-xl shadow-sm hover:cursor-pointer flex items-center gap-2">
+                        <Plus className="h-4 w-4" />
+                        {createText}
                     </Button>
                 )}
             </div>
             
-            <div className="sm:rounded-3xl border-4 border-zinc-300 dark:border-zinc-600 shadow-[0_0_20px_rgba(0,0,0,0.2)] hover:shadow-[0_0_30px_rgba(0,0,0,0.2)] hover:border-borderH hover:ring-4 hover:ring-zinc-500/10 transition-all duration-300 bg-card  overflow-hidden">
+            <div className="rounded-2xl border shadow-sm bg-card overflow-hidden">
                 <Table>
-                    <TableHeader className="bg-muted/50">
+                    <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="hover:bg-muted/50 border-border">
+                            <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
                                     return (
                                         <TableHead key={header.id} className="text-muted-foreground font-semibold">
@@ -89,8 +106,6 @@ export function GenericTable<T>({ data, columns, searchKey, onEdit, onDelete, on
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
-                                    className={`hover:bg-gray-800/20  hover:rounded-2xl  transition-all border-border text-foreground ${onEdit ? 'cursor-pointer' : ''}`}
-                                    onClick={() => onEdit && onEdit(row.original)}
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
@@ -101,7 +116,7 @@ export function GenericTable<T>({ data, columns, searchKey, onEdit, onDelete, on
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                                <TableCell colSpan={columns.length} className="h-24 text-center">
                                     No hay resultados.
                                 </TableCell>
                             </TableRow>
@@ -110,18 +125,20 @@ export function GenericTable<T>({ data, columns, searchKey, onEdit, onDelete, on
                 </Table>
             </div>
             
-            {/* Paginación */}
-            <div className="flex items-center justify-between px-4 py-4 bg-muted/30 sm:rounded-2xl border-2 border-zinc-200 dark:border-zinc-800">
-                <div className="flex-1 text-sm text-muted-foreground">
-                    Página {table.getState().pagination.pageIndex + 1} de{" "}
-                    {table.getPageCount()}
+            <div className="flex items-center justify-between py-4 px-2">
+                <div className="text-sm text-muted-foreground">
+                    {pagination ? (
+                        <span>Página {pagination.page} de {pagination.totalPages}</span>
+                    ) : (
+                        <span>{table.getFilteredRowModel().rows.length} resultados</span>
+                    )}
                 </div>
                 <div className="flex items-center space-x-2">
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
+                        onClick={() => pagination ? pagination.onPageChange(pagination.page - 1) : table.previousPage()}
+                        disabled={pagination ? pagination.page <= 1 : !table.getCanPreviousPage()}
                         className="hover:cursor-pointer disabled:cursor-not-allowed"
                     >
                         Anterior
@@ -129,8 +146,8 @@ export function GenericTable<T>({ data, columns, searchKey, onEdit, onDelete, on
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
+                        onClick={() => pagination ? pagination.onPageChange(pagination.page + 1) : table.nextPage()}
+                        disabled={pagination ? pagination.page >= pagination.totalPages : !table.getCanNextPage()}
                         className="hover:cursor-pointer disabled:cursor-not-allowed"
                     >
                         Siguiente

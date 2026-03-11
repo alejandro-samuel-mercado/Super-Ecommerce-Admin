@@ -4,9 +4,9 @@ import api from "./api"
 export type { Purchase }
 
 export const purchaseService = {
-    getAll: async (params?: any): Promise<Purchase[]> => {
+    getAll: async (params?: any): Promise<any> => {
         const { data } = await api.get('/purchases', { params })
-        return data.data
+        return data?.data?.data || data?.data || data
     },
 
     getById: async (id: number): Promise<Purchase> => {

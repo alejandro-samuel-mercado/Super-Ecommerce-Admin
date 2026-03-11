@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { formatCurrency } from "@/lib/utils"
 import { CategoriesAPI, ConfigAPI, CurrenciesAPI, ProductsAPI } from "@/services/api"
 import { Category, Condition, Currency, Product } from "@/types/schema"
 import { Plus, X } from "lucide-react"
@@ -208,13 +209,13 @@ const router=useRouter()
                                             <SelectTrigger className="bg-background border-input text-foreground">
                                                 <SelectValue placeholder="Seleccione una categoría" />
                                             </SelectTrigger>
-                                            <SelectContent className="bg-popover border-border">
-                                                {categories.map((cat) => (
+                                            <SelectContent className="bg-popover border-border max-h-[300px] overflow-y-auto">
+                                                {(Array.isArray(categories) ? categories : []).map((cat) => (
                                                     <SelectItem key={cat.id} value={String(cat.id)}>
                                                         {cat.name}
                                                     </SelectItem>
                                                 ))}
-                                                {categories.length === 0 && <SelectItem value="0" disabled>No hay categorías</SelectItem>}
+                                                {(!categories || categories.length === 0) && <SelectItem value="0" disabled>No hay categorías</SelectItem>}
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -313,6 +314,130 @@ const router=useRouter()
                                     )}
                                 </div>
                             </div>
+
+                            <div className="space-y-4 mt-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-6 w-1 bg-blue-500 rounded-full"></div>
+                                        <h3 className="font-semibold text-foreground">Características</h3>
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="hover:cursor-pointer"
+                                        onClick={() => {
+                                            const current = formData.characteristics || [];
+                                            setFormData({...formData, characteristics: [...current, { key: '', value: '' }]});
+                                        }}
+                                    >
+                                        <Plus className="h-4 w-4 mr-1" /> Agregar
+                                    </Button>
+                                </div>
+                                <div className="max-h-[200px] overflow-y-auto space-y-2 pr-1">
+                                    {(formData.characteristics || []).map((item, idx) => (
+                                        <div key={idx} className="flex items-center gap-2">
+                                            <Input
+                                                placeholder="Ej: Material"
+                                                value={item.key}
+                                                onChange={(e) => {
+                                                    const updated = [...(formData.characteristics || [])];
+                                                    updated[idx] = { ...updated[idx], key: e.target.value };
+                                                    setFormData({...formData, characteristics: updated});
+                                                }}
+                                                className="flex-1 bg-background border-input text-foreground text-sm"
+                                            />
+                                            <Input
+                                                placeholder="Ej: Acero inoxidable"
+                                                value={item.value}
+                                                onChange={(e) => {
+                                                    const updated = [...(formData.characteristics || [])];
+                                                    updated[idx] = { ...updated[idx], value: e.target.value };
+                                                    setFormData({...formData, characteristics: updated});
+                                                }}
+                                                className="flex-1 bg-background border-input text-foreground text-sm"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 shrink-0 text-destructive hover:bg-destructive/10 hover:cursor-pointer"
+                                                onClick={() => {
+                                                    const updated = (formData.characteristics || []).filter((_, i) => i !== idx);
+                                                    setFormData({...formData, characteristics: updated});
+                                                }}
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                    {(!formData.characteristics || formData.characteristics.length === 0) && (
+                                        <p className="text-xs text-muted-foreground italic py-2">Sin características agregadas.</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 mt-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-6 w-1 bg-amber-500 rounded-full"></div>
+                                        <h3 className="font-semibold text-foreground">Especificaciones</h3>
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="hover:cursor-pointer"
+                                        onClick={() => {
+                                            const current = formData.specifications || [];
+                                            setFormData({...formData, specifications: [...current, { key: '', value: '' }]});
+                                        }}
+                                    >
+                                        <Plus className="h-4 w-4 mr-1" /> Agregar
+                                    </Button>
+                                </div>
+                                <div className="max-h-[200px] overflow-y-auto space-y-2 pr-1">
+                                    {(formData.specifications || []).map((item, idx) => (
+                                        <div key={idx} className="flex items-center gap-2">
+                                            <Input
+                                                placeholder="Ej: Peso"
+                                                value={item.key}
+                                                onChange={(e) => {
+                                                    const updated = [...(formData.specifications || [])];
+                                                    updated[idx] = { ...updated[idx], key: e.target.value };
+                                                    setFormData({...formData, specifications: updated});
+                                                }}
+                                                className="flex-1 bg-background border-input text-foreground text-sm"
+                                            />
+                                            <Input
+                                                placeholder="Ej: 250g"
+                                                value={item.value}
+                                                onChange={(e) => {
+                                                    const updated = [...(formData.specifications || [])];
+                                                    updated[idx] = { ...updated[idx], value: e.target.value };
+                                                    setFormData({...formData, specifications: updated});
+                                                }}
+                                                className="flex-1 bg-background border-input text-foreground text-sm"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 shrink-0 text-destructive hover:bg-destructive/10 hover:cursor-pointer"
+                                                onClick={() => {
+                                                    const updated = (formData.specifications || []).filter((_, i) => i !== idx);
+                                                    setFormData({...formData, specifications: updated});
+                                                }}
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                    {(!formData.specifications || formData.specifications.length === 0) && (
+                                        <p className="text-xs text-muted-foreground italic py-2">Sin especificaciones agregadas.</p>
+                                    )}
+                                </div>
+                            </div>
                         </TabsContent>
 
                         <TabsContent value="pricing" className="space-y-6 mt-0 animate-in fade-in-50 duration-300">
@@ -328,12 +453,30 @@ const router=useRouter()
                                         <div className="space-y-2">
                                             <Label className="text-foreground">Precio Base ($)</Label>
                                             <Input 
-                                                type="number" 
+                                                type="text" 
                                                 inputMode="decimal"
                                                 value={formData.basePrice} 
-                                                onChange={(e) => setFormData({...formData, basePrice: parseFloat(e.target.value)})} 
+                                                onChange={(e) => {
+                                                    const val = e.target.value.replace(',', '.');
+                                                    if (val === '' || val === '.') {
+                                                        setFormData({...formData, basePrice: val as any});
+                                                        return;
+                                                    }
+                                                    if (/^\d*\.?\d*$/.test(val)) {
+                                                        setFormData({...formData, basePrice: val as any});
+                                                    }
+                                                }}
+                                                onBlur={() => {
+                                                    const parsed = parseFloat(String(formData.basePrice));
+                                                    setFormData({...formData, basePrice: isNaN(parsed) ? 0 : parsed});
+                                                }}
                                                 className="bg-muted/50 border-input text-xl font-bold text-foreground"
                                             />
+                                            {formData.basePrice && Number(formData.basePrice) > 0 && (
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    {formatCurrency(Number(formData.basePrice) || 0)}
+                                                </p>
+                                            )}
                                         </div>
                                         <div className="grid grid-cols-1  sm:grid-cols-2 gap-4">
                                              <div className="space-y-2">
@@ -431,16 +574,22 @@ const router=useRouter()
                                                 <div className="w-16 font-bold">{curr.code}</div>
                                                 <div className="flex-1">
                                                     <Input 
-                                                        type="number"
+                                                        type="text"
+                                                        inputMode="decimal"
                                                         placeholder={`Precio en ${curr.code}`}
                                                         value={existing?.price || ''}
                                                         onChange={(e) => {
-                                                            const price = parseFloat(e.target.value)
-                                                            const newPrices = [...manualPrices.filter(mp => mp.currencyCode !== curr.code)]
-                                                            if (!isNaN(price)) {
-                                                                newPrices.push({ currencyCode: curr.code, price })
+                                                            const val = e.target.value.replace(',', '.');
+                                                            if (val === '' || val === '.' || /^\d*\.?\d*$/.test(val)) {
+                                                                const newPrices = [...manualPrices.filter(mp => mp.currencyCode !== curr.code)]
+                                                                if (val !== '' && val !== '.') {
+                                                                    const price = parseFloat(val);
+                                                                    if (!isNaN(price)) {
+                                                                        newPrices.push({ currencyCode: curr.code, price })
+                                                                    }
+                                                                }
+                                                                setManualPrices(newPrices)
                                                             }
-                                                            setManualPrices(newPrices)
                                                         }}
                                                     />
                                                 </div>

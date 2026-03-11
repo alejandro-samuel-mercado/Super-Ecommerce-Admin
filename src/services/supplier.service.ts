@@ -37,7 +37,7 @@ export interface SupplierSKU {
 export const supplierService = {
     getAll: async (params?: any) => {
         const { data } = await api.get('/suppliers', { params })
-        return data.data
+        return data?.data?.data || data?.data || data
     },
 
     getById: async (id: number) => {

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
+import { formatCurrency } from "@/lib/utils"
 import { SalesAPI } from "@/services/api"
 import { useBranchStore } from "@/store/branch.store"
 import { Sale } from "@/types/schema"
@@ -409,8 +410,8 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                                 {item.skuCode && <span className="inline-block px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-[10px] font-mono border border-border mt-1">SKU: {item.skuCode}</span>}
                                             </td>
                                             <td className="px-4 py-3 text-center text-muted-foreground">{item.quantity}</td>
-                                            <td className="px-4 py-3 text-right text-muted-foreground">{sale.currencyCode} {Number(item.unitPrice).toLocaleString()}</td>
-                                            <td className="px-4 py-3 text-right font-bold text-foreground border-l border-border bg-muted/20">{sale.currencyCode} {Number(item.subtotal).toLocaleString()}</td>
+                                            <td className="px-4 py-3 text-right text-muted-foreground">{formatCurrency(item.unitPrice, sale.currencyCode)}</td>
+                                            <td className="px-4 py-3 text-right font-bold text-foreground border-l border-border bg-muted/20">{formatCurrency(item.subtotal, sale.currencyCode)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -422,7 +423,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                     <div className="flex flex-col gap-2 ml-auto w-full md:w-1/2">
                         <div className="flex justify-between text-zinc-500 text-sm">
                             <span>Subtotal Productos</span>
-                             <span>{sale.currencyCode} {(Number(sale.subtotal) || 0).toLocaleString()}</span>
+                             <span>{formatCurrency(sale.subtotal, sale.currencyCode)}</span>
                         </div>
                         
                         {/* Descuento */}
@@ -431,7 +432,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                 <span>
                                     Descuento {sale.coupon ? `(Cupón: ${sale.coupon.code})` : ''}
                                 </span>
-                                 <span>-{sale.currencyCode} {Number(sale.discount).toLocaleString()}</span>
+                                 <span>-{formatCurrency(sale.discount, sale.currencyCode)}</span>
                             </div>
                         ) : null}
 
@@ -439,13 +440,13 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                          {Number(sale.shippingCost) > 0 ? (
                             <div className="flex justify-between text-zinc-600 dark:text-zinc-400 text-sm bg-zinc-50 px-2 py-1 rounded">
                                 <span>Costo de Envío</span>
-                                 <span>+{sale.currencyCode} {Number(sale.shippingCost).toLocaleString()}</span>
+                                 <span>+{formatCurrency(sale.shippingCost, sale.currencyCode)}</span>
                             </div>
                         ) : null}
                         
                         <div className="flex justify-between text-2xl font-bold  dark:text-zinc-100 border-t border-zinc-200 dark:border-zinc-800 pt-3 mt-2">
                             <span>Total Final</span>
-                             <span>{sale.currencyCode} {(Number(sale.total) || 0).toLocaleString()}</span>
+                             <span>{formatCurrency(sale.total, sale.currencyCode)}</span>
                         </div>
                     </div>
                 </div>

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/components/ui/use-toast"
 import { exportToCSV } from '@/lib/export-utils'
+import { formatCurrency } from '@/lib/utils'
 import { SalesAPI } from '@/services/api'
 import { useBranchStore } from '@/store/branch.store'
 import { useAuthStore } from '@/store/use-auth-store'
@@ -33,16 +34,24 @@ function SalesPageContent() {
     const [selectedSale, setSelectedSale] = useState<Sale | null>(null)
     const [sales, setSales] = useState<Sale[]>([])
     const [loading, setLoading] = useState(true)
+    const [page, setPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+    const [limit] = useState(20)
+    const [search, setSearch] = useState("")
+    const [currentTab, setCurrentTab] = useState('real')
     const { toast } = useToast()
 
-    const [currentTab, setCurrentTab] = useState('real')
-
-    const loadSales = useCallback(async () => {
+    const loadSales = useCallback(async (pageNum = page) => {
         if (!activeBranch) return
         
         setLoading(true)
         try {
-            const params: any = { branchId: activeBranch.id }
+            const params: any = { 
+                branchId: activeBranch.id,
+                page: pageNum,
+                limit,
+                search
+            }
             if (currentTab === 'abandoned') {
                 params.isAbandoned = 'true'
             } else if (currentTab === 'pending') {
@@ -54,17 +63,27 @@ function SalesPageContent() {
             }
             
             const response = await SalesAPI.getAll(params)
-            setSales(response.data || [])
+            const paginatedData = response.data
+            setSales(paginatedData?.data || [])
+            setTotalPages(paginatedData?.totalPages || 1)
+            setPage(paginatedData?.page || 1)
         } catch (error) {
             toast({ title: "Error", description: "No se pudieron cargar las ventas.", variant: "destructive" })
         } finally {
             setLoading(false)
         }
-    }, [activeBranch, currentTab, toast])
+    }, [activeBranch, currentTab, toast, page, limit, search])
 
     useEffect(() => {
-        loadSales()
-    }, [loadSales])
+        loadSales(1)
+    }, [activeBranch, currentTab])
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            loadSales(1)
+        }, 500)
+        return () => clearTimeout(timer)
+    }, [search])
 
     useEffect(() => {
         if (saleIdParam && activeBranch) {
@@ -75,7 +94,6 @@ function SalesPageContent() {
                     const sale = await SalesAPI.getOne(id)
                     if (sale) {
                         setSelectedSale(sale)
-                        // Limpiar el parámetro de la URL sin recargar para que no se reabra si se cierra
                         const url = new URL(window.location.href)
                         url.searchParams.delete('saleId')
                         window.history.replaceState({}, '', url)
@@ -97,7 +115,7 @@ function SalesPageContent() {
             ID: sale.id,
             Fecha: format(new Date(sale.createdAt || new Date()), "dd/MM/yyyy HH:mm"),
             Cliente: (sale as any).user?.name || "Desconocido",
-            Total: `${sale.currencyCode || ''} ${Number(sale.total).toLocaleString()}`,
+            Total: formatCurrency(sale.total, sale.currencyCode),
             Metodo_Pago: sale.paymentType,
             Estado_Pago: sale.paymentStatus,
             Tipo_Entrega: sale.deliveryType,
@@ -146,7 +164,7 @@ function SalesPageContent() {
                     </Button>
                      <Button 
                         variant="outline" 
-                        onClick={loadSales} 
+                        onClick={() => loadSales(1)} 
                         disabled={loading} 
                         title="Recargar Ventas"
                         className="rounded-xl border-slate-300 dark:border-zinc-800 hover:cursor-pointer"
@@ -180,6 +198,16 @@ function SalesPageContent() {
                         <SalesTable 
                             data={sales}
                             onView={handleView}
+                            search={search}
+                            onSearchChange={setSearch}
+                            pagination={{
+                                page,
+                                totalPages,
+                                onPageChange: (newPage: number) => {
+                                    setPage(newPage)
+                                    loadSales(newPage)
+                                }
+                            }}
                         />
                     )}
                 </TabsContent>
@@ -194,6 +222,16 @@ function SalesPageContent() {
                         <SalesTable 
                             data={sales}
                             onView={handleView}
+                            search={search}
+                            onSearchChange={setSearch}
+                            pagination={{
+                                page,
+                                totalPages,
+                                onPageChange: (newPage: number) => {
+                                    setPage(newPage)
+                                    loadSales(newPage)
+                                }
+                            }}
                         />
                     )}
                 </TabsContent>
@@ -208,6 +246,16 @@ function SalesPageContent() {
                         <SalesTable 
                             data={sales}
                             onView={handleView}
+                            search={search}
+                            onSearchChange={setSearch}
+                            pagination={{
+                                page,
+                                totalPages,
+                                onPageChange: (newPage: number) => {
+                                    setPage(newPage)
+                                    loadSales(newPage)
+                                }
+                            }}
                         />
                     )}
                 </TabsContent>
@@ -222,18 +270,27 @@ function SalesPageContent() {
                         <SalesTable 
                             data={sales}
                             onView={handleView}
+                            search={search}
+                            onSearchChange={setSearch}
+                            pagination={{
+                                page,
+                                totalPages,
+                                onPageChange: (newPage: number) => {
+                                    setPage(newPage)
+                                    loadSales(newPage)
+                                }
+                            }}
                         />
                     )}
                 </TabsContent>
             </Tabs>
 
-            {/*  Modal de Detalles de Venta */}
             {selectedSale && (
                 <SaleDetailsDialog 
                     sale={selectedSale} 
                     open={!!selectedSale} 
                     onOpenChange={(open) => !open && setSelectedSale(null)} 
-                    onSaleUpdated={loadSales}
+                    onSaleUpdated={() => loadSales(page)}
                 />
             )}
         </div>

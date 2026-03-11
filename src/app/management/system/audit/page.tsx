@@ -175,7 +175,7 @@ export default function AuditPage() {
             <Button 
               variant="outline" 
               size="icon"
-              onClick={loadAuditLogs} 
+              onClick={() => loadAuditLogs()} 
               disabled={loading} 
               className="rounded-xl border-slate-300 dark:border-zinc-800 hover:cursor-pointer"
             >

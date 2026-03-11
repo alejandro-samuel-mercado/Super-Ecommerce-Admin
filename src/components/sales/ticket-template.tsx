@@ -1,4 +1,5 @@
 
+import { formatCurrency } from "@/lib/utils";
 import { useConfigStore } from "@/store/config.store";
 import { Sale } from "@/types/schema";
 import { format } from "date-fns";
@@ -57,10 +58,10 @@ export const TicketTemplate = forwardRef<HTMLDivElement, TicketTemplateProps>(({
                                <div className="text-[10px]">{item.skuCode}</div>
                            </td>
                            <td className="pt-1 text-right align-top pr-1">
-                               {Number(item.quantity)} x ${Number(item.unitPrice).toFixed(2)}
+                                {Number(item.quantity)} x {formatCurrency(item.unitPrice)}
                            </td>
                            <td className="pt-1 text-right align-top font-bold pr-1">
-                               ${Number(item.subtotal).toFixed(2)}
+                                {formatCurrency(item.subtotal)}
                            </td>
                        </tr>
                    ))}
@@ -71,26 +72,26 @@ export const TicketTemplate = forwardRef<HTMLDivElement, TicketTemplateProps>(({
            <div className="border-t border-black pt-2 space-y-1 text-right pr-1">
                <div className="flex justify-between">
                    <span>Subtotal:</span>
-                   <span>${Number(sale.subtotal).toFixed(2)}</span>
+                    <span>{formatCurrency(sale.subtotal)}</span>
                </div>
               
                {Number(sale.discount) > 0 && (
                    <div className="flex justify-between font-bold">
                        <span>Descuento:</span>
-                       <span>-${Number(sale.discount).toFixed(2)}</span>
+                        <span>-{formatCurrency(sale.discount)}</span>
                    </div>
                )}
 
                {Number(sale.shippingCost) > 0 && (
                     <div className="flex justify-between">
                        <span>Envío:</span>
-                       <span>+${Number(sale.shippingCost).toFixed(2)}</span>
+                        <span>+{formatCurrency(sale.shippingCost)}</span>
                    </div>
                )}
 
                <div className="flex justify-between text-base font-bold border-t border-dashed border-black pt-1 mt-1">
                    <span>TOTAL:</span>
-                   <span>${Number(sale.total).toFixed(2)}</span>
+                    <span>{formatCurrency(sale.total)}</span>
                </div>
            </div>
 

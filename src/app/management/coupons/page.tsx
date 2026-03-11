@@ -2,11 +2,11 @@
 
 import { Badge } from "@/components/ui/badge";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
+   Breadcrumb,
+   BreadcrumbItem,
+   BreadcrumbLink,
+   BreadcrumbList,
+   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { GenericTable } from "@/components/ui/generic-table";
@@ -14,20 +14,20 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Loader2, RefreshCw, Save, Ticket, Trash } from "lucide-react";
 
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+   Dialog,
+   DialogContent,
+   DialogFooter,
+   DialogHeader,
+   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+   Select,
+   SelectContent,
+   SelectItem,
+   SelectTrigger,
+   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { CouponsAPI } from "@/services/api";
@@ -48,8 +48,13 @@ export default function CouponsPage() {
     maxUses: 100,
     active: true,
   });
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [limit] = useState(20)
+  const [search, setSearch] = useState("")
+  const { toast } = useToast()
+;
 
   useEffect(() => {
     if (editingCoupon) {
@@ -71,25 +76,37 @@ export default function CouponsPage() {
     }
   }, [editingCoupon]);
 
-  const loadCoupons = useCallback(async () => {
-    setLoading(true);
+  const loadCoupons = useCallback(async (pageNum = page) => {
+    setLoading(true)
     try {
-      const data = await CouponsAPI.getAll();
-      setCoupons(data.data || []);
+        const response = await CouponsAPI.getAll({
+            page: pageNum,
+            limit,
+            search
+        })
+        const paginatedData = response.data
+        setCoupons(paginatedData?.data || [])
+        setTotalPages(paginatedData?.totalPages || 1)
+        setPage(paginatedData?.page || 1)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "No se pudieron cargar los cupones.",
-        variant: "destructive",
-      });
+        toast({ title: "Error", description: "No se pudieron cargar los cupones.", variant: "destructive" })
     } finally {
-      setLoading(false);
+        setLoading(false)
     }
-  }, [toast]);
+}, [toast, page, limit, search])
+;
 
   useEffect(() => {
-    loadCoupons();
-  }, [loadCoupons]);
+    loadCoupons(1)
+  }, [])
+
+  useEffect(() => {
+      const timer = setTimeout(() => {
+          loadCoupons(1)
+      }, 500)
+      return () => clearTimeout(timer)
+  }, [search])
+;
 
   const handleSave = async () => {
     if (formData.validFrom && formData.validUntil) {
@@ -213,7 +230,7 @@ export default function CouponsPage() {
         </div>
         <Button
           variant="outline"
-          onClick={loadCoupons}
+          onClick={() => loadCoupons()}
           disabled={loading}
           title="Recargar"
           className="hover:cursor-pointer"
@@ -230,13 +247,23 @@ export default function CouponsPage() {
         </div>
       ) : (
         <GenericTable
-          data={coupons}
-          columns={columns}
-          searchKey="code"
-          onCreate={userRole === "EMPLOYEE" ? undefined : openCreate}
-          onEdit={userRole === "EMPLOYEE" ? undefined : openEdit}
-          onDelete={userRole === "EMPLOYEE" ? undefined : () => {}}
-          createText="Nuevo Cupón"
+            data={coupons}
+            columns={columns}
+            searchKey="code"
+            onEdit={userRole === "EMPLOYEE" ? undefined : openEdit}
+            onDelete={userRole === "EMPLOYEE" ? undefined : handleDelete}
+            onCreate={userRole === "EMPLOYEE" ? undefined : openCreate}
+            createText="Nuevo Cupón"
+            search={search}
+            onSearchChange={setSearch}
+            pagination={{
+                page,
+                totalPages,
+                onPageChange: (newPage: number) => {
+                    setPage(newPage)
+                    loadCoupons(newPage)
+                }
+            }}
         />
       )}
 

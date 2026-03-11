@@ -37,8 +37,11 @@ export default function UsersPage() {
     const currentUserRole = (user?.role?.name || 'EMPLOYEE') as UserRole
     const [branches, setBranches] = useState<Branch[]>([])
     const [selectedBranchId, setSelectedBranchId] = useState<string>("all")
-
     const [users, setUsers] = useState<User[]>([])
+    const [page, setPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+    const [limit] = useState(20)
+    const [search, setSearch] = useState("")
 
     const loadBranches = useCallback(async () => {
         try {
@@ -48,22 +51,38 @@ export default function UsersPage() {
         }
     }, [])
 
-    const loadUsers = useCallback(async () => {
+    const loadUsers = useCallback(async (pageNum = page) => {
         setLoading(true)
         try {
-            const response = await UsersAPI.getAll()
-            setUsers(response.data || [])
+            const response = await UsersAPI.getAll({
+                page: pageNum,
+                limit,
+                search,
+                branchId: selectedBranchId,
+                role: roleFilter
+            })
+            const paginatedData = response.data
+            setUsers(paginatedData?.data || [])
+            setTotalPages(paginatedData?.totalPages || 1)
+            setPage(paginatedData?.page || 1)
         } catch (error) {
             toast({ title: "Error", description: "No se pudieron cargar los usuarios.", variant: "destructive" })
         } finally {
             setLoading(false)
         }
-    }, [toast])
+    }, [toast, page, limit, search, selectedBranchId, roleFilter])
 
     useEffect(() => {
-        loadUsers()
+        loadUsers(1)
         loadBranches()
-    }, [loadUsers, loadBranches])
+    }, [loadBranches, roleFilter])
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            loadUsers(1)
+        }, 500)
+        return () => clearTimeout(timer)
+    }, [search, selectedBranchId])
 
     useEffect(() => {
         if (activeBranch) {
@@ -72,29 +91,6 @@ export default function UsersPage() {
             setSelectedBranchId("all")
         }
     }, [activeBranch])
-
-    const filteredUsers = useMemo(() => {
-        let result = users
-
-      
-
-        if (roleFilter) {
-            result = result.filter(u => u.role?.name === roleFilter)
-        }
-
-        if (selectedBranchId && selectedBranchId !== "all") {
-            const sId = parseInt(selectedBranchId)
-            result = result.filter(u => {
-                if (u.role?.name === 'SUPER_ADMIN' && (!u.adminBranches || u.adminBranches.length === 0)) return true;
-                if (u.branchId === sId) return true
-                if (u.adminBranches?.some((as: { branchId: number }) => as.branchId === sId)) return true
-                if (u.role?.name === 'CUSTOMER' && u.sales?.some(s => s.branchId === sId)) return true
-                return false
-            })
-        }
-
-        return result
-    }, [users, roleFilter, selectedBranchId])
 
     const handleView = (user: User) => {
         setSelectedUser(user)
@@ -209,7 +205,7 @@ export default function UsersPage() {
                             </Button>
                         )}
 
-                        <Button variant="outline" onClick={loadUsers} disabled={loading} title="Recargar" className="bg-background hover:bg-muted border-input text-foreground hover:cursor-pointer">
+                        <Button variant="outline" onClick={() => loadUsers(1)} disabled={loading} title="Recargar" className="bg-background hover:bg-muted border-input text-foreground hover:cursor-pointer">
                             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                         </Button>
                     </div>
@@ -222,13 +218,23 @@ export default function UsersPage() {
                     </div>
                 ) : (
                     <UserTable 
-                        data={filteredUsers}
+                        data={users}
                         currentUserRole={currentUserRole}
                         currentFilter={roleFilter}
                         onView={handleView}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onViewCart={handleViewCart}
+                        search={search}
+                        onSearchChange={setSearch}
+                        pagination={{
+                            page,
+                            totalPages,
+                            onPageChange: (newPage: number) => {
+                                setPage(newPage)
+                                loadUsers(newPage)
+                            }
+                        }}
                     />
                 )}
 

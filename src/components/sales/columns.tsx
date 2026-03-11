@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { formatCurrency } from "@/lib/utils"
 import { Sale } from "@/types/schema"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, Eye } from "lucide-react"
@@ -64,7 +65,7 @@ export const columns: ColumnDef<Sale>[] = [
           </Button>
         )
       },
-    cell: ({ row }) => <span className="font-bold">${row.original.total.toLocaleString("es-AR")}</span>
+    cell: ({ row }) => <span className="font-bold">{formatCurrency(row.original.total)}</span>
   },
 
   {

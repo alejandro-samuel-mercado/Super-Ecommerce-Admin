@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { formatCurrency } from "@/lib/utils"
 import { TransfersAPI } from "@/services/api"
 import { useBranchStore } from "@/store/branch.store"
 import { Transfer } from "@/types/schema"
@@ -130,7 +131,7 @@ export function TransfersTab() {
 
                             <div className="flex items-center gap-8">
                                 <div className="text-right">
-                                    <p className="font-bold text-2xl tracking-tight">${Number(t.amount).toLocaleString()}</p>
+                                    <p className="font-bold text-2xl tracking-tight">{formatCurrency(t.amount)}</p>
                                     <p className="text-xs text-muted-foreground">{new Date(t.createdAt).toLocaleString()}</p>
                                 </div>
                                 <div className="flex flex-col gap-2 items-end">

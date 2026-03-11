@@ -149,7 +149,7 @@ export function SupplierPaymentForm({ onSuccess, onCancel, initialPurchaseId, in
                                 <SelectValue placeholder="Seleccionar Proveedor" />
                             </SelectTrigger>
                             <SelectContent className="bg-popover border-border">
-                                {suppliers.map(s => (
+                                {(Array.isArray(suppliers) ? suppliers : []).map(s => (
                                     <SelectItem key={s.id} value={s.id.toString()}>
                                         {s.tradeName}
                                     </SelectItem>

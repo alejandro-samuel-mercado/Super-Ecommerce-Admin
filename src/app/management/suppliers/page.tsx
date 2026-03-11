@@ -35,7 +35,7 @@ export default function SuppliersPage() {
         try {
             setLoading(true)
             const data = await supplierService.getAll({ search })
-            setSuppliers(data)
+            setSuppliers(data.data || data)
         } catch (error) {
         } finally {
             setLoading(false)

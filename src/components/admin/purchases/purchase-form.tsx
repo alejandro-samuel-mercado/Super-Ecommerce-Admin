@@ -147,7 +147,7 @@ export function PurchaseForm({ onSuccess, onCancel }: PurchaseFormProps) {
                                 <SelectValue placeholder="Seleccionar Proveedor" />
                             </SelectTrigger>
                             <SelectContent className="bg-popover border-border">
-                                {suppliers.map(s => (
+                                {(Array.isArray(suppliers) ? suppliers : []).map(s => (
                                     <SelectItem key={s.id} value={s.id.toString()}>
                                         {s.tradeName}
                                     </SelectItem>
@@ -188,7 +188,7 @@ export function PurchaseForm({ onSuccess, onCancel }: PurchaseFormProps) {
                                         <SelectValue placeholder="Producto..." />
                                     </SelectTrigger>
                                     <SelectContent className="bg-popover border-border">
-                                        {supplierSkus.map(s => {
+                                        {(Array.isArray(supplierSkus) ? supplierSkus : []).map(s => {
                                             const variantText = s.sku.variantOptions?.length > 0 
                                                 ? ` (${s.sku.variantOptions.map((v: any) => `${v.name}: ${v.value}`).join(', ')})`
                                                 : '';

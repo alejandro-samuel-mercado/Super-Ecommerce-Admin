@@ -125,8 +125,8 @@ export const ProductsAPI = {
         const { data } = await api.get('/products', { params })
         return data
     },
-    getOne: async (id: number) => {
-        const { data } = await api.get(`/products/${id}`)
+    getOne: async (id: number, branchId?: number) => {
+        const { data } = await api.get(`/products/${id}`, { params: { branchId } })
         return data.data
     },
     create: async (product: Partial<Product>, branchId?: number) => {
@@ -194,8 +194,8 @@ export const ShippingAPI = {
 
 export const CategoriesAPI = {
     getAll: async () => {
-        const { data } = await api.get('/categories')
-        return data.data || data
+        const { data } = await api.get('/categories', { params: { limit: 500 } })
+        return data?.data?.data || data?.data || data
     },
     create: async (data: any, branchId?: number) => {
         const { data: res } = await api.post('/categories', data, { params: { branchId } })
@@ -260,8 +260,8 @@ export const SalesAPI = {
 }
 
 export const CouponsAPI = {
-    getAll: async () => {
-        const { data } = await api.get('/coupons')
+    getAll: async (params?: any) => {
+        const { data } = await api.get('/coupons', { params })
         return data
     },
     create: async (data: any) => {
@@ -291,9 +291,9 @@ export const ContentAPI = {
 }
 
 export const CommentsAPI = {
-    getAll: async () => {
-        const { data } = await api.get('/comments')
-        return data.data || data
+    getAll: async (params?: any) => {
+        const { data } = await api.get('/comments', { params })
+        return data
     },
     moderate: async (id: number, approved: boolean) => {
         const { data } = await api.put(`/comments/${id}/moderate`, { approved })
@@ -383,7 +383,7 @@ export const SkuAPI = {
 export const TransfersAPI = {
     getAll: async (params?: any) => {
         const { data } = await api.get('/transfers', { params })
-        return data.data
+        return data?.data?.data || data?.data || data
     },
     updateStatus: async (id: number, status: 'APPROVED' | 'REJECTED') => {
         const { data } = await api.patch(`/transfers/${id}`, { status })
@@ -393,7 +393,7 @@ export const TransfersAPI = {
 
 export const BlogAPI = {
     getAll: async (params?: any) => {
-        const { data } = await api.get('/blog', { params })
+        const { data } = await api.get('/blog', { params: { ...params, limit: params?.limit || 500 } })
         return data
     },
     getOne: async (slug: string) => {
@@ -415,9 +415,8 @@ export const BlogAPI = {
 
 export const CurrenciesAPI = {
     getAll: async (active?: boolean) => {
-        const { data } = await api.get('/currencies', { params: { active } })
-    
-        return data.data
+        const { data } = await api.get('/currencies', { params: { active, limit: 500 } })
+        return data?.data?.data || data?.data || data
     },
     create: async (currency: any) => {
         const { data } = await api.post('/currencies', currency)
@@ -429,6 +428,62 @@ export const CurrenciesAPI = {
     },
     delete: async (id: number) => {
         await api.delete(`/currencies/${id}`)
+    }
+}
+
+export const PurchasesAPI = {
+    getAll: async (params?: any) => {
+        const { data } = await api.get('/purchases', { params })
+        return data
+    },
+    getOne: async (id: number) => {
+        const { data } = await api.get(`/purchases/${id}`)
+        return data
+    },
+    create: async (payload: any) => {
+        const { data } = await api.post('/purchases', payload)
+        return data
+    },
+    confirm: async (id: number) => {
+        const { data } = await api.post(`/purchases/${id}/confirm`)
+        return data
+    },
+    receive: async (id: number) => {
+        const { data } = await api.post(`/purchases/${id}/receive`)
+        return data
+    },
+    cancel: async (id: number) => {
+        const { data } = await api.post(`/purchases/${id}/cancel`)
+        return data
+    }
+}
+
+export const SupplierPaymentsAPI = {
+    getAll: async (params?: any) => {
+        const { data } = await api.get('/supplier-payments', { params })
+        return data
+    },
+    create: async (payload: any) => {
+        const { data } = await api.post('/supplier-payments', payload)
+        return data
+    }
+}
+
+export const AdminStockAPI = {
+    getInventory: async (params?: any) => {
+        const { data } = await api.get('/admin/stock/inventory', { params })
+        return data
+    },
+    updateStock: async (skuId: number, quantity: number, type: string) => {
+        const { data } = await api.put(`/skus/${skuId}/stock`, { quantity, type })
+        return data
+    }
+}
+
+export const AlertsAPI = {
+    getAll: async (params?: any) => {
+        const { data } = await api.get('/admin/notifications', { params })
+        return data
     }
 }
 

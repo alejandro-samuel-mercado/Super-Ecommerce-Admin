@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { formatCurrency } from "@/lib/utils"
 import { Product, UserRole } from "@/types/schema"
 import { CellContext, ColumnDef, ColumnFiltersState, HeaderContext, SortingState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
 import { ArrowUpDown, Boxes, Edit, Search, Settings2, Trash } from "lucide-react"
@@ -19,9 +20,14 @@ interface ProductTableProps {
     onDelete: (product: Product) => void
     onSelectionChange?: (selectedIds: number[]) => void
     currentUserRole: UserRole
+    pagination?: {
+        page: number
+        totalPages: number
+        onPageChange: (page: number) => void
+    }
 }
 
-export function ProductTable({ data, onEdit, onDelete, onSelectionChange, currentUserRole }: ProductTableProps) {
+export function ProductTable({ data, onEdit, onDelete, onSelectionChange, currentUserRole, pagination }: ProductTableProps) {
     const router = useRouter()
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -94,7 +100,7 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
         {
             accessorKey: "basePrice",
             header: "Precio Base",
-            cell: ({ row }: CellContext<Product, unknown>) => <span className="font-medium text-foreground">${(row.getValue("basePrice") as number).toLocaleString()}</span>
+            cell: ({ row }: CellContext<Product, unknown>) => <span className="font-medium text-foreground">{formatCurrency(row.getValue("basePrice") as number)}</span>
         },
         {
             accessorKey: "stock",
@@ -193,6 +199,8 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
             columnFilters,
             rowSelection,
         },
+        manualPagination: !!pagination,
+        pageCount: pagination?.totalPages,
     })
 
     useEffect(() => {
@@ -272,25 +280,34 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
                 </Table>
             </div>
 
-            <div className="flex items-center justify-end space-x-2 py-4">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                    className="border-input text-foreground hover:bg-accent hover:text-accent-foreground hover:cursor-pointer"
-                >
-                    Anterior
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                    className="border-input text-foreground hover:bg-accent hover:text-accent-foreground hover:cursor-pointer"
-                >
-                    Siguiente
-                </Button>
+            <div className="flex items-center justify-between py-4 px-2">
+                <div className="text-sm text-muted-foreground">
+                    {pagination ? (
+                        <span>Página {pagination.page} de {pagination.totalPages}</span>
+                    ) : (
+                        <span>{table.getFilteredRowModel().rows.length} productos</span>
+                    )}
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => pagination ? pagination.onPageChange(pagination.page - 1) : table.previousPage()}
+                        disabled={pagination ? pagination.page <= 1 : !table.getCanPreviousPage()}
+                        className="border-slate-300 dark:border-zinc-800 hover:cursor-pointer"
+                    >
+                        Anterior
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => pagination ? pagination.onPageChange(pagination.page + 1) : table.nextPage()}
+                        disabled={pagination ? pagination.page >= pagination.totalPages : !table.getCanNextPage()}
+                        className="border-slate-300 dark:border-zinc-800 hover:cursor-pointer"
+                    >
+                        Siguiente
+                    </Button>
+                </div>
             </div>
 
             {selectedSkuProduct && (

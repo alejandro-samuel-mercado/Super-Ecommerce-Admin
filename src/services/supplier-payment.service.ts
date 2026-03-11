@@ -12,8 +12,8 @@ interface CreatePaymentDto {
 }
 
 const supplierPaymentService = {
-  getAll: async (params?: any): Promise<SupplierPayment[]> => {
-    const { data } = await api.get<{ success: boolean; data: SupplierPayment[] }>('/supplier-payments', { params });
+  getAll: async (params?: any): Promise<any> => {
+    const { data } = await api.get<{ success: boolean; data: any }>('/supplier-payments', { params });
     return data.data;
   },
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { cn } from "@/lib/utils"
+import { cn, formatCurrency } from "@/lib/utils"
 import { ConfigAPI, CouponsAPI, ProductsAPI, PromosAPI, SalesAPI, ShippingAPI, UsersAPI } from "@/services/api"
 import { useBranchStore } from "@/store/branch.store"
 import { useCartStore } from "@/store/cart-store"
@@ -130,7 +130,12 @@ export function RegistrationTab() {
              }
 
              if (usersData) {
-                 const users = Array.isArray(usersData) ? usersData : (usersData as any).data || [];
+                 const users = Array.isArray(usersData) 
+                    ? usersData 
+                    : (usersData as any)?.data?.data 
+                       || (usersData as any)?.data 
+                       || [];
+
                  if (Array.isArray(users)) {
                     useDataStore.getState().setUsers(users);
                  }
@@ -690,14 +695,14 @@ export function RegistrationTab() {
                                                     if (amount > 0) {
                                                         return (
                                                             <div className="flex flex-col items-end leading-tight">
-                                                                <span className="text-[10px] text-muted-foreground line-through decoration-red-500/50">${Number(minPrice).toLocaleString()}</span>
-                                                                <span className="font-black text-lg text-emerald-600">${Number(minPrice - amount).toLocaleString()}</span>
+                                                                <span className="text-[10px] text-muted-foreground line-through decoration-red-500/50">{formatCurrency(minPrice)}</span>
+                                                                <span className="font-black text-lg text-emerald-600">{formatCurrency(minPrice - amount)}</span>
                                                             </div>
                                                         );
                                                     }
                                                     return (
                                                         <p className="font-black text-lg text-foreground">
-                                                            ${Number(minPrice).toLocaleString()}
+                                                            {formatCurrency(minPrice)}
                                                         </p>
                                                     );
                                                 })() : (
@@ -898,10 +903,19 @@ export function RegistrationTab() {
                                     <div className="flex-1 space-y-1">
                                          <Label className="text-xs font-bold text-orange-900">COSTO ENVÍO</Label>
                                          <Input 
-                                            type="number" 
+                                            type="text" 
                                             inputMode="decimal"
                                             value={shippingCost}
-                                            onChange={(e) => setShippingCost(Number(e.target.value))}
+                                            onChange={(e) => {
+                                                const val = e.target.value.replace(',', '.');
+                                                if (val === '' || val === '.') {
+                                                    setShippingCost(0);
+                                                    return;
+                                                }
+                                                if (/^\d*\.?\d*$/.test(val)) {
+                                                    setShippingCost(Number(val));
+                                                }
+                                            }}
                                             className="bg-background font-mono font-black border-2 border-orange-200 text-orange-900"
                                         />
                                     </div>
@@ -982,7 +996,7 @@ export function RegistrationTab() {
                              {/* Subtotal */}
                              <div className="flex justify-between items-center text-muted-foreground">
                                 <span className="text-xs font-bold uppercase">Subtotal</span>
-                                <span className="font-mono text-sm">${getSubtotal().toLocaleString()}</span>
+                                <span className="font-mono text-sm">{formatCurrency(getSubtotal())}</span>
                              </div>
                              
                              {/* Envío */}
@@ -991,7 +1005,7 @@ export function RegistrationTab() {
                                 {shippingCost === 0 && deliveryType === 'DELIVERY' ? (
                                     <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold border-0">GRATIS</Badge>
                                 ) : (
-                                    <span className="font-mono text-foreground">${shippingCost.toLocaleString()}</span>
+                                    <span className="font-mono text-foreground">{formatCurrency(shippingCost)}</span>
                                 )}
                              </div>
 
@@ -1000,7 +1014,7 @@ export function RegistrationTab() {
                                  <div className="flex justify-between items-center text-muted-foreground">
                                     <span className="text-xs font-bold uppercase">Impuestos ({storeConfig.taxRate}%)</span>
                                     <span className="font-mono text-foreground">
-                                        +${( 
+                                        +{formatCurrency(( 
                                             (() => {
                                                 const { getItemDiscount } = useCartStore.getState();
                                                 let netItemsTotal = 0;
@@ -1021,7 +1035,7 @@ export function RegistrationTab() {
                                                  
                                                  return Math.max(0, finalPreTax) * (Number(storeConfig.taxRate) / 100);
                                              })()
-                                        ).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        ))}
                                     </span>
                                  </div>
                              )}
@@ -1103,10 +1117,10 @@ export function RegistrationTab() {
                                             <div className="pb-1">
                                                  {pointsToUse > 0 ? (
                                                      <Badge variant="outline" className="text-xs border-indigo-500 text-indigo-400 font-mono">
-                                                         -${(pointsToUse * (Number(storeConfig.moneyPerPoint) || 0)).toFixed(2)}
+                                                         -{formatCurrency(pointsToUse * (Number(storeConfig.moneyPerPoint) || 0))}
                                                      </Badge>
                                                  ) : (
-                                                     <span className="text-[10px] text-muted-foreground">Valor: ${Number(storeConfig?.moneyPerPoint || 0)}/pt</span>
+                                                     <span className="text-[10px] text-muted-foreground">Valor: {formatCurrency(Number(storeConfig?.moneyPerPoint || 0))}/pt</span>
                                                  )}
                                             </div>
                                         </div>
@@ -1127,7 +1141,7 @@ export function RegistrationTab() {
                                    
                                 </div>
                                 <span className="font-black text-4xl tracking-tighter text-foreground">
-                                    ${total.toLocaleString()}
+                                    {formatCurrency(total)}
                                 </span>
                              </div>
                         </div>
@@ -1185,17 +1199,17 @@ export function RegistrationTab() {
                                                 if (amount > 0) {
                                                     return (
                                                         <div className="text-right flex flex-col">
-                                                            <span className="text-xs text-muted-foreground line-through Decoration-red-500 decoration-2">${(unitPrice * item.quantity).toLocaleString()}</span>
-                                                            <span className="font-mono text-lg text-emerald-600">${(finalUnitPrice * item.quantity).toLocaleString()}</span>
+                                                            <span className="text-xs text-muted-foreground line-through Decoration-red-500 decoration-2">{formatCurrency(unitPrice * item.quantity)}</span>
+                                                            <span className="font-mono text-lg text-emerald-600">{formatCurrency(finalUnitPrice * item.quantity)}</span>
                                                         </div>
                                                     )
                                                 }
                                                 return (
                                                     <div className="text-right flex flex-col items-end">
-                                                        <span className="font-mono text-lg">${(unitPrice * item.quantity).toLocaleString()}</span>
+                                                        <span className="font-mono text-lg">{formatCurrency(unitPrice * item.quantity)}</span>
                                                         {item.allowFractional && item.measurementUnit && (
                                                             <span className="text-[10px] text-muted-foreground">
-                                                                ${unitPrice.toLocaleString()}/{item.measurementUnit === 'KG' ? 'kg' : item.measurementUnit === 'LITRO' ? 'L' : item.measurementUnit === 'METRO' ? 'm' : item.measurementUnit.toLowerCase()}
+                                                                {formatCurrency(unitPrice)}/{item.measurementUnit === 'KG' ? 'kg' : item.measurementUnit === 'LITRO' ? 'L' : item.measurementUnit === 'METRO' ? 'm' : item.measurementUnit.toLowerCase()}
                                                             </span>
                                                         )}
                                                     </div>
@@ -1209,7 +1223,7 @@ export function RegistrationTab() {
                                                      const { amount, label } = useCartStore.getState().getItemDiscount(item);
                                                      if (amount > 0) return (
                                                          <Badge variant="default" className="text-[10px] h-5 bg-green-600/90 hover:bg-green-600 text-white border-0 flex items-center gap-1">
-                                                             <Tag className="w-3 h-3" /> {label || 'Descuento'} (-${amount.toLocaleString()})
+                                                             <Tag className="w-3 h-3" /> {label || 'Descuento'} (-{formatCurrency(amount)})
                                                          </Badge>
                                                      )
                                                  })()}
@@ -1217,21 +1231,23 @@ export function RegistrationTab() {
                                             {item.allowFractional ? (
                                                 <div className="flex items-center gap-1 bg-background border-2 border-border rounded-md shadow-sm px-2 py-1">
                                                     <Input
-                                                        type="number"
+                                                        type="text"
                                                         inputMode="decimal"
                                                         value={item.quantity === 0 ? "" : item.quantity}
                                                         onChange={(e) => {
-                                                            const raw = e.target.value;
-                                                           
-                                                            if (raw === '' || raw === '.') return;
-                                                            const val = parseFloat(raw);
-                                                            if (!isNaN(val) && val >= 0) {
-                                                                updateQuantity(item.skuCode, val);
+                                                            const raw = e.target.value.replace(',', '.');
+                                                            if (raw === '' || raw === '.') {
+                                                                updateQuantity(item.skuCode, 0);
+                                                                return;
+                                                            }
+                                                            if (/^\d*\.?\d*$/.test(raw)) {
+                                                                const val = parseFloat(raw);
+                                                                if (!isNaN(val) && val >= 0) {
+                                                                    updateQuantity(item.skuCode, val);
+                                                                }
                                                             }
                                                         }}
                                                         placeholder="0.000"
-                                                        step="0.001"
-                                                        min="0"
                                                         className="h-7 w-20 text-xs font-bold font-mono border-none focus-visible:ring-0 p-0 text-center"
                                                     />
                                                     <span className="text-[10px] font-bold text-muted-foreground uppercase">
@@ -1325,14 +1341,14 @@ export function RegistrationTab() {
                                         if (amount > 0) {
                                             return (
                                                 <div className="flex flex-col items-end leading-tight mb-1">
-                                                    <span className="text-[10px] text-muted-foreground line-through decoration-red-500/50">${realSkuPrice.toLocaleString()}</span>
-                                                    <span className="font-black text-lg text-emerald-600">${(realSkuPrice - amount).toLocaleString()}</span>
+                                                    <span className="text-[10px] text-muted-foreground line-through decoration-red-500/50">{formatCurrency(realSkuPrice)}</span>
+                                                    <span className="font-black text-lg text-emerald-600">{formatCurrency(realSkuPrice - amount)}</span>
                                                 </div>
                                             );
                                         }
                                         return (
                                             <p className="font-black text-lg text-foreground">
-                                                ${realSkuPrice.toLocaleString()}
+                                                {formatCurrency(realSkuPrice)}
                                             </p>
                                         );
                                     })()}
@@ -1387,7 +1403,7 @@ export function RegistrationTab() {
                         </div>
                         <div className="space-y-1">
                              <p className="text-sm font-bold text-muted-foreground uppercase">Total Cobrado</p>
-                             <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400">${Number(completedSale?.total || 0).toLocaleString()}</p>
+                             <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(completedSale?.total || 0)}</p>
                         </div>
                         <div className="space-y-1">
                              <p className="text-sm font-bold text-muted-foreground uppercase">Ticket</p>
