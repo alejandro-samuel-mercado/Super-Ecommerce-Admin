@@ -129,6 +129,7 @@ export default function ShippingPage() {
                 <GenericTable 
                     data={zones}
                     columns={columns}
+                    searchKey="location"
                     onCreate={handleCreate}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
