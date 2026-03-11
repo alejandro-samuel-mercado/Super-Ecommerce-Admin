@@ -16,7 +16,7 @@ import { useAuthStore } from '@/store/use-auth-store'
 import { StockTransfer } from "@/types/schema"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { ArrowLeftRight, ArrowRight, Calendar as CalendarIcon, Loader2, Plus, RefreshCw, X } from "lucide-react"
+import { ArrowLeftRight, ArrowRight, Calendar as CalendarIcon, Loader2, Plus, RefreshCw, Settings2, X } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 
 export default function TransfersPage() {
@@ -43,7 +43,7 @@ export default function TransfersPage() {
             if (endDate) params.endDate = endDate.toISOString()
             
             const data = await stockTransferService.getAll(params)
-            setTransfers(data.data || [])
+            setTransfers(Array.isArray(data) ? data : (data.data || []))
         } catch (error) {
         } finally {
             setLoading(false)
@@ -67,7 +67,7 @@ export default function TransfersPage() {
     }
 
     return (
-        <div className="sm:p-8 px-0 pt-2 space-y-8  pb-40 sm:pb-20">
+        <div className="sm:p-8 px-0 pt-2 space-y-8  pb-40 sm:pb-20 max-w-7xl">
              <Breadcrumb className="px-2">
                 <BreadcrumbList>
                     <BreadcrumbItem><BreadcrumbLink href="/management">Inicio</BreadcrumbLink></BreadcrumbItem>
@@ -182,13 +182,14 @@ export default function TransfersPage() {
                         <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
                     ) : (
                         <Table >
-                            <TableHeader>
+                            <TableHeader className="bg-muted/500">
                                 <TableRow className="border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800">
                                     <TableHead>ID</TableHead>
                                     <TableHead>Fecha</TableHead>
                                     <TableHead>Ruta</TableHead>
                                     <TableHead>Items</TableHead>
                                     <TableHead>Estado</TableHead>
+                                    <TableHead></TableHead>   
                                    
                                 </TableRow>
                             </TableHeader>
@@ -198,7 +199,7 @@ export default function TransfersPage() {
                                         <TableCell className="font-mono">#{t.id}</TableCell>
                                         <TableCell>{new Date(t.createdAt).toLocaleDateString()}</TableCell>
                                         <TableCell>
-                                            <div className="flex items-center gap-2 text-sm">
+                                            <div className="flex  text-sm">
                                                 <span className={t.originBranch?.id === activeBranch?.id ? 'font-bold' : ''}>{t.originBranch?.name}</span>
                                                 <ArrowRight className="h-3 w-3 text-muted-foreground" />
                                                 <span className={t.destinationBranch?.id === activeBranch?.id ? 'font-bold' : ''}>{t.destinationBranch?.name}</span>
@@ -208,7 +209,11 @@ export default function TransfersPage() {
                                         <TableCell>
                                             <Badge variant={getStatusVariant(t.status) as any}>{t.status}</Badge>
                                         </TableCell>
-                                      
+                                       <TableCell className="">
+                                                                                  <Button variant="ghost" size="icon" className="hover:cursor-pointer" onClick={() => handleView(t)}>
+                                                                                          <Settings2 className="h-4 w-4" />
+                                                                                  </Button>
+                                                                                  </TableCell>
                                     </TableRow>
                                 ))}
                                 {transfers.length === 0 && (

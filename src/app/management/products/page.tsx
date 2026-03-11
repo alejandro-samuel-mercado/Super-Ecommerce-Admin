@@ -23,7 +23,7 @@ export default function ProductsPage() {
     const [selectedIds, setSelectedIds] = useState<number[]>([])
     const [page, setPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
-    const [limit] = useState(25) // Aumentar un poco el default si se desea
+    const [limit] = useState(25) 
     const { activeBranch } = useBranchStore()
     const { user } = useAuthStore()
     const { toast } = useToast()

@@ -274,9 +274,7 @@ export function RegistrationTab() {
              
 
              // Manejar estructuras típicas de respuesta de express
-             // 1. El objeto raíz es el usuario (res.id)
-             // 2. res.data es el usuario (res.data.id)
-             // 3. res.data.data es el usuario (res.data.data.id) - común en APIs paginadas/envueltas
+           
              
              let newUser = res;
              if (res.data) {

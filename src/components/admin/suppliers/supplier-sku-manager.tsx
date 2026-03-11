@@ -198,7 +198,7 @@ export function SupplierSkuManager({ supplierId, initialSkus = [] }: SupplierSku
                             <TableHead className="text-muted-foreground font-semibold">Producto / Variante</TableHead>
                             <TableHead className="text-muted-foreground font-semibold">Precio Base</TableHead>
                             <TableHead className="text-muted-foreground font-semibold">Moneda</TableHead>
-                            <TableHead className="text-right text-muted-foreground font-semibold">Acciones</TableHead>
+                            <TableHead className="text-right text-muted-foreground font-semibold"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>

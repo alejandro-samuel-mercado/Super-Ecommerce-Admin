@@ -118,7 +118,7 @@ export default function GatewayManagementPage() {
                 </BreadcrumbList>
             </Breadcrumb>
             
-            <div className="flex flex-col sm:flex-row gap-6 sm:gap-0 items-center justify-between top-0  z-10 py-4 px-4">
+            <div className="flex flex-col sm:flex-row gap-6 sm:gap-0 items-center justify-between top-0  z-10 py-4 px-4 ">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
                         <CreditCard className="h-6 w-6" />
@@ -132,7 +132,7 @@ export default function GatewayManagementPage() {
             </div>
 
             <Tabs defaultValue="gateways" className="w-full">
-                <TabsList className="grid sm:w-full w-[80%] mx-auto sm:mx-0 sm:grid-cols-2 grid-cols-1 mb-8 max-w-md gap-3 sm_mb-0 mb-20">
+                <TabsList className="grid sm:w-full w-[80%] mx-auto sm:mx-0 sm:grid-cols-2 grid-cols-1 mb-6 max-w-md gap-3 sm_mb-0">
                     <TabsTrigger className="border-2 border-secondary/40 hover:border-secondary/40 data-[state=active]:border-secondary/80 data-[state=active]:bg-secondary/30" value="gateways">Pasarelas Disponibles</TabsTrigger>
                     <TabsTrigger className="border-2 border-secondary/40 hover:border-secondary/40 data-[state=active]:border-secondary/80 data-[state=active]:bg-secondary/30" value="currencies">Configuración por Moneda</TabsTrigger>
                 </TabsList>

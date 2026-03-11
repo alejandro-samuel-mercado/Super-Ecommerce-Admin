@@ -84,23 +84,11 @@ export default function ShippingPage() {
             header: "Estado",
             cell: ({ row }) => <Badge variant={row.original.active ? 'default' : 'secondary'}>{row.original.active ? 'Activo' : 'Inactivo'}</Badge>
         },
-        {
-            id: "actions",
-            cell: ({ row }: any) => (
-                <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="hover:cursor-pointer" onClick={(e) => { e.stopPropagation(); handleEdit(row.original); }}>
-                        <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:cursor-pointer" onClick={(e) => { e.stopPropagation(); handleDelete(row.original); }}>
-                        <Trash className="h-4 w-4" />
-                    </Button>
-                </div>
-            ),
-        }
+        
     ]
 
     return (
-        <div className="sm:p-8 pt-2 space-y-6">
+        <div className="sm:p-8 pt-2 space-y-6 max-w-5xl mx-auto">
             <Breadcrumb className="px-2">
                 <BreadcrumbList>
                     <BreadcrumbItem><BreadcrumbLink href="/management">Inicio</BreadcrumbLink></BreadcrumbItem>

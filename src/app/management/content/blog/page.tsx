@@ -25,7 +25,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { BlogAPI } from "@/services/api"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { CheckCircle2, Clock, Edit, ExternalLink, Globe, Plus, Search, Trash2 } from "lucide-react"
+import { CheckCircle2, Clock, Edit, ExternalLink, Globe, Plus, Search, Settings2, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
@@ -175,7 +175,7 @@ export default function BlogManagementPage() {
                             <TableHead className="font-bold">Estado</TableHead>
                             <TableHead className="font-bold">Fecha</TableHead>
                             <TableHead className="font-bold">Etiquetas</TableHead>
-                            <TableHead className="text-right font-bold">Acciones</TableHead>
+                            <TableHead className="text-right font-bold"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -232,7 +232,7 @@ export default function BlogManagementPage() {
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">
                                             <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(post)} className="hover:bg-purple-100 hover:text-purple-600 dark:hover:bg-purple-900/30 hover:cursor-pointer">
-                                                <Edit className="w-4 h-4" />
+                                                <Settings2  className="w-4 h-4" />
                                             </Button>
                                             <Button variant="ghost" size="icon" onClick={() => handleDelete(post.id)} className="hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/30 hover:cursor-pointer">
                                                 <Trash2 className="w-4 h-4" />

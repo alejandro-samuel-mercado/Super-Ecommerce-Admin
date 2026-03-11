@@ -153,7 +153,7 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground shadow-xl z-50 min-w-[200px]">
-                                <DropdownMenuLabel className="text-muted-foreground uppercase text-xs font-bold tracking-wider px-4 py-2">Acciones</DropdownMenuLabel>
+                                <DropdownMenuLabel className="text-muted-foreground uppercase text-xs font-bold tracking-wider px-4 py-2"></DropdownMenuLabel>
                                 <DropdownMenuItem onClick={() => onEdit(product)} className="hover:bg-secondary/5 cursor-pointer p-3 text-sm font-medium transition-colors">
                                     <Edit className="mr-3 h-5 w-5 text-secondary" /> Editar Producto
                                 </DropdownMenuItem>

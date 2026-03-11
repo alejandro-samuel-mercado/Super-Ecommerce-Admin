@@ -441,7 +441,6 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
                                 { id: 'DEBIT', label: 'Tarjeta Débito' },
                                 { id: 'TRANSFER', label: 'Transferencia' },
                                 { id: 'MERCADO_PAGO', label: 'Mercado Pago' },
-                                { id: 'POINTS', label: 'Puntos' },
                             ].map(m => (
                                 <div key={m.id} className="flex items-center space-x-2">
                                     <Switch checked={paymentMethods.includes(m.id)} onCheckedChange={() => togglePayment(m.id)} />

@@ -220,7 +220,7 @@ export default function StockControlPage() {
                     <SelectContent>
                         <SelectItem value="ALL">Proveedores: Todos</SelectItem>
                         {(Array.isArray(suppliers) ? suppliers : []).map(sup => (
-                            <SelectItem key={sup.id} value={String(sup.id)}>{sup.name || sup.businessName}</SelectItem>
+                            <SelectItem key={sup.id} value={String(sup.id)}>{sup.tradeName || sup.businessName || sup.name}</SelectItem>
                         ))}
                     </SelectContent>
                 </Select>

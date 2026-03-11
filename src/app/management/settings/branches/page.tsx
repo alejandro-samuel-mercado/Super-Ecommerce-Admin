@@ -16,7 +16,7 @@ import {
 import { useToast } from "@/components/ui/use-toast"
 import branchService from "@/services/branch.service"
 import { Branch } from "@/types/schema"
-import { Edit, Loader2, MapPin, Plus, Store, Trash2 } from "lucide-react"
+import { Edit, Loader2, MapPin, Plus, Settings2, Store, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 
 export default function BranchesPage() {
@@ -103,7 +103,7 @@ export default function BranchesPage() {
                                     <TableHead>Código</TableHead>
                                     <TableHead>Dirección</TableHead>
                                     <TableHead>Estado</TableHead>
-                                    <TableHead className="text-right">Acciones</TableHead>
+                                    <TableHead className="text-right"></TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -130,7 +130,7 @@ export default function BranchesPage() {
                                         </TableCell>
                                         <TableCell className="text-right space-x-2">
                                             <Button variant="ghost" size="icon" className="hover:cursor-pointer" onClick={() => handleEdit(branch)}>
-                                                <Edit className="h-4 w-4" />
+                                                    <Settings2 className="h-4 w-4" />
                                             </Button>
                                             <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-700 hover:bg-red-50 hover:cursor-pointer" onClick={() => handleDelete(branch)}>
                                                 <Trash2 className="h-4 w-4" />

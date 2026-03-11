@@ -106,7 +106,7 @@ export default function CurrenciesPage() {
                                     <TableHead>Símbolo</TableHead>
                                     <TableHead>Tasa (vs Base)</TableHead>
                                     <TableHead>Estado</TableHead>
-                                    <TableHead className="text-right">Acciones</TableHead>
+                                    <TableHead className="text-right"></TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>

@@ -205,7 +205,7 @@ export default function CouponsPage() {
   ];
 
   return (
-    <div className="sm:p-8  pt-2 space-y-6 pb-40 sm:pb-20">
+    <div className="sm:p-8  pt-2 space-y-6 pb-40 sm:pb-20 max-w-5xl mx-auto">
       <Breadcrumb className="px-2">
         <BreadcrumbList>
           <BreadcrumbItem>

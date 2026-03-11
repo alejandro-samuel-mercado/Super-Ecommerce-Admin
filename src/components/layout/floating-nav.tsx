@@ -18,7 +18,7 @@ export function FloatingNav() {
 
   return (
     <div className={cn(
-        "fixed bottom-2 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center p-1.5 rounded-full bg-white dark:bg-zinc-900 border-3 border-gray-600 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:border-secondary/50", 
+        "fixed bottom-2 left-1/2 -translate-x-1/2 z-40 flex items-center justify-center p-1.5 rounded-full bg-white dark:bg-zinc-900 border-3 border-gray-600 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:border-secondary/50", 
         (isSales || isAdmin) && !isProcessing ? "" : (isProcessing ? "opacity-50 pointer-events-none cursor-not-allowed" : "hidden")
     )}>
       <div className="flex items-center gap-1 relative">

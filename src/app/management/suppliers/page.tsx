@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table"
 import { Supplier, supplierService } from "@/services/supplier.service"
 import { useAuthStore } from "@/store/use-auth-store"
-import { Loader2, Plus, Search, Truck } from "lucide-react"
+import { Loader2, Plus, Search, Settings2, Truck } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 
 export default function SuppliersPage() {
@@ -108,7 +108,7 @@ export default function SuppliersPage() {
                                 <TableHead className="text-muted-foreground font-semibold">CUIT</TableHead>
                                 <TableHead className="text-muted-foreground font-semibold">Contacto</TableHead>
                                 <TableHead className="text-muted-foreground font-semibold">Estado</TableHead>
-                               
+                               <TableHead></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -122,8 +122,8 @@ export default function SuppliersPage() {
                                 suppliers && suppliers.map((supplier) => (
                                     <TableRow 
                                         key={supplier.id} 
-                                        className="hover:bg-gray-800/20  hover:rounded-2xl    text-foreground transition-colors border-border hover:cursor-pointer"
-                                        onClick={() => setSelectedSupplierId(supplier.id)}
+                                        className="hover:bg-gray-800/20  hover:rounded-2xl    text-foreground transition-cqolors border-border hover:cursor-pointer"
+                                        onClick={() => setSelectedSupplierId(supplier.id)} 
                                     >
                                         <TableCell className="font-medium">{supplier.tradeName}</TableCell>
                                         <TableCell>{supplier.legalName}</TableCell>
@@ -139,7 +139,11 @@ export default function SuppliersPage() {
                                                 {supplier.isActive ? "Activo" : "Inactivo"}
                                             </Badge>
                                         </TableCell>
-                                     
+                                      <TableCell className="text-right space-x-2">
+                                            <Button variant="ghost" size="icon" className="hover:cursor-pointer"   onClick={() => setSelectedSupplierId(supplier.id)}>
+                                                    <Settings2 className="h-4 w-4" />
+                                            </Button>
+                                            </TableCell>
                                     </TableRow>
                                 ))
                             )}

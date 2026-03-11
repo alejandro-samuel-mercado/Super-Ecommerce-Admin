@@ -164,7 +164,7 @@ export function AuditLogTable({ logs }: AuditLogTableProps) {
               <TableHead className="w-[220px] font-black uppercase text-[11px] tracking-wider text-slate-500">Usuario Responsable</TableHead>
               <TableHead className="w-[220px] font-black uppercase text-[11px] tracking-wider text-slate-500">Entidad Afectada</TableHead>
               <TableHead className="w-[200px] font-black uppercase text-[11px] tracking-wider text-slate-500">Actividad</TableHead>
-              <TableHead className="text-right font-black uppercase text-[11px] tracking-wider py-4 px-6 text-slate-500">Acciones</TableHead>
+              <TableHead className="text-right font-black uppercase text-[11px] tracking-wider py-4 px-6 text-slate-500"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

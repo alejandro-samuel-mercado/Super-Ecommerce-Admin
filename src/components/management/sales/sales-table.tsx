@@ -10,7 +10,7 @@ import { Sale } from "@/types/schema"
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { ArrowUpDown, FileText, Filter, Search, X } from "lucide-react"
+import { ArrowUpDown, FileText, Filter, Search, Settings2, X } from "lucide-react"
 import { useState } from "react"
 
 
@@ -48,6 +48,7 @@ export function SalesTable({ data, onView, hideSearch = false, search, onSearchC
             )
         },
         {
+            id: "createdAt",
             accessorKey: "createdAt",
             header: ({ column }) => {
                 return (
@@ -165,7 +166,13 @@ export function SalesTable({ data, onView, hideSearch = false, search, onSearchC
                  <span className="text-xs font-medium text-muted-foreground">{row.getValue("deliveryType")=== "DELIVERY" ? "Envío" : row.getValue("deliveryType")=== "PICKUP" ? "Retiro" : "Otro"}</span>
             )
         },
-        
+         {
+            id: "actions",
+            accessorKey: "id",
+            header: "",
+            cell: ({ row }) => (<Button variant="ghost" size="icon"  className="hover:cursor-pointer"    onClick={() => onView(row.original)}>  <Settings2 className="h-4 w-4" /></Button>)
+        }
+         
     ]
 
     const table = useReactTable({

@@ -22,6 +22,7 @@ import {
     Plus,
     RefreshCw,
     Search,
+    Settings2,
     ToggleLeft,
     ToggleRight,
     Trash2
@@ -123,7 +124,7 @@ export default function BotManagementPage() {
                 </BreadcrumbList>
             </Breadcrumb>
 
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 max-sm:px-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
                         <Bot className="h-8 w-8 text-secondary" />
@@ -143,7 +144,7 @@ export default function BotManagementPage() {
             </div>
 
             <div >
-                <CardHeader className="">
+                <CardHeader className="max-sm:px-4 px-0">
                     <div className="flex items-center justify-between ">
                         
                         <div className="relative w-full max-w-sm ">
@@ -168,7 +169,7 @@ export default function BotManagementPage() {
                                     <TableHead className="w-[200px]">Disparador (Trigger)</TableHead>
                                     <TableHead>Respuesta Automática</TableHead>
                                     <TableHead className="w-[120px] text-center">Estado</TableHead>
-                                    <TableHead className="w-[150px] text-right">Acciones</TableHead>
+                                    <TableHead className="w-[150px] text-right"></TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -223,8 +224,8 @@ export default function BotManagementPage() {
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end gap-1">
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-secondary hover:cursor-pointer" onClick={() => openEditDialog(item)}>
-                                                        <Pencil className="h-4 w-4" />
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8  hover:cursor-pointer" onClick={() => openEditDialog(item)}>
+                                                        <Settings2  className="h-4 w-4" />
                                                     </Button>
                                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:cursor-pointer" onClick={() => handleDelete(item.id)}>
                                                         <Trash2 className="h-4 w-4" />

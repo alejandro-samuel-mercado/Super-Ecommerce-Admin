@@ -279,7 +279,7 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
                                     <th className="px-4 py-3">Atributos</th>
                                     <th className="px-4 py-3">Precio</th>
                                     <th className="px-4 py-3">Stock</th>
-                                    <th className="px-4 py-3 text-right">Acciones</th>
+                                    <th className="px-4 py-3 text-right"></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border bg-background">

@@ -33,7 +33,7 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
     // 1. Estado de Carga Inicial (Antes de la Hidratación)
     if (!hydrated) {
          return (
-             <div className="h-screen w-full flex flex-col items-center justify-center bg-background text-foreground gap-4 z-2000">
+             <div className="fixed inset-0 w-full flex flex-col items-center justify-center bg-background text-foreground gap-4 z-[100] overflow-hidden">
                  <Loader2 className="h-12 w-12 animate-spin text-secondary" />
                  <p className="text-muted-foreground font-medium animate-pulse">Verificando sesión...</p>
             </div>
@@ -46,7 +46,7 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
 
     if (!isAuthorized) {
         return (
-            <div className="h-screen w-full flex flex-col items-center justify-center bg-background text-foreground gap-4">
+            <div className="fixed inset-0 w-full flex flex-col items-center justify-center bg-background text-foreground gap-4 z-[100]">
                  <div className="p-4 rounded-full bg-destructive/10 text-destructive mb-2">
                     <ShieldAlert className="w-12 h-12" />
                  </div>

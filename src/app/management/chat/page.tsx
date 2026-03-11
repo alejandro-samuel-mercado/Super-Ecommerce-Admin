@@ -122,7 +122,7 @@ export default function KnowledgeBasePage() {
                 <TableRow>
                   <TableHead>Palabras Clave</TableHead>
                   <TableHead>Respuesta</TableHead>
-                  <TableHead className="w-[100px]">Acciones</TableHead>
+                  <TableHead className="w-[100px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

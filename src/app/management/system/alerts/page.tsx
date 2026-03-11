@@ -200,7 +200,7 @@ export default function SystemAlertsPage() {
                                 <TableHead className="text-muted-foreground font-semibold">Mensaje</TableHead>
                                 <TableHead className="text-center text-muted-foreground font-semibold">Ocurrencias</TableHead>
                                 <TableHead className="text-muted-foreground font-semibold">Fecha</TableHead>
-                                <TableHead className="text-right text-muted-foreground font-semibold">Acciones</TableHead>
+                                <TableHead className="text-right text-muted-foreground font-semibold"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>

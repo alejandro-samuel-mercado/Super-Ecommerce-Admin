@@ -133,7 +133,7 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
                            </Button>
                        </DropdownMenuTrigger>
                        <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground shadow-xl z-50 min-w-[200px]">
-                           <DropdownMenuLabel className="text-muted-foreground uppercase text-xs font-bold tracking-wider px-4 py-2">Acciones</DropdownMenuLabel>
+                           <DropdownMenuLabel className="text-muted-foreground uppercase text-xs font-bold tracking-wider px-4 py-2"></DropdownMenuLabel>
 
                            {canEdit && (
                                <>

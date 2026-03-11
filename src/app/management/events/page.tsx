@@ -11,7 +11,7 @@ import { PromosAPI } from "@/services/api";
 import { useAuthStore } from '@/store/use-auth-store';
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Calendar, Edit, Plus, RefreshCw, Trash } from "lucide-react";
+import { Calendar, Edit, Plus, RefreshCw, Settings2, Trash } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 export default function EventsPage() {
@@ -105,7 +105,7 @@ export default function EventsPage() {
             cell: ({ row }: any) => (
                 <div className="flex items-center gap-2">
                     <Button variant="ghost" size="icon" onClick={() => handleEdit(row.original)} className="hover:cursor-pointer">
-                        <Edit className="h-4 w-4" />
+                        <Settings2 className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" size="icon" onClick={() => handleDelete(row.original.id)} className="text-destructive hover:text-destructive/90 hover:cursor-pointer">
                         <Trash className="h-4 w-4" />

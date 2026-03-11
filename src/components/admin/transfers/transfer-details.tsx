@@ -49,7 +49,7 @@ export function TransferDetails({ transfer, open, onOpenChange, onUpdate }: Tran
 
     const canShip = transfer.status === 'PENDING' && isOrigin
     const canReceive = transfer.status === 'IN_TRANSIT' && isDestination
-    const canCancel = ['PENDING', 'IN_TRANSIT'].includes(transfer.status) && isOrigin
+    const canCancel = transfer.status === 'PENDING' && isOrigin
 
     const getStatusColor = (status: string) => {
         if (status === 'COMPLETED') return 'bg-green-500'
