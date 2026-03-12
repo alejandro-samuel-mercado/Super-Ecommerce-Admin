@@ -10,6 +10,7 @@ import { SkuAPI } from "@/services/api"
 import { Product, SKU } from "@/types/schema"
 import { Edit, ScanLine, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 interface SkuManagerProps {
     open: boolean
@@ -222,6 +223,7 @@ function SkuForm({
 export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManagerProps) {
     const [skus, setSkus] = useState<SKU[]>(product.skus || [])
     const [editingSkuId, setEditingSkuId] = useState<number | null>(null)
+    const [skuToDelete, setSkuToDelete] = useState<number | null>(null)
 
     useEffect(() => {
         setSkus(product.skus || [])
@@ -243,23 +245,33 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
         }
     }, [open])
 
-    const handleDeleteSku = async (id: number) => {
-        if (!confirm("¿Está seguro de eliminar esta variante?")) return
+    const handleDeleteSku = async () => {
+        if (!skuToDelete) return;
+        const id = skuToDelete;
+       
+        const toastId = toast.loading("Eliminando variante...");
         try {
             await SkuAPI.delete(id)
+         
             setSkus(skus.filter(s => s.id !== id))
             onUpdate()
-        } catch (error) {
-            alert("No se pudo eliminar. Verifique si tiene ventas asociadas.")
+          
+        } catch (error: any) {
+            
+            const message = error.response?.data?.message || "No se pudo eliminar la variante. Intente nuevamente.";
+            toast.error(message, { id: toastId });
+        } finally {
+            setSkuToDelete(null);
         }
     }
 
     return (
+        <>
         <Dialog open={open} onOpenChange={(val) => {
             if (!val) handleCancelEdit()
             onOpenChange(val)
         }}>
-            <DialogContent className="sm:w-auto w-[100%] max-h-[90vh] overflow-y-auto overflow-x-auto text-foreground border-4 border-secondary/60 shadow-2xl">
+            <DialogContent className="sm:w-auto w-[95%] max-h-[90vh] overflow-y-auto overflow-x-auto text-foreground border-4 border-secondary/60 shadow-2xl ">
                 <DialogHeader className="sm:w-full w-[100%]">
                     <DialogTitle className="text-xl font-bold text-foreground">Gestión de Variantes</DialogTitle>
                     <DialogDescription className="text-muted-foreground">
@@ -312,7 +324,7 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
                                             <Button 
                                                 variant="ghost" 
                                                 size="sm" 
-                                                onClick={() => handleDeleteSku(sku.id)}
+                                                onClick={() => setSkuToDelete(sku.id)}
                                                 className="text-destructive hover:cursor-pointer hover:text-destructive hover:bg-destructive/10"
                                             >
                                                 <Trash2 className="h-4 w-4" />
@@ -344,5 +356,25 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+
+        <Dialog open={!!skuToDelete} onOpenChange={(val) => !val && setSkuToDelete(null)}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Confirmar Eliminación</DialogTitle>
+                    <DialogDescription>
+                        ¿Está seguro de que desea eliminar esta variante? Esta acción no se puede deshacer, pero conservaremos el historial de ventas si lo tiene.
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="gap-2 sm:gap-0">
+                    <Button variant="outline" onClick={() => setSkuToDelete(null)} className="hover:cursor-pointer">
+                        Cancelar
+                    </Button>
+                    <Button variant="destructive" onClick={handleDeleteSku} className="hover:cursor-pointer">
+                        Eliminar Variante
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+        </>
     )
 }
