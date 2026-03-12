@@ -9,13 +9,14 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+   Table,
+   TableBody,
+   TableCell,
+   TableHead,
+   TableHeader,
+   TableRow,
 } from "@/components/ui/table"
 import { cn, formatCurrency } from "@/lib/utils"
 import supplierPaymentService from "@/services/supplier-payment.service"
@@ -60,8 +61,8 @@ function SupplierPaymentsContent() {
 
     const loadFilters = async () => {
         try {
-            const suppliersData = await supplierService.getAll({ active: true })
-            setSuppliers(Array.isArray(suppliersData) ? suppliersData : [])
+            const suppliersRes = await supplierService.getAll({ active: true })
+            setSuppliers(suppliersRes?.data || [])
         } catch (error) {
         }
     }
@@ -236,95 +237,108 @@ function SupplierPaymentsContent() {
                 </div>
             </div>
 
-            {loading ? (
-                <div className="flex flex-col items-center justify-center h-64 space-y-4">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p className="text-muted-foreground font-medium">Cargando pagos...</p>
-                </div>
-            ) : (
-                <div className="space-y-4">
-                    <div className="sm:rounded-3xl border-4 border-zinc-300 dark:border-zinc-600 shadow-[0_0_20px_rgba(0,0,0,0.2)] hover:shadow-[0_0_30px_rgba(0,0,0,0.2)] hover:border-purple-500 hover:ring-4 hover:ring-zinc-500/10 transition-all duration-300 bg-card  overflow-hidden">
-                        <Table>
-                            <TableHeader className="bg-muted/50">
-                                <TableRow className="hover:bg-muted/50 border-border">
-                                    <TableHead className="text-muted-foreground font-semibold">ID</TableHead>
-                                    <TableHead className="text-muted-foreground font-semibold">Proveedor</TableHead>
-                                    <TableHead className="text-muted-foreground font-semibold">Monto</TableHead>
-                                    <TableHead className="text-muted-foreground font-semibold">Método</TableHead>
-                                    <TableHead className="text-muted-foreground font-semibold">Referencia</TableHead>
-                                    <TableHead className="text-muted-foreground font-semibold">Fecha</TableHead>
-                                    <TableHead className="text-muted-foreground font-semibold">Orden de Compra</TableHead>
+            <div className="relative">
+                <div className="sm:rounded-3xl border-4 border-zinc-300 dark:border-zinc-600 shadow-[0_0_20px_rgba(0,0,0,0.2)] hover:shadow-[0_0_30px_rgba(0,0,0,0.2)] hover:border-purple-500 hover:ring-4 hover:ring-zinc-500/10 transition-all duration-300 bg-card  overflow-hidden">
+                    <Table>
+                        <TableHeader className="bg-muted/50">
+                            <TableRow className="hover:bg-muted/50 border-border">
+                                <TableHead className="text-muted-foreground font-semibold">ID</TableHead>
+                                <TableHead className="text-muted-foreground font-semibold">Proveedor</TableHead>
+                                <TableHead className="text-muted-foreground font-semibold">Monto</TableHead>
+                                <TableHead className="text-muted-foreground font-semibold">Método</TableHead>
+                                <TableHead className="text-muted-foreground font-semibold">Referencia</TableHead>
+                                <TableHead className="text-muted-foreground font-semibold">Fecha</TableHead>
+                                <TableHead className="text-muted-foreground font-semibold">Orden de Compra</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody className="relative min-h-[200px]">
+                            {loading && (
+                                <TableRow className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+                                    <TableCell colSpan={7} className="border-none flex flex-col items-center gap-2">
+                                        <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+                                        <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest animate-pulse">Cargando...</p>
+                                    </TableCell>
                                 </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {payments.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                                            No se encontraron pagos.
+                            )}
+                            {loading ? (
+                                Array.from({ length: 5 }).map((_, i) => (
+                                    <TableRow key={`skeleton-${i}`} className="border-border">
+                                        <TableCell><Skeleton className="h-4 w-8 bg-zinc-400/20" /></TableCell>
+                                        <TableCell><Skeleton className="h-6 w-32 bg-zinc-400/20" /></TableCell>
+                                        <TableCell><Skeleton className="h-6 w-24 bg-zinc-400/20" /></TableCell>
+                                        <TableCell><Skeleton className="h-6 w-20 bg-zinc-400/20" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-24 bg-zinc-400/20" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-20 bg-zinc-400/20" /></TableCell>
+                                        <TableCell><Skeleton className="h-6 w-12 bg-zinc-400/20" /></TableCell>
+                                    </TableRow>
+                                ))
+                            ) : payments.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                                        No se encontraron pagos.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                payments.map((payment) => (
+                                    <TableRow key={payment.id} className="hover:bg-gray-800/20  hover:rounded-2xl    text-foreground transition-colors border-border">
+                                        <TableCell className="text-muted-foreground font-mono text-xs">#{payment.id}</TableCell>
+                                        <TableCell className="font-medium">
+                                            {payment.supplier?.tradeName || 'Desconocido'}
+                                        </TableCell>
+                                        <TableCell className="text-emerald-600 dark:text-emerald-400 font-bold font-mono">
+                                            {formatCurrency(payment.amount)}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline" className="border-border text-foreground bg-muted/50">
+                                                {payment.method}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-sm text-foreground">
+                                            {payment.reference || '-'}
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground">
+                                            {format(new Date(payment.paymentDate), "dd/MM/yyyy", { locale: es })}
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground">
+                                            {payment.purchaseId ? (
+                                                <span className="font-mono bg-muted px-2 py-1 rounded text-xs">
+                                                    #{payment.purchaseId}
+                                                </span>
+                                            ) : <span className="text-muted-foreground text-xs italic">Sin Orden</span>}
                                         </TableCell>
                                     </TableRow>
-                                ) : (
-                                    payments.map((payment) => (
-                                        <TableRow key={payment.id} className="hover:bg-gray-800/20  hover:rounded-2xl    text-foreground transition-colors border-border">
-                                            <TableCell className="text-muted-foreground font-mono text-xs">#{payment.id}</TableCell>
-                                            <TableCell className="font-medium">
-                                                {payment.supplier?.tradeName || 'Desconocido'}
-                                            </TableCell>
-                                            <TableCell className="text-emerald-600 dark:text-emerald-400 font-bold font-mono">
-                                                {formatCurrency(payment.amount)}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge variant="outline" className="border-border text-foreground bg-muted/50">
-                                                    {payment.method}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="text-sm text-foreground">
-                                                {payment.reference || '-'}
-                                            </TableCell>
-                                            <TableCell className="text-muted-foreground">
-                                                {format(new Date(payment.paymentDate), "dd/MM/yyyy", { locale: es })}
-                                            </TableCell>
-                                            <TableCell className="text-muted-foreground">
-                                                {payment.purchaseId ? (
-                                                    <span className="font-mono bg-muted px-2 py-1 rounded text-xs">
-                                                        #{payment.purchaseId}
-                                                    </span>
-                                                ) : <span className="text-muted-foreground text-xs italic">Sin Orden</span>}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                    </div>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
 
-                    <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-zinc-950 rounded-2xl border-4 border-zinc-200 dark:border-zinc-800 shadow-sm">
-                        <div className="text-[11px] font-black text-slate-500 uppercase tracking-wider">
-                            Página {page} de {totalPages}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => fetchPayments(page - 1)}
-                                disabled={page === 1 || loading}
-                                className="rounded-xl font-bold uppercase text-[10px] h-9 border-2 hover:cursor-pointer"
-                            >
-                                Anterior
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => fetchPayments(page + 1)}
-                                disabled={page === totalPages || loading}
-                                className="rounded-xl font-bold uppercase text-[10px] h-9 border-2 hover:cursor-pointer"
-                            >
-                                Siguiente
-                            </Button>
-                        </div>
+                <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-zinc-950 rounded-2xl border-4 border-zinc-200 dark:border-zinc-800 shadow-sm mt-4">
+                    <div className="text-[11px] font-black text-slate-500 uppercase tracking-wider">
+                        Página {page} de {totalPages}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => fetchPayments(page - 1)}
+                            disabled={page === 1 || loading}
+                            className="rounded-xl font-bold uppercase text-[10px] h-9 border-2 hover:cursor-pointer"
+                        >
+                            Anterior
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => fetchPayments(page + 1)}
+                            disabled={page === totalPages || loading}
+                            className="rounded-xl font-bold uppercase text-[10px] h-9 border-2 hover:cursor-pointer"
+                        >
+                            Siguiente
+                        </Button>
                     </div>
                 </div>
-            )}
+            </div>
 
             <Dialog open={isNewModalOpen} onOpenChange={setIsNewModalOpen}>
                 <DialogContent className="sm:max-w-[750px] overflow-y-auto max-h-[90vh] border-4 border-secondary/60 shadow-2xl">

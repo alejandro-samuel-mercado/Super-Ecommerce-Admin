@@ -4,13 +4,14 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { formatCurrency } from "@/lib/utils"
 import { Sale } from "@/types/schema"
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { ArrowUpDown, FileText, Filter, Search, Settings2, X } from "lucide-react"
+import { ArrowUpDown, FileText, Filter, Loader2, Search, Settings2, X } from "lucide-react"
 import { useState } from "react"
 
 
@@ -26,9 +27,10 @@ interface SalesTableProps {
         totalPages: number
         onPageChange: (page: number) => void
     }
+    loading?: boolean
 }
 
-export function SalesTable({ data, onView, hideSearch = false, search, onSearchChange, pagination }: SalesTableProps) {
+export function SalesTable({ data, onView, hideSearch = false, search, onSearchChange, pagination, loading }: SalesTableProps) {
     const [sorting, setSorting] = useState<any>([])
     const [columnFilters, setColumnFilters] = useState<any>([])
     
@@ -317,13 +319,31 @@ export function SalesTable({ data, onView, hideSearch = false, search, onSearchC
                                 </TableRow>
                             ))}
                         </TableHeader>
-                        <TableBody>
-                            {table.getRowModel().rows?.length ? (
+                        <TableBody className="relative min-h-[200px]">
+                            {loading && (
+                                <TableRow className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+                                    <TableCell colSpan={columns.length} className="border-none flex flex-col items-center gap-2">
+                                        <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+                                        <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest animate-pulse">Cargando...</p>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                            {loading ? (
+                                Array.from({ length: 5 }).map((_, i) => (
+                                    <TableRow key={`skeleton-${i}`}>
+                                        {columns.map((_, j) => (
+                                            <TableCell key={`cell-${i}-${j}`}>
+                                                <Skeleton className="h-6 w-full bg-zinc-400/20" />
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
                                     <TableRow
                                         key={row.id}
                                         data-state={row.getIsSelected() && "selected"}
-                                        className="hover:bg-gray-800/20  hover:rounded-2xl    text-foreground transition-colors cursor-pointer border-border"
+                                        className="hover:bg-gray-200 dark:hover:bg-zinc-800/50 text-foreground transition-colors cursor-pointer border-border"
                                         onClick={() => onView(row.original)}
                                     >
                                         {row.getVisibleCells().map((cell) => (
@@ -335,7 +355,7 @@ export function SalesTable({ data, onView, hideSearch = false, search, onSearchC
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                                    <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground font-medium uppercase tracking-widest italic opacity-50">
                                         No hay resultados.
                                     </TableCell>
                                 </TableRow>

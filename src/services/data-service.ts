@@ -156,7 +156,8 @@ export const DataService = {
     try {
       const response = await SalesAPI.getAll({ ...params, orderBy: "desc" });
 
-      return response.data || [];
+      // Extraer solo el array de datos de la respuesta paginada
+      return response.data?.data || response.data || [];
     } catch (error) {
       return [];
     }

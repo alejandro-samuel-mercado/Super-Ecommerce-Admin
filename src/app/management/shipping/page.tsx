@@ -3,14 +3,13 @@
 import { ShippingZoneDialog } from "@/components/admin/shipping-zone-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
 import { GenericTable } from '@/components/ui/generic-table'
 import { useToast } from "@/components/ui/use-toast"
 import { ShippingAPI } from '@/services/api'
 import { useAuthStore } from '@/store/use-auth-store'
 import { ShippingZone } from '@/types/extended'
 import { ColumnDef } from '@tanstack/react-table'
-import { Edit, Loader2, Trash, Truck } from 'lucide-react'
+import { Truck } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
 
@@ -23,19 +22,37 @@ export default function ShippingPage() {
     const [selectedZone, setSelectedZone] = useState<ShippingZone | null>(null)
     const { toast } = useToast()
 
+    // Estados para búsqueda y paginación
+    const [search, setSearch] = useState("")
+    const [debouncedSearch, setDebouncedSearch] = useState("")
+    const [page, setPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
 
+    // Debounce para búsqueda
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search)
+            setPage(1) // Resetear a la primera página al buscar
+        }, 500)
+        return () => clearTimeout(timer)
+    }, [search])
 
     const loadZones = useCallback(async () => {
         setLoading(true)
         try {
-            const data = await ShippingAPI.getZones()
-            setZones(data)
+            const result = await ShippingAPI.getZones({
+                search: debouncedSearch,
+                page,
+                limit: 10
+            })
+            setZones(result.data)
+            setTotalPages(result.meta.totalPages)
         } catch (error) {
             toast({ title: "Error", description: "No se pudieron cargar las zonas de envío.", variant: "destructive" })
         } finally {
             setLoading(false)
         }
-    }, [toast])
+    }, [toast, debouncedSearch, page])
 
     useEffect(() => {
         loadZones()
@@ -108,22 +125,23 @@ export default function ShippingPage() {
               
             </div>
  
-            {loading ? (
-                <div className="flex flex-col items-center justify-center h-64 space-y-4">
-                     <Loader2 className="h-8 w-8 animate-spin text-secondary" />
-                     <p className="text-muted-foreground">Cargando zonas de envío...</p>
-                </div>
-            ) : (
-                <GenericTable 
-                    data={zones}
-                    columns={columns}
-                    searchKey="location"
-                    onCreate={handleCreate}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    createText="Nueva Zona"
-                />
-            )}
+            <GenericTable 
+                data={zones}
+                columns={columns}
+                searchKey="location" // Se mantiene pero GenericTable usará onSearchChange al detectar pagination
+                onCreate={handleCreate}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                createText="Nueva Zona"
+                loading={loading}
+                search={search}
+                onSearchChange={setSearch}
+                pagination={{
+                    page,
+                    totalPages,
+                    onPageChange: setPage
+                }}
+            />
 
             <ShippingZoneDialog 
                 key={selectedZone?.id ? `edit-${selectedZone.id}` : 'create-new'}

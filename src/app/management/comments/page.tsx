@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { CommentsAPI } from "@/services/api"
 import { ColumnDef } from '@tanstack/react-table'
 import { format } from "date-fns"
-import { Check, Loader2, MessageSquare, RefreshCw, Trash, X } from 'lucide-react'
+import { Check, MessageSquare, RefreshCw, Trash, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from "react"
 
 export default function CommentsPage() {
@@ -155,29 +155,23 @@ export default function CommentsPage() {
                     <span className="ml-2 hidden sm:inline">Actualizar</span>
                 </Button>
             </div>
-            {loading ? (
-                <div className="flex flex-col items-center justify-center h-64 space-y-4">
-                    <Loader2 className="h-8 w-8 animate-spin text-secondary" />
-                    <p className="text-muted-foreground">Cargando comentarios...</p>
-                </div>
-            ) : (
-                <GenericTable 
-                    data={comments}
-                    columns={columns}
-                    searchKey="content"
-                    onEdit={handleView}
-                    search={search}
-                    onSearchChange={setSearch}
-                    pagination={{
-                        page,
-                        totalPages,
-                        onPageChange: (newPage: number) => {
-                            setPage(newPage)
-                            loadComments(newPage)
-                        }
-                    }}
-                />
-            )}
+            <GenericTable 
+                data={comments}
+                columns={columns}
+                searchKey="content"
+                onEdit={handleView}
+                search={search}
+                onSearchChange={setSearch}
+                loading={loading}
+                pagination={{
+                    page,
+                    totalPages,
+                    onPageChange: (newPage: number) => {
+                        setPage(newPage)
+                        loadComments(newPage)
+                    }
+                }}
+            />
 
             {/*Modal */}
             <Dialog open={viewOpen} onOpenChange={setViewOpen}>

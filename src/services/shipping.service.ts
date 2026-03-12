@@ -5,7 +5,8 @@ import { ShippingZone } from '@/types/schema';
 const shippingService = {
     getAll: async (): Promise<ShippingZone[]> => {
         const response = await api.get('/shipping');
-        return response.data;
+        // Manejar formato paginado { data: [], meta: {} } o array directo
+        return Array.isArray(response.data) ? response.data : (response.data?.data || []);
     },
 
     create: async (data: Partial<ShippingZone>): Promise<ShippingZone> => {

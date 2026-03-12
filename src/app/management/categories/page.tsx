@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { GenericTable } from '@/components/ui/generic-table'
 import { Category } from '@/types/schema'
 import { ColumnDef } from '@tanstack/react-table'
-import { Loader2, RefreshCw, Tags, Trash } from 'lucide-react'
+import { RefreshCw, Tags, Trash } from 'lucide-react'
 
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -142,24 +142,18 @@ export default function CategoriesPage() {
                 </Button>
             </div>
 
-            {loading ? (
-                <div className="flex flex-col items-center justify-center h-64 space-y-4">
-                    <Loader2 className="h-8 w-8 animate-spin text-secondary" />
-                    <p className="text-muted-foreground">Cargando categorías...</p>
-                </div>
-            ) : (
-                <div className="max-w-full mx-auto">
-                    <GenericTable 
-                        data={categories}
-                        columns={columns}
-                        searchKey="name"
-                        onCreate={userRole === 'EMPLOYEE' ? undefined : openCreate}
-                        onEdit={userRole === 'EMPLOYEE' ? undefined : openEdit} 
-                        onDelete={userRole === 'EMPLOYEE' ? undefined : handleDelete as any}
-                        createText="Nueva Categoría"
-                    />
-                </div>
-            )}
+            <div className="max-w-full mx-auto">
+                <GenericTable 
+                    data={categories}
+                    columns={columns}
+                    searchKey="name"
+                    onCreate={userRole === 'EMPLOYEE' ? undefined : openCreate}
+                    onEdit={userRole === 'EMPLOYEE' ? undefined : openEdit} 
+                    onDelete={userRole === 'EMPLOYEE' ? undefined : handleDelete as any}
+                    createText="Nueva Categoría"
+                    loading={loading}
+                />
+            </div>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className="bg-background border-4 border-secondary/60 text-foreground sm:max-w-[425px]">

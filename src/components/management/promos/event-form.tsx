@@ -12,8 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/components/ui/use-toast"
 import { CategoriesAPI, ProductsAPI, PromosAPI } from "@/services/api"
 import { BannerSlide, Event } from "@/types/extended"
-import { Plus, Search, Trash2, X } from "lucide-react"
-import { useEffect, useState } from "react"
+import { Loader2, Plus, Search, Trash2, X } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { BannerCarouselManager, MarqueeItemManager, SecondaryAdsManager } from "../content/web-content-managers"
 
 interface EventFormProps {
@@ -45,12 +45,14 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
     const [marqueeText, setMarqueeText] = useState<string[]>(initialData?.marqueeText || [])
     const [secondaryAds, setSecondaryAds] = useState<{ url: string, link?: string }[]>(initialData?.secondaryAds || [])
 
-    const [eventDiscounts, setEventDiscounts] = useState<any[]>(initialData?.discounts || [])
+    const [eventDiscounts, setEventDiscounts] = useState<any[]>(
+        (initialData?.discounts || []).map(d => ({ ...d, q: '', results: [], searching: false }))
+    )
     
     const [products, setProducts] = useState<any[]>([])
     const [categories, setCategories] = useState<any[]>([])
     const [hasAnotherActiveEvent, setHasAnotherActiveEvent] = useState(false)
-    const [searchQuery, setSearchQuery] = useState('')
+    const searchTimeouts = useRef<Record<number, NodeJS.Timeout>>({})
 
     useEffect(() => {
         loadDependencies()
@@ -72,22 +74,23 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
             
             setPaymentMethods(initialData.paymentMethods || [])
             setDeliveryMethods(initialData.deliveryMethods || [])
-
+ 
             setHeroBanners(initialData.heroBanners || [])
             setMarqueeText(initialData.marqueeText || [])
             setSecondaryAds(initialData.secondaryAds || [])
-            setEventDiscounts(initialData.discounts || [])
+            setEventDiscounts((initialData.discounts || []).map(d => ({ ...d, q: '', results: [], searching: false })))
         }
     }, [initialData])
 
-    const loadDependencies = async () => {
+    const loadDependencies = useCallback(async () => {
         try {
             const [prods, cats, eventsRes] = await Promise.all([
-                ProductsAPI.getAll(),
+                ProductsAPI.getAll({ limit: 100, adminView: true }), 
                 CategoriesAPI.getAll(),
                 PromosAPI.getEvents()
             ])
-            setProducts(prods.data?.data || prods.data || prods || [])
+            const pData = prods.data?.data || prods.data || [];
+            setProducts(Array.isArray(pData) ? pData : [])
             setCategories(cats.data || cats || [])
             
             const events = eventsRes.data || eventsRes || []
@@ -95,6 +98,37 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
             setHasAnotherActiveEvent(anotherActive)
         } catch (error) {
         }
+    }, [initialData?.id])
+
+    useEffect(() => {
+        loadDependencies()
+    }, [loadDependencies])
+
+    const handleSearch = (idx: number, query: string) => {
+        setEventDiscounts(prev => {
+            const newDiscs = [...prev]
+            if (newDiscs[idx]) {
+                newDiscs[idx] = { ...newDiscs[idx], q: query, searching: query.length > 0 }
+            }
+            return newDiscs
+        })
+
+        if (searchTimeouts.current[idx]) clearTimeout(searchTimeouts.current[idx])
+
+        if (query.length === 0) {
+            updateDiscountRow(idx, { q: '', results: [], searching: false })
+            return
+        }
+
+        searchTimeouts.current[idx] = setTimeout(async () => {
+             try {
+                const res = await ProductsAPI.getAll({ search: query, limit: 100, adminView: true, includeInactive: true })
+                const data = res.data?.data || res.data || []
+                updateDiscountRow(idx, { results: Array.isArray(data) ? data : [], searching: false })
+             } catch (e) {
+                updateDiscountRow(idx, { searching: false })
+             }
+        }, 500)
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -138,20 +172,23 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
                 const updatedRules = { ...(disc.rules || {}) };
                 updatedRules.action = {
                     type: disc.type || updatedRules.action?.type || 'PERCENTAGE',
-                    value: Math.min(100, parseFloat(disc.value))
+                    value: Math.min(100, parseFloat(disc.value || '0'))
                 };
                 
                 updatedRules.targets = disc.scope === 'GLOBAL' 
                     ? [{ type: 'GLOBAL' }] 
                     : [{ type: disc.scope, value: disc.targetIds }];
 
+                // Sanitize payload: remove frontend-only states
+                const { q, results, searching, isNew, ...rest } = disc;
+
                 const discPayload = {
-                    ...disc,
+                    ...rest,
                     rules: updatedRules,
                     eventId: eventId,
                     active: true 
                 }
-                if (disc.id && !disc.isNew) {
+                if (disc.id && !isNew) {
                     await PromosAPI.updateDiscount(disc.id, discPayload)
                 } else {
                     await PromosAPI.createDiscount(discPayload)
@@ -174,7 +211,10 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
             type: 'PERCENTAGE',
             value: 0,
             targetIds: [],
-            isNew: true
+            isNew: true,
+            q: '',
+            results: [],
+            searching: false
         }])
     }
 
@@ -195,9 +235,13 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
     }
 
     const updateDiscountRow = (index: number, data: any) => {
-        const newDiscs = [...eventDiscounts]
-        newDiscs[index] = { ...newDiscs[index], ...data }
-        setEventDiscounts(newDiscs)
+        setEventDiscounts(prev => {
+            const newDiscs = [...prev]
+            if (newDiscs[index]) {
+                newDiscs[index] = { ...newDiscs[index], ...data }
+            }
+            return newDiscs
+        })
     }
 
     const togglePayment = (method: string) => {
@@ -338,29 +382,36 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
                                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                                     <Input 
                                                         placeholder={disc.scope === 'CATEGORY' ? "Escribe nombre de categoría..." : "Escribe nombre de producto..."}
-                                                        value={searchQuery}
-                                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                                        value={disc.q || ''}
+                                                        onChange={(e) => handleSearch(idx, e.target.value)}
                                                         className="pl-9 h-9 text-sm bg-gray-200 border-3 border-gray-400/20"
                                                     />
                                                 </div>
                                             </div>
 
-                                            {searchQuery.length > 0 && (
+                                            {(disc.q?.length > 0 || disc.scope === 'PRODUCT') && (
                                                 <div className="border rounded-md bg-background shadow-sm max-h-[150px] overflow-y-auto divide-y">
-                                                    {(disc.scope === 'CATEGORY' ? categories : products)
-                                                        .filter(item => 
-                                                            item.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
-                                                            !disc.targetIds?.includes(item.id)
+                                                    {disc.searching ? (
+                                                        <div className="p-4 text-center">
+                                                            <Loader2 className="h-4 w-4 animate-spin mx-auto text-muted-foreground" />
+                                                            <span className="text-xs text-muted-foreground mt-2 block italic">Buscando...</span>
+                                                        </div>
+                                                    ) : (disc.scope === 'CATEGORY' 
+                                                            ? categories.filter((item: any) => item.name.toLowerCase().includes(disc.q?.toLowerCase() || '') && !disc.targetIds?.includes(item.id)) 
+                                                            : (disc.results?.length > 0 ? disc.results : products).filter((item: any) => !disc.targetIds?.includes(item.id))
                                                         )
-                                                        .slice(0, 10)
-                                                        .map(item => (
+                                                        .slice(0, 100)
+                                                        .map((item: any) => (
                                                             <div 
                                                                 key={item.id} 
                                                                 className="flex items-center justify-between p-2 hover:bg-muted/50 cursor-pointer transition-colors"
                                                                 onClick={() => {
                                                                     const ids = disc.targetIds || []
-                                                                    updateDiscountRow(idx, { targetIds: [...ids, item.id] })
-                                                                    setSearchQuery('')
+                                                                    updateDiscountRow(idx, { 
+                                                                        targetIds: [...ids, item.id],
+                                                                        q: '',
+                                                                        results: []
+                                                                    })
                                                                 }}
                                                             >
                                                                 <span className="text-sm">{item.name}</span>
@@ -368,7 +419,7 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
                                                             </div>
                                                         ))
                                                     }
-                                                    {(disc.scope === 'CATEGORY' ? categories : products).filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()) && !disc.targetIds?.includes(item.id)).length === 0 && (
+                                                    {!disc.searching && (disc.scope === 'CATEGORY' ? categories.filter((item: any) => item.name.toLowerCase().includes(disc.q?.toLowerCase() || '') && !disc.targetIds?.includes(item.id)).length : (disc.results?.length > 0 ? disc.results : products).filter((item: any) => !disc.targetIds?.includes(item.id)).length) === 0 && disc.q?.length > 0 && (
                                                         <div className="p-3 text-center text-xs text-muted-foreground">No se encontraron resultados</div>
                                                     )}
                                                 </div>
@@ -379,7 +430,7 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
                                                 <div className="flex flex-wrap gap-1.5 p-2 bg-secondary/5 border border-secondary/10 rounded-md min-h-[45px]">
                                                     {disc.targetIds?.length > 0 ? (
                                                         disc.targetIds.map((id: number) => {
-                                                            const item = (disc.scope === 'CATEGORY' ? categories : products).find(i => i.id === id)
+                                                            const item = (disc.scope === 'CATEGORY' ? categories : products).find((i: any) => i.id === id)
                                                             if (!item) return null
                                                             return (
                                                                 <Badge 

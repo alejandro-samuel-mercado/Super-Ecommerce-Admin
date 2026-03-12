@@ -225,7 +225,8 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
 
     useEffect(() => {
         setSkus(product.skus || [])
-    }, [product.skus])
+        setEditingSkuId(null)
+    }, [product.id, product.skus])
 
     const handleEditClick = (sku: SKU) => {
         setEditingSkuId(sku.id)
@@ -234,6 +235,13 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
     const handleCancelEdit = () => {
         setEditingSkuId(null)
     }
+
+  
+    useEffect(() => {
+        if (!open) {
+            handleCancelEdit()
+        }
+    }, [open])
 
     const handleDeleteSku = async (id: number) => {
         if (!confirm("¿Está seguro de eliminar esta variante?")) return

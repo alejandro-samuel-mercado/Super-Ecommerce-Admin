@@ -327,7 +327,7 @@ const router=useRouter()
                                         size="sm"
                                         className="hover:cursor-pointer"
                                         onClick={() => {
-                                            const current = formData.characteristics || [];
+                                            const current = Array.isArray(formData.characteristics) ? formData.characteristics : [];
                                             setFormData({...formData, characteristics: [...current, { key: '', value: '' }]});
                                         }}
                                     >
@@ -335,13 +335,14 @@ const router=useRouter()
                                     </Button>
                                 </div>
                                 <div className="max-h-[200px] overflow-y-auto space-y-2 pr-1">
-                                    {(formData.characteristics || []).map((item, idx) => (
+                                    {(Array.isArray(formData.characteristics) ? formData.characteristics : []).map((item, idx) => (
                                         <div key={idx} className="flex items-center gap-2">
                                             <Input
                                                 placeholder="Ej: Material"
                                                 value={item.key}
                                                 onChange={(e) => {
-                                                    const updated = [...(formData.characteristics || [])];
+                                                    const currentChars = Array.isArray(formData.characteristics) ? formData.characteristics : [];
+                                                    const updated = [...currentChars];
                                                     updated[idx] = { ...updated[idx], key: e.target.value };
                                                     setFormData({...formData, characteristics: updated});
                                                 }}
@@ -351,7 +352,8 @@ const router=useRouter()
                                                 placeholder="Ej: Acero inoxidable"
                                                 value={item.value}
                                                 onChange={(e) => {
-                                                    const updated = [...(formData.characteristics || [])];
+                                                    const currentChars = Array.isArray(formData.characteristics) ? formData.characteristics : [];
+                                                    const updated = [...currentChars];
                                                     updated[idx] = { ...updated[idx], value: e.target.value };
                                                     setFormData({...formData, characteristics: updated});
                                                 }}
@@ -363,7 +365,8 @@ const router=useRouter()
                                                 size="icon"
                                                 className="h-8 w-8 shrink-0 text-destructive hover:bg-destructive/10 hover:cursor-pointer"
                                                 onClick={() => {
-                                                    const updated = (formData.characteristics || []).filter((_, i) => i !== idx);
+                                                    const currentChars = Array.isArray(formData.characteristics) ? formData.characteristics : [];
+                                                    const updated = currentChars.filter((_, i) => i !== idx);
                                                     setFormData({...formData, characteristics: updated});
                                                 }}
                                             >
@@ -371,7 +374,7 @@ const router=useRouter()
                                             </Button>
                                         </div>
                                     ))}
-                                    {(!formData.characteristics || formData.characteristics.length === 0) && (
+                                    {(!Array.isArray(formData.characteristics) || formData.characteristics.length === 0) && (
                                         <p className="text-xs text-muted-foreground italic py-2">Sin características agregadas.</p>
                                     )}
                                 </div>
@@ -389,7 +392,7 @@ const router=useRouter()
                                         size="sm"
                                         className="hover:cursor-pointer"
                                         onClick={() => {
-                                            const current = formData.specifications || [];
+                                            const current = Array.isArray(formData.specifications) ? formData.specifications : [];
                                             setFormData({...formData, specifications: [...current, { key: '', value: '' }]});
                                         }}
                                     >
@@ -397,13 +400,14 @@ const router=useRouter()
                                     </Button>
                                 </div>
                                 <div className="max-h-[200px] overflow-y-auto space-y-2 pr-1">
-                                    {(formData.specifications || []).map((item, idx) => (
+                                    {(Array.isArray(formData.specifications) ? formData.specifications : []).map((item, idx) => (
                                         <div key={idx} className="flex items-center gap-2">
                                             <Input
                                                 placeholder="Ej: Peso"
                                                 value={item.key}
                                                 onChange={(e) => {
-                                                    const updated = [...(formData.specifications || [])];
+                                                    const currentSpecs = Array.isArray(formData.specifications) ? formData.specifications : [];
+                                                    const updated = [...currentSpecs];
                                                     updated[idx] = { ...updated[idx], key: e.target.value };
                                                     setFormData({...formData, specifications: updated});
                                                 }}
@@ -413,7 +417,8 @@ const router=useRouter()
                                                 placeholder="Ej: 250g"
                                                 value={item.value}
                                                 onChange={(e) => {
-                                                    const updated = [...(formData.specifications || [])];
+                                                    const currentSpecs = Array.isArray(formData.specifications) ? formData.specifications : [];
+                                                    const updated = [...currentSpecs];
                                                     updated[idx] = { ...updated[idx], value: e.target.value };
                                                     setFormData({...formData, specifications: updated});
                                                 }}
@@ -425,7 +430,8 @@ const router=useRouter()
                                                 size="icon"
                                                 className="h-8 w-8 shrink-0 text-destructive hover:bg-destructive/10 hover:cursor-pointer"
                                                 onClick={() => {
-                                                    const updated = (formData.specifications || []).filter((_, i) => i !== idx);
+                                                    const currentSpecs = Array.isArray(formData.specifications) ? formData.specifications : [];
+                                                    const updated = currentSpecs.filter((_, i) => i !== idx);
                                                     setFormData({...formData, specifications: updated});
                                                 }}
                                             >
@@ -433,7 +439,7 @@ const router=useRouter()
                                             </Button>
                                         </div>
                                     ))}
-                                    {(!formData.specifications || formData.specifications.length === 0) && (
+                                    {(!Array.isArray(formData.specifications) || formData.specifications.length === 0) && (
                                         <p className="text-xs text-muted-foreground italic py-2">Sin especificaciones agregadas.</p>
                                     )}
                                 </div>

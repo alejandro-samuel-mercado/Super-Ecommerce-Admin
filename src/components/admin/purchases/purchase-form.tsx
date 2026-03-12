@@ -1,16 +1,18 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
-import { formatCurrency } from "@/lib/utils"
+import { cn, formatCurrency } from "@/lib/utils"
 import { purchaseService } from "@/services/purchase.service"
 import { supplierService } from "@/services/supplier.service"
 import { useBranchStore } from "@/store/branch.store"
-import { Plus, Trash2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { Check, ChevronsUpDown, Loader2, Plus, Trash2 } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
 
 interface PurchaseFormProps {
     onSuccess?: () => void;
@@ -29,12 +31,34 @@ export function PurchaseForm({ onSuccess, onCancel }: PurchaseFormProps) {
     
     const [suppliers, setSuppliers] = useState<any[]>([])
     const [supplierSkus, setSupplierSkus] = useState<any[]>([])
+    const [supplierSearchQuery, setSupplierSearchQuery] = useState("")
+    const [isSearchingSuppliers, setIsSearchingSuppliers] = useState(false)
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false)
     
     const [loading, setLoading] = useState(false)
 
-    useEffect(() => {
-        loadSuppliers()
+    const searchSuppliers = useCallback(async (query: string) => {
+        try {
+            setIsSearchingSuppliers(true)
+            const data = await supplierService.getAll({ search: query, active: true, limit: 50 })
+            setSuppliers(Array.isArray(data) ? data : (data.data || []))
+        } catch (error) {
+            console.error("Error searching suppliers:", error)
+        } finally {
+            setIsSearchingSuppliers(false)
+        }
     }, [])
+
+    useEffect(() => {
+        searchSuppliers("")
+    }, [searchSuppliers])
+    
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            searchSuppliers(supplierSearchQuery)
+        }, 500)
+        return () => clearTimeout(timer)
+    }, [supplierSearchQuery, searchSuppliers])
     
     useEffect(() => {
         if (supplierId) {
@@ -45,14 +69,6 @@ export function PurchaseForm({ onSuccess, onCancel }: PurchaseFormProps) {
         }
     }, [supplierId])
 
-    const loadSuppliers = async () => {
-        try {
-            const data = await supplierService.getAll({ active: true })
-            setSuppliers(data)
-        } catch (error) {
-        }
-    }
-    
     const loadSupplierSkus = async (id: number) => {
         try {
             const data = await supplierService.getById(id)
@@ -101,7 +117,7 @@ export function PurchaseForm({ onSuccess, onCancel }: PurchaseFormProps) {
 
     const handleSubmit = async () => {
         if (!activeBranch) {
-           toast({ title: "Selecciona una branch primero", variant: "destructive" })
+           toast({ title: "Selecciona una sucursal  primero", variant: "destructive" })
            return
         }
         if (!supplierId || items.length === 0) {
@@ -142,18 +158,66 @@ export function PurchaseForm({ onSuccess, onCancel }: PurchaseFormProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <Label>Proveedor</Label>
-                        <Select value={supplierId} onValueChange={setSupplierId}>
-                            <SelectTrigger className="bg-background border-input">
-                                <SelectValue placeholder="Seleccionar Proveedor" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-popover border-border">
-                                {(Array.isArray(suppliers) ? suppliers : []).map(s => (
-                                    <SelectItem key={s.id} value={s.id.toString()}>
-                                        {s.tradeName}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={isPopoverOpen}
+                                    className="w-full justify-between bg-background border-input font-normal hover:cursor-pointer"
+                                >
+                                    {supplierId
+                                        ? suppliers.find((s) => s.id.toString() === supplierId)?.tradeName || "Proveedor seleccionado"
+                                        : "Seleccionar Proveedor"}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[400px] p-0" align="start">
+                                <Command shouldFilter={false}>
+                                    <CommandInput 
+                                        placeholder="Buscar proveedor..." 
+                                        value={supplierSearchQuery}
+                                        onValueChange={setSupplierSearchQuery}
+                                    />
+                                    <CommandList className="max-h-[300px] overflow-y-auto">
+                                        {isSearchingSuppliers ? (
+                                            <div className="p-4 text-center">
+                                                <Loader2 className="h-4 w-4 animate-spin mx-auto text-muted-foreground" />
+                                                <span className="text-xs text-muted-foreground mt-2 block">Buscando...</span>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <CommandEmpty>No se encontraron proveedores.</CommandEmpty>
+                                                <CommandGroup>
+                                                    {suppliers.map((s) => (
+                                                        <CommandItem
+                                                            key={s.id}
+                                                            value={s.id.toString()}
+                                                            onSelect={(currentValue) => {
+                                                                setSupplierId(currentValue)
+                                                                setIsPopoverOpen(false)
+                                                            }}
+                                                            className="hover:cursor-pointer"
+                                                        >
+                                                            <Check
+                                                                className={cn(
+                                                                    "mr-2 h-4 w-4",
+                                                                    supplierId === s.id.toString() ? "opacity-100" : "opacity-0"
+                                                                )}
+                                                            />
+                                                            <div className="flex flex-col">
+                                                                <span className="font-medium text-foreground">{s.tradeName}</span>
+                                                                <span className="text-xs text-muted-foreground">{s.legalName} - CUIT: {s.taxId}</span>
+                                                            </div>
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </>
+                                        )}
+                                    </CommandList>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
                     </div>
                     
                     <div className="space-y-2">

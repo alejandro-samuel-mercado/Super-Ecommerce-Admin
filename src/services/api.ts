@@ -171,8 +171,8 @@ export const ConfigAPI = {
 }
 
 export const ShippingAPI = {
-    getZones: async () => {
-        const { data } = await api.get('/shipping')
+    getZones: async (params?: any) => {
+        const { data } = await api.get('/shipping', { params })
         return data
     },
     createZone: async (zone: any) => {

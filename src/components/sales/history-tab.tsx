@@ -28,7 +28,10 @@ export function HistoryTab({ sales }: HistoryTabProps) {
     const [sortOrder, setSortOrder] = useState<"recent" | "oldest" | "maxPrice" | "minPrice">("recent")
     const [selectedSale, setSelectedSale] = useState<Sale | null>(null)
 
-    const filteredData = sales.filter(sale => {
+    
+    const salesArray = (Array.isArray(sales) ? sales : ((sales as any)?.data || [])) as Sale[];
+
+    const filteredData = salesArray.filter((sale: Sale) => {
         
         const searchTerm = globalFilter.toLowerCase();
         const matchesGlobal = 
@@ -49,7 +52,7 @@ export function HistoryTab({ sales }: HistoryTabProps) {
         const matchesPaymentType = paymentTypeFilter === "all" || sale.paymentType === paymentTypeFilter
 
         return matchesGlobal && matchesDate && matchesPayment && matchesDeliveryStatus && matchesDeliveryType && matchesPaymentType
-    }).sort((a, b) => {
+    }).sort((a: Sale, b: Sale) => {
         const dateA = new Date(a.createdAt || 0).getTime()
         const dateB = new Date(b.createdAt || 0).getTime()
         

@@ -312,8 +312,9 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                             size="sm" 
                                             className="font-bold flex gap-2"
                                             onClick={() => window.open(sale.paymentProofUrl!, '_blank')}
+                                            disabled={sale.paymentStatus === 'CANCELLED'}
                                         >
-                                            <Eye size={14} /> Ampliar
+                                            <Eye size={14} /> {sale.paymentStatus === 'CANCELLED' ? 'No disponible' : 'Ampliar'}
                                         </Button>
                                     </div>
                                 </div>
@@ -374,6 +375,18 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                             </h3>
                             <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-lg border border-amber-200 dark:border-amber-900/50 text-sm">
                                 <p className="text-zinc-700 dark:text-zinc-300 italic">{sale.observations}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Motivo de Anulación */}
+                    {sale.paymentStatus === 'CANCELLED' && sale.cancelReason && (
+                        <div className="mt-6">
+                            <h3 className="text-xs font-bold text-red-600 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                <AlertCircle size={14} /> Motivo de Anulación
+                            </h3>
+                            <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-900/50 text-sm">
+                                <p className="text-red-700 dark:text-red-300 font-medium italic">{sale.cancelReason}</p>
                             </div>
                         </div>
                     )}
@@ -456,15 +469,16 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                         <Button 
                             variant="outline" 
                             onClick={handlePrintTicket}
-                            className="text-muted-foreground hover:bg-background flex gap-2 font-bold border-2 border-secondary/50 hover:cursor-pointer hover:bg-secondary hover:text-white"
+                            disabled={sale.paymentStatus === 'CANCELLED'}
+                            className="text-muted-foreground hover:bg-background flex gap-2 font-bold border-2 border-secondary/50 hover:cursor-pointer hover:bg-secondary hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Printer size={16} /> Ticket
                         </Button>
                         <Button 
                             variant="outline" 
                             onClick={handleDownloadInvoice}
-                            disabled={isDownloading}
-                            className="text-secondary hover:bg-secondary hover:text-white  flex gap-2 font-bold border-2 border-secondary/50  hover:cursor-pointer "
+                            disabled={isDownloading || sale.paymentStatus === 'CANCELLED'}
+                            className="text-secondary hover:bg-secondary hover:text-white  flex gap-2 font-bold border-2 border-secondary/50  hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed "
                         >
                             {isDownloading ? (
                                 <Loader2 size={16} className="animate-spin" />

@@ -4,8 +4,9 @@ import { BotResponseDialog } from "@/components/management/content/bot/bot-respo
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
     Table,
     TableBody,
@@ -18,7 +19,6 @@ import { cn } from "@/lib/utils";
 import { ChatAutoResponse, chatBotService } from "@/services/chat-bot.service";
 import {
     Bot,
-    Pencil,
     Plus,
     RefreshCw,
     Search,
@@ -174,12 +174,14 @@ export default function BotManagementPage() {
                             </TableHeader>
                             <TableBody>
                                 {loading ? (
-                                    <TableRow>
-                                        <TableCell colSpan={4} className="h-32 text-center">
-                                            <RefreshCw className="h-6 w-6 animate-spin mx-auto text-secondary opacity-50" />
-                                            <p className="mt-2 text-sm text-muted-foreground">Cargando reglas...</p>
-                                        </TableCell>
-                                    </TableRow>
+                                    Array.from({ length: 5 }).map((_, i) => (
+                                        <TableRow key={`skeleton-${i}`}>
+                                            <TableCell><Skeleton className="h-6 w-32 bg-zinc-400/20" /></TableCell>
+                                            <TableCell><Skeleton className="h-6 w-full bg-zinc-400/20" /></TableCell>
+                                            <TableCell><Skeleton className="h-8 w-20 mx-auto bg-zinc-400/20" /></TableCell>
+                                            <TableCell><Skeleton className="h-8 w-16 ml-auto bg-zinc-400/20" /></TableCell>
+                                        </TableRow>
+                                    ))
                                 ) : filteredResponses.length === 0 ? (
                                     <TableRow >
                                         <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">

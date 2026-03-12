@@ -11,7 +11,7 @@ import { PromosAPI } from "@/services/api";
 import { useAuthStore } from '@/store/use-auth-store';
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Calendar, Edit, Plus, RefreshCw, Settings2, Trash } from "lucide-react";
+import { Calendar, Plus, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 export default function EventsPage() {
@@ -41,10 +41,10 @@ export default function EventsPage() {
         loadEvents()
     }, [loadEvents])
 
-    const handleDelete = async (id: number) => {
+    const handleDeleteItem = async (item: any) => {
         if (!confirm("¿Eliminar este evento?")) return
         try {
-            await PromosAPI.deleteEvent(id)
+            await PromosAPI.deleteEvent(item.id)
             toast({ title: "Evento eliminado" })
             loadEvents()
         } catch (error) {
@@ -100,19 +100,6 @@ export default function EventsPage() {
                 )
             }
         },
-        ...(userRole !== 'EMPLOYEE' ? [{
-            id: "actions",
-            cell: ({ row }: any) => (
-                <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(row.original)} className="hover:cursor-pointer">
-                        <Settings2 className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(row.original.id)} className="text-destructive hover:text-destructive/90 hover:cursor-pointer">
-                        <Trash className="h-4 w-4" />
-                    </Button>
-                </div>
-            )
-        }] : [])
     ]
 
     return (
@@ -149,6 +136,9 @@ export default function EventsPage() {
                 columns={columns} 
                 data={events} 
                 searchKey="name" 
+                loading={loading}
+                onEdit={userRole === 'EMPLOYEE' ? undefined : handleEdit}
+                onDelete={userRole === 'EMPLOYEE' ? undefined : handleDeleteItem}
             />
 
             <Dialog open={formOpen} onOpenChange={setFormOpen}>

@@ -27,11 +27,14 @@ export function MercadoPagoTab({ sales }: MercadoPagoTabProps) {
      const [sortOrder, setSortOrder] = useState<"recent" | "oldest" | "maxPrice" | "minPrice">("recent")
      const [selectedSale, setSelectedSale] = useState<Sale | null>(null)
 
-     const mpSales = sales.filter(sale => 
-        sale.paymentType === 'MERCADO_PAGO'
+   
+     const salesArray = (Array.isArray(sales) ? sales : ((sales as any)?.data || [])) as Sale[];
+
+     const mpSales = salesArray.filter((sale: Sale) => 
+        sale.paymentType === "MERCADO_PAGO"
      )
 
-     const filteredSales = mpSales.filter(sale => {
+     const filteredSales = mpSales.filter((sale: Sale) => {
         const searchTerm = globalFilter.toLowerCase();
         const matchesGlobal = 
             (sale.id?.toString() || "").includes(searchTerm) ||
@@ -49,7 +52,7 @@ export function MercadoPagoTab({ sales }: MercadoPagoTabProps) {
         const matchesDeliveryType = deliveryTypeFilter === "all" || sale.deliveryType === deliveryTypeFilter
 
         return matchesGlobal && matchesDate && matchesPayment && matchesDeliveryStatus && matchesDeliveryType
-    }).sort((a, b) => {
+    }).sort((a: Sale, b: Sale) => {
         const dateA = new Date(a.createdAt || 0).getTime()
         const dateB = new Date(b.createdAt || 0).getTime()
         

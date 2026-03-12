@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatCurrency } from "@/lib/utils"
 import { Product, UserRole } from "@/types/schema"
 import { CellContext, ColumnDef, ColumnFiltersState, HeaderContext, SortingState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
-import { ArrowUpDown, Boxes, Edit, Search, Settings2, Trash } from "lucide-react"
+import { ArrowUpDown, Boxes, Edit, Loader2, Search, Settings2, Trash } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { SkuManager } from "./sku-manager"
@@ -17,7 +17,7 @@ import { SkuManager } from "./sku-manager"
 interface ProductTableProps {
     data: Product[]
     onEdit: (product: Product) => void
-    onDelete: (product: Product) => void
+    onDelete: (product: Product) => void | Promise<void>
     onSelectionChange?: (selectedIds: number[]) => void
     currentUserRole: UserRole
     pagination?: {
@@ -25,9 +25,12 @@ interface ProductTableProps {
         totalPages: number
         onPageChange: (page: number) => void
     }
+    search?: string
+    onSearchChange?: (value: string) => void
+    loading?: boolean
 }
 
-export function ProductTable({ data, onEdit, onDelete, onSelectionChange, currentUserRole, pagination }: ProductTableProps) {
+export function ProductTable({ data, onEdit, onDelete, onSelectionChange, currentUserRole, pagination, search, onSearchChange, loading }: ProductTableProps) {
     const router = useRouter()
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -223,11 +226,9 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
                         <Search className="h-4 w-4" />
                     </div>
                     <Input
-                        placeholder="Filtrar por nombre..."
-                        value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-                        onChange={(event) =>
-                            table.getColumn("name")?.setFilterValue(event.target.value)
-                        }
+                        placeholder="Buscar por nombre, marca, modelo o SKU..."
+                        value={search ?? ""}
+                        onChange={(event) => onSearchChange?.(event.target.value)}
                         className="pl-10 pr-4 rounded-full shadow-sm w-full bg-gray-200 border-3 border-gray-400/20"
                     />
                 </div>
@@ -253,8 +254,26 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
                             </TableRow>
                         ))}
                     </TableHeader>
-                    <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                    <TableBody className="relative min-h-[200px]">
+                        {loading && (
+                            <TableRow className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+                                <TableCell colSpan={columns.length} className="border-none flex flex-col items-center gap-2">
+                                    <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+                                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest animate-pulse">Cargando...</p>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                        {loading ? (
+                             Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={`loading-${i}`} className="border-border">
+                                    {columns.map((_, j) => (
+                                        <TableCell key={`loading-cell-${j}`} className="h-16">
+                                             <div className="h-4 bg-muted animate-pulse rounded w-full" />
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}

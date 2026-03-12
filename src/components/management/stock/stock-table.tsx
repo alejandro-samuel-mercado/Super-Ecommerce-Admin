@@ -8,7 +8,7 @@ import { InventoryItem, formatPrice, formatStock } from "@/services/stock-contro
 import { useAuthStore } from "@/store/use-auth-store"
 import { UserRole } from "@/types/schema"
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
-import { Edit3, Settings2, X } from "lucide-react"
+import { Edit3, Loader2, Settings2, X } from "lucide-react"
 import { useState } from "react"
 import { BulkEditDialog } from "./bulk-edit-dialog"
 import { StockAdjustmentDialog } from "./stock-adjustment-dialog"
@@ -23,6 +23,7 @@ interface StockTableProps {
         totalPages: number
         onPageChange: (page: number) => void
     }
+    loading?: boolean
 }
 
 export function StockTable({ 
@@ -30,7 +31,8 @@ export function StockTable({
     onRefresh,
     lowThreshold,
     criticalThreshold,
-    pagination
+    pagination,
+    loading
 }: StockTableProps) {
     const { user } = useAuthStore()
     const currentUserRole = (user?.role?.name || 'EMPLOYEE') as UserRole
@@ -214,8 +216,26 @@ export function StockTable({
                             </TableRow>
                         ))}
                     </TableHeader>
-                    <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                    <TableBody className="relative min-h-[200px]">
+                        {loading && (
+                            <TableRow className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+                                <TableCell colSpan={columns.length} className="border-none flex flex-col items-center gap-2">
+                                    <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+                                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest animate-pulse">Cargando...</p>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                        {loading ? (
+                            Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={`loading-${i}`} className="border-border">
+                                    {columns.map((_, j) => (
+                                        <TableCell key={`loading-cell-${j}`} className="h-16">
+                                             <div className="h-4 bg-muted animate-pulse rounded w-full" />
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}

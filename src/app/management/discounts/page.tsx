@@ -28,11 +28,14 @@ export default function DiscountsPage() {
     const [categories, setCategories] = useState<any[]>([])
     const [productQuery, setProductQuery] = useState('')
     const [categoryQuery, setCategoryQuery] = useState('')
+    const [isSearchingProduct, setIsSearchingProduct] = useState(false)
+    const [searchResults, setSearchResults] = useState<any[]>([])
 
     const [editingId, setEditingId] = useState<number | null>(null) 
 
     const [isLoading, setIsLoading] = useState(true) 
     const [activeEvent, setActiveEvent] = useState<any>(null)
+    const [isSaving, setIsSaving] = useState(false)
 
 
 
@@ -45,16 +48,8 @@ export default function DiscountsPage() {
                     CategoriesAPI.getAll()
                 ])
                 
-                let prods = [];
-                if (dProducts?.data?.data && Array.isArray(dProducts.data.data)) {
-                    prods = dProducts.data.data;
-                } else if (dProducts?.data && Array.isArray(dProducts.data)) {
-                    prods = dProducts.data;
-                } else if (Array.isArray(dProducts)) {
-                    prods = dProducts;
-                }
-                
-                setProducts(prods)
+                const prodsLimit = (dProducts?.data?.data && Array.isArray(dProducts.data.data)) ? dProducts.data.data : (dProducts?.data && Array.isArray(dProducts.data)) ? dProducts.data : Array.isArray(dProducts) ? dProducts : [];
+                setProducts(prodsLimit.slice(0, 50))
                 setCategories(dCategories)
             }
 
@@ -77,6 +72,31 @@ export default function DiscountsPage() {
     useEffect(() => {
         loadData()
     }, [loadData])
+
+    useEffect(() => {
+        if (productQuery.length < 2) {
+            setSearchResults([])
+            return
+        }
+
+        if (newDiscount.scope !== 'PRODUCT') return
+
+        const timer = setTimeout(async () => {
+            setIsSearchingProduct(true)
+            try {
+                const res = await ProductsAPI.getAll({ search: productQuery, limit: 50, adminView: true })
+                const data = res.data?.data || res.data || res || []
+                setSearchResults(data)
+            } catch (error) {
+                console.error("Error searching products:", error)
+            } finally {
+                setIsSearchingProduct(true) 
+                setIsSearchingProduct(false)
+            }
+        }, 500)
+
+        return () => clearTimeout(timer)
+    }, [productQuery, newDiscount.scope])
 
     const handleOpenCreate = () => {
         setNewDiscount({ 
@@ -129,6 +149,12 @@ export default function DiscountsPage() {
         const newScope = newData.scope;
         const newTargets = newData.targetIds || [];
 
+        // If no targets selected for non-global scope, we should probably warn, 
+        // but it shouldn't cause a crash here. 
+        if (newScope !== 'GLOBAL' && newTargets.length === 0) return null;
+
+        if (!Array.isArray(discounts)) return null;
+
         for (const d of discounts) {
             
             if (editingId && d.id === editingId) continue;
@@ -142,7 +168,8 @@ export default function DiscountsPage() {
 
             // 2. Conflicto Categoría
             if (newScope === 'CATEGORY' && dScope === 'CATEGORY') {
-                const dTargets = d.rules?.targets?.[0]?.value || d.targetIds || [];
+                const rawTargets = d.rules?.targets?.[0]?.value || d.targetIds || [];
+                const dTargets = Array.isArray(rawTargets) ? rawTargets : (rawTargets ? [rawTargets] : []);
                
                 const hasIntersection = newTargets.some((id: any) => dTargets.includes(id));
                 if (hasIntersection) return "Ya existe un descuento para una de las categorías seleccionadas.";
@@ -150,7 +177,8 @@ export default function DiscountsPage() {
 
             // 3. Conflicto Producto
             if (newScope === 'PRODUCT' && dScope === 'PRODUCT') {
-                 const dTargets = d.rules?.targets?.[0]?.value || d.targetIds || [];
+                 const rawTargets = d.rules?.targets?.[0]?.value || d.targetIds || [];
+                 const dTargets = Array.isArray(rawTargets) ? rawTargets : (rawTargets ? [rawTargets] : []);
                  const hasIntersection = newTargets.some((id: any) => dTargets.includes(id));
                  if (hasIntersection) return "Ya existe un descuento para uno de los productos seleccionados.";
             }
@@ -174,6 +202,7 @@ export default function DiscountsPage() {
             return;
         }
 
+        setIsSaving(true)
         try {
             if (editingId) {
                 await PromosAPI.updateDiscount(editingId, data)
@@ -187,6 +216,8 @@ export default function DiscountsPage() {
         } catch (error: any) {
             const message = error.response?.data?.message || "Error al guardar descuento"
             toast({ title: "Error", description: message, variant: "destructive" })
+        } finally {
+            setIsSaving(false)
         }
     }
 
@@ -257,20 +288,14 @@ export default function DiscountsPage() {
                 </div>
             )}
             
-            {isLoading ? (
-                <div className="flex flex-col items-center justify-center h-64 space-y-4">
-                     <Loader2 className="h-8 w-8 animate-spin text-secondary" />
-                     <p className="text-muted-foreground">Cargando reglas...</p>
-                </div>
-            ) : (
-                <GenericTable 
-                    data={discounts}
-                    columns={columns}
-                    searchKey="name"
-                    onEdit={userRole === 'EMPLOYEE' ? undefined : handleEdit} 
-                    onDelete={userRole === 'EMPLOYEE' ? undefined : (() => {})} 
-                />
-            )}
+            <GenericTable 
+                data={discounts}
+                columns={columns}
+                searchKey="name"
+                onEdit={userRole === 'EMPLOYEE' ? undefined : handleEdit} 
+                onDelete={userRole === 'EMPLOYEE' ? undefined : (() => {})} 
+                loading={isLoading}
+            />
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className="bg-background border-4 border-secondary/60 text-foreground sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
@@ -358,12 +383,18 @@ export default function DiscountsPage() {
                                 </div>
                             )}
 
-                             {newDiscount.scope === 'PRODUCT' && (
+                              {newDiscount.scope === 'PRODUCT' && (
                                 <div className="grid gap-2">
                                     <Label>Selecciona Productos</Label>
                                     <Input placeholder="Buscar producto o marca..." value={productQuery} onChange={(e) => setProductQuery(e.target.value)} className="bg-background border-input text-sm h-8" />
                                     <div className="h-[200px] overflow-y-auto border border-border rounded-md p-2 bg-background">
-                                        {products.filter(prod => prod.name.toLowerCase().includes(productQuery.toLowerCase()) || prod.brand?.toLowerCase().includes(productQuery.toLowerCase())).map(prod => (
+                                        {isSearchingProduct ? (
+                                            <div className="p-4 text-center">
+                                                <Loader2 className="h-4 w-4 animate-spin mx-auto text-muted-foreground" />
+                                                <span className="text-xs text-muted-foreground mt-2 block italic">Buscando productos...</span>
+                                            </div>
+                                        ) : (searchResults.length > 0 ? searchResults : products.filter(p => p.name.toLowerCase().includes(productQuery.toLowerCase()) || p.brand?.toLowerCase().includes(productQuery.toLowerCase())))
+                                            .map(prod => (
                                             <div key={prod.id} className="flex items-center space-x-2 py-1">
                                                 <input 
                                                     type="checkbox"
@@ -379,6 +410,9 @@ export default function DiscountsPage() {
                                                 <Label className="font-normal">{prod.name} ({prod.brand})</Label>
                                             </div>
                                         ))}
+                                        {!isSearchingProduct && productQuery.length >= 2 && searchResults.length === 0 && (
+                                            <div className="p-3 text-center text-xs text-muted-foreground">No se encontraron resultados</div>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -479,9 +513,15 @@ export default function DiscountsPage() {
                                     
                                 saveWithRules({ ...newDiscount, rules })
                             }}
-                            className="bg-secondary hover:bg-secondary/90 shadow-sm text-secondary-foreground"
+                            disabled={isSaving}
+                            className="bg-secondary hover:bg-secondary/90 shadow-sm text-secondary-foreground hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <Save className="mr-2 h-4 w-4" /> {editingId ? 'Guardar Cambios' : 'Crear Regla'} 
+                            {isSaving ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <Save className="mr-2 h-4 w-4" />
+                            )}
+                            {editingId ? 'Guardar Cambios' : 'Crear Regla'} 
                         </Button>
                     </DialogFooter>
                 </DialogContent>

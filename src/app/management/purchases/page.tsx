@@ -10,13 +10,14 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+   Table,
+   TableBody,
+   TableCell,
+   TableHead,
+   TableHeader,
+   TableRow,
 } from "@/components/ui/table"
 import { cn, formatCurrency } from "@/lib/utils"
 import branchService from "@/services/branch.service"
@@ -24,13 +25,13 @@ import { Purchase, purchaseService } from "@/services/purchase.service"
 import { supplierService } from "@/services/supplier.service"
 import { useAuthStore } from "@/store/use-auth-store"
 import {
-    ColumnDef,
-    flexRender,
-    getCoreRowModel,
-    getFilteredRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    useReactTable,
+   ColumnDef,
+   flexRender,
+   getCoreRowModel,
+   getFilteredRowModel,
+   getPaginationRowModel,
+   getSortedRowModel,
+   useReactTable,
 } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -64,11 +65,11 @@ export default function PurchasesPage() {
 
     const loadFilters = async () => {
         try {
-            const [suppliersData, branchesData] = await Promise.all([
+            const [suppliersRes, branchesData] = await Promise.all([
                 supplierService.getAll({ active: true }),
                 branchService.getAll()
             ])
-            setSuppliers(Array.isArray(suppliersData) ? suppliersData : [])
+            setSuppliers(suppliersRes?.data || [])
             setBranches(Array.isArray(branchesData) ? branchesData : [])
         } catch (error) {
         }
@@ -229,6 +230,7 @@ export default function PurchasesPage() {
 
     return (
         <div className="sm:p-8 pt-2 space-y-6 pb-40 sm:pb-20">
+            <Skeleton className="hidden" />
              <Breadcrumb className="px-2">
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -354,80 +356,90 @@ export default function PurchasesPage() {
                 </div>
             </div>
 
-            {loading ? (
-                <div className="flex flex-col items-center justify-center h-64 space-y-4">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p className="text-muted-foreground">Cargando...</p>
-                </div>
-            ) : (
-                <div className="space-y-4">
-                    <div className="sm:rounded-3xl border-4 border-zinc-300 dark:border-zinc-600 shadow-[0_0_20px_rgba(0,0,0,0.2)] hover:shadow-[0_0_30px_rgba(0,0,0,0.2)] hover:border-purple-500 hover:ring-4 hover:ring-zinc-500/10 transition-all duration-300 bg-card overflow-hidden">
-                        <Table>
-                            <TableHeader className="bg-muted/50">
-                                {table.getHeaderGroups().map((headerGroup) => (
-                                    <TableRow key={headerGroup.id} className="border-border hover:bg-muted/50">
-                                        {headerGroup.headers.map((header) => (
-                                            <TableHead key={header.id} className="text-muted-foreground font-semibold">
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(
-                                                        header.column.columnDef.header,
-                                                        header.getContext()
-                                                    )}
-                                            </TableHead>
+            <div className="relative">
+                <div className="sm:rounded-3xl border-4 border-zinc-300 dark:border-zinc-600 shadow-[0_0_20px_rgba(0,0,0,0.2)] hover:shadow-[0_0_30px_rgba(0,0,0,0.2)] hover:border-purple-500 hover:ring-4 hover:ring-zinc-500/10 transition-all duration-300 bg-card overflow-hidden">
+                    <Table>
+                        <TableHeader className="bg-muted/50">
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <TableRow key={headerGroup.id} className="border-border hover:bg-muted/50">
+                                    {headerGroup.headers.map((header) => (
+                                        <TableHead key={header.id} className="text-muted-foreground font-semibold">
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
+                                        </TableHead>
+                                    ))}
+                                </TableRow>
+                            ))}
+                        </TableHeader>
+                        <TableBody className="relative min-h-[200px]">
+                            {loading && (
+                                <TableRow className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+                                    <TableCell colSpan={columns.length} className="border-none flex flex-col items-center gap-2">
+                                        <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+                                        <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest animate-pulse">Cargando...</p>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                            {loading ? (
+                                Array.from({ length: 5 }).map((_, i) => (
+                                    <TableRow key={`skeleton-${i}`} className="border-border">
+                                        {columns.map((_, j) => (
+                                            <TableCell key={`cell-${i}-${j}`}>
+                                                <Skeleton className="h-6 w-full bg-zinc-400/20" />
+                                            </TableCell>
                                         ))}
                                     </TableRow>
-                                ))}
-                            </TableHeader>
-                            <TableBody>
-                                {table.getRowModel().rows?.length ? (
-                                    table.getRowModel().rows.map((row) => (
-                                        <TableRow 
-                                            key={row.id} 
-                                            className="hover:bg-gray-800/20 text-foreground transition-colors cursor-pointer border-border"
-                                            onClick={() => setSelectedPurchaseId(row.original.id)}
-                                        >
-                                            {row.getVisibleCells().map((cell) => (
-                                                <TableCell key={cell.id}>
-                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={columns.length} className="h-72 text-center text-muted-foreground">
-                                            No hay resultados.
-                                        </TableCell>
+                                ))
+                            ) : table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row) => (
+                                    <TableRow 
+                                        key={row.id} 
+                                        className="hover:bg-gray-800/20 text-foreground transition-colors cursor-pointer border-border"
+                                        onClick={() => setSelectedPurchaseId(row.original.id)}
+                                    >
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id}>
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        ))}
                                     </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </div>
-
-                    {/* Patrón estricto de paginación */}
-                    <div className="flex items-center justify-end space-x-2 py-4">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => table.previousPage()}
-                            disabled={!table.getCanPreviousPage()}
-                            className="hover:cursor-pointer"
-                        >
-                            Anterior
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => table.nextPage()}
-                            disabled={!table.getCanNextPage()}
-                            className="hover:cursor-pointer"
-                        >
-                            Siguiente
-                        </Button>
-                    </div>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={columns.length} className="h-72 text-center text-muted-foreground">
+                                        No hay resultados.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
                 </div>
-            )}
+
+                <div className="flex items-center justify-end space-x-2 py-4">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                        className="hover:cursor-pointer"
+                    >
+                        Anterior
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                        className="hover:cursor-pointer"
+                    >
+                        Siguiente
+                    </Button>
+                </div>
+            </div>
 
             <Dialog open={isNewModalOpen} onOpenChange={setIsNewModalOpen}>
                 <DialogContent className="sm:max-w-[1000px] overflow-y-auto overflow-x-auto max-h-[90vh] bg-background text-foreground border-4 border-secondary/60 shadow-2xl  transition-all duration-200">

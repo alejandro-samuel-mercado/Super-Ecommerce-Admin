@@ -155,6 +155,7 @@ export interface Sale {
   subtotal: number;
   discount: number;
   observations?:string;
+  cancelReason?: string | null;
   coupon?: Coupon | null;
   shippingCost: number;
   currencyCode: string;

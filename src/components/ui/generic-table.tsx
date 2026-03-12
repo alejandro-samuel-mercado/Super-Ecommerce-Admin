@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ColumnDef, ColumnFiltersState, SortingState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
-import { Plus, Search, Settings, Settings2, Trash2 } from "lucide-react"
+import { Loader2, Plus, Search, Settings2, Trash2 } from "lucide-react"
 import { useMemo, useState } from "react"
+import { Skeleton } from "./skeleton"
 
 interface GenericTableProps<T> {
     data: T[]
@@ -14,6 +15,7 @@ interface GenericTableProps<T> {
     onEdit?: (item: T) => void
     onDelete?: (item: T) => void
     onCreate?: () => void
+    onRowClick?: (item: T) => void
     createText?: string
     search?: string
     onSearchChange?: (val: string) => void
@@ -22,6 +24,7 @@ interface GenericTableProps<T> {
         totalPages: number
         onPageChange: (page: number) => void
     }
+    loading?: boolean
 }
 
 export function GenericTable<T>({ 
@@ -31,10 +34,12 @@ export function GenericTable<T>({
     onEdit, 
     onDelete, 
     onCreate, 
+    onRowClick,
     createText = "Crear Nuevo",
     search,
     onSearchChange,
-    pagination
+    pagination,
+    loading
 }: GenericTableProps<T>) {
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -108,7 +113,7 @@ export function GenericTable<T>({
                 )}
             </div>
             
-            <div className="rounded-2xl border shadow-sm bg-card overflow-hidden">
+            <div className="sm:rounded-3xl rounded-none border-4 border-zinc-300 dark:border-zinc-600 shadow-[0_0_20px_rgba(0,0,0,0.2)] hover:shadow-[0_0_30px_rgba(0,0,0,0.2)] hover:border-borderH hover:ring-4 hover:ring-zinc-500/10 transition-all duration-300 bg-card  overflow-hidden">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -128,14 +133,32 @@ export function GenericTable<T>({
                             </TableRow>
                         ))}
                     </TableHeader>
-                    <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                    <TableBody className="relative min-h-[200px]">
+                        {loading && (
+                            <TableRow className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+                                <TableCell colSpan={tableColumns.length} className="border-none flex flex-col items-center gap-2">
+                                    <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+                                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest animate-pulse">Cargando...</p>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                        {loading ? (
+                            Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={`skeleton-${i}`}>
+                                    {tableColumns.map((_, j) => (
+                                        <TableCell key={`cell-${i}-${j}`}>
+                                            <Skeleton className="h-6 w-full bg-zinc-400/20" />
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
-                                    onClick={onEdit ? () => onEdit(row.original) : undefined}
-                                    className={onEdit ? "cursor-pointer hover:bg-muted/50 transition-colors" : ""}
+                                    onClick={(onEdit || onRowClick) ? () => (onEdit || onRowClick)?.(row.original) : undefined}
+                                    className={`${(onEdit || onRowClick) ? "cursor-pointer" : ""} hover:bg-gray-200 dark:hover:bg-zinc-800/50 transition-colors`}
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
@@ -146,7 +169,7 @@ export function GenericTable<T>({
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
+                                <TableCell colSpan={tableColumns.length} className="h-24 text-center text-muted-foreground font-medium uppercase tracking-widest italic opacity-50">
                                     No hay resultados.
                                 </TableCell>
                             </TableRow>

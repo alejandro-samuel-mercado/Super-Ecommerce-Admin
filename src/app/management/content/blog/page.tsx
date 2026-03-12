@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import {
    Table,
@@ -25,7 +26,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { BlogAPI } from "@/services/api"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { CheckCircle2, Clock, Edit, ExternalLink, Globe, Plus, Search, Settings2, Trash2 } from "lucide-react"
+import { CheckCircle2, Clock, ExternalLink, Globe, Plus, Search, Settings2, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
@@ -178,18 +179,36 @@ export default function BlogManagementPage() {
                             <TableHead className="text-right font-bold"></TableHead>
                         </TableRow>
                     </TableHeader>
-                    <TableBody>
-                        {loading ? (
-                            <TableRow>
-                                <TableCell colSpan={5} className="h-40 text-center">Cargando artículos...</TableCell>
+                    <TableBody className="relative min-h-[300px]">
+                        {loading && (
+                            <TableRow className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+                                <TableCell colSpan={5} className="border-none flex flex-col items-center gap-2">
+                                    <Clock className="h-8 w-8 animate-spin text-secondary" />
+                                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest animate-pulse">Cargando...</p>
+                                </TableCell>
                             </TableRow>
+                        )}
+                        {loading ? (
+                            Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={`loading-${i}`} className="border-border">
+                                    <TableCell><Skeleton className="h-12 w-full rounded-lg" /></TableCell>
+                                    <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                                    <TableCell><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
+                                </TableRow>
+                            ))
                         ) : filteredPosts.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={5} className="h-40 text-center text-muted-foreground">No se encontraron artículos.</TableCell>
                             </TableRow>
                         ) : (
                             filteredPosts.map((post) => (
-                                <TableRow key={post.id} className="group hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
+                                <TableRow 
+                                    key={post.id} 
+                                    className="group hover:bg-gray-200 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer"
+                                    onClick={() => handleOpenEdit(post)}
+                                >
                                     <TableCell>
                                         <div className="flex items-center gap-4">
                                             {post.coverImage ? (

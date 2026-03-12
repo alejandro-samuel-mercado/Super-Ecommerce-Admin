@@ -2,12 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+   Dialog,
+   DialogContent,
+   DialogDescription,
+   DialogFooter,
+   DialogHeader,
+   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -98,7 +98,7 @@ export function BranchDialog({
 
   const loadCandidateUsers = useCallback(async () => {
     try {
-      const response = await UsersAPI.getAll();
+      const response = await UsersAPI.getAll({ isStaffOnly: true });
       let users = Array.isArray(response) 
           ? response 
           : Array.isArray(response?.data) 
@@ -108,7 +108,8 @@ export function BranchDialog({
                   : [];
 
       users = users.filter(
-        (u: { role?: { name: string } }) => u.role?.name !== "CUSTOMER",
+        (u: { role?: { name: string }, roleId?: number }) => 
+          u.role?.name !== "CUSTOMER" && u.roleId !== 4 && u.roleId !== 99,
       );
 
       if (currentUser?.role?.name === "ADMIN") {
@@ -143,12 +144,15 @@ export function BranchDialog({
 
   const filteredCandidates = candidateUsers
     .filter((user) => {
-      if (!searchQuery) return true; 
+      // Evitar duplicados: No mostrar usuarios que ya están en la branch
+      if (branchUsers.some((bu) => bu.id === user.id)) return false;
+      
+      if (!searchQuery) return true;
       const query = searchQuery.toLowerCase();
       return (
         (user.name && user.name.toLowerCase().includes(query)) ||
         (user.email && user.email.toLowerCase().includes(query)) ||
-        (user.dni && user.dni.includes(query))
+        (user.dni && String(user.dni).includes(query))
       );
     })
     .slice(0, 5);
@@ -177,20 +181,22 @@ export function BranchDialog({
     if (!branch) return;
     if (!confirm("¿Desvincular usuario de esta branch?")) return;
 
-    setUsersLoading(true);
+    // Actualización optimista: Remover de la UI inmediatamente
+    const previousUsers = [...branchUsers];
+    setBranchUsers((prev) => prev.filter((u) => u.id !== userId));
+
     try {
       await branchService.removeUser(branch.id, userId);
       toast({ title: "Usuario desvinculado" });
-      loadBranchUsers();
     } catch (error: any) {
+      // Revertir si falla el servidor
+      setBranchUsers(previousUsers);
       toast({
         title: "Error al desvincular",
         description:
           error.response?.data?.message || "No se pudo quitar el usuario",
         variant: "destructive",
       });
-    } finally {
-      setUsersLoading(false);
     }
   };
 
@@ -546,9 +552,9 @@ export function BranchDialog({
                         if (!assignedSearchQuery) return true;
                         const q = assignedSearchQuery.toLowerCase();
                         return (
-                          (u.name && u.name.toLowerCase().includes(q)) ||
-                          (u.email && u.email.toLowerCase().includes(q)) ||
-                          (u.dni && u.dni.includes(q))
+                          (u.name && String(u.name).toLowerCase().includes(q)) ||
+                          (u.email && String(u.email).toLowerCase().includes(q)) ||
+                          (u.dni && String(u.dni).includes(q))
                         );
                       })
                       .map((user) => (
@@ -558,7 +564,7 @@ export function BranchDialog({
                         >
                           <div className="flex items-center gap-3">
                             <div className="h-8 w-8 rounded-full bg-secondary/20 flex items-center justify-center text-secondary font-bold text-xs">
-                              {user.name.substring(0, 2).toUpperCase()}
+                              {user.name?.substring(0, 2).toUpperCase() || "U"}
                             </div>
                             <div>
                               <div className="font-medium text-sm flex items-center gap-2">

@@ -3,12 +3,12 @@
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+   Dialog,
+   DialogContent,
+   DialogDescription,
+   DialogFooter,
+   DialogHeader,
+   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -48,6 +48,8 @@ export function TransferDialog({ open, onOpenChange, onSuccess }: TransferDialog
   const [notes, setNotes] = useState("")
   
   const [items, setItems] = useState<TransferItemRow[]>([{ skuId: '1', selectedSkuId: null, quantity: 1 }])
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isSearching, setIsSearching] = useState(false)
 
   useEffect(() => {
     if (activeBranch) {
@@ -55,26 +57,42 @@ export function TransferDialog({ open, onOpenChange, onSuccess }: TransferDialog
     }
   }, [activeBranch])
 
-  const loadData = useCallback(async () => {
+  const loadBranches = useCallback(async () => {
     try {
-        const [sucData, prodData] = await Promise.all([
-            branchService.getAll(),
-            ProductsAPI.getAll() 
-        ])
+        const sucData = await branchService.getAll()
         setBranches(sucData)
-      
-        const productsList = prodData.data?.data || prodData.data || []
-        setProducts(productsList)
     } catch (e) {
-        toast({ title: "Error cargando datos", variant: "destructive" })
+        toast({ title: "Error cargando sucursales", variant: "destructive" })
     }
   }, [toast])
 
+  const searchProducts = useCallback(async (query: string) => {
+    setIsSearching(true)
+    try {
+        const prodData = await ProductsAPI.getAll({ search: query, limit: 50, adminView: true }) 
+        const productsList = prodData.data?.data || prodData.data || []
+        setProducts(productsList)
+    } catch (e) {
+        console.error("Error buscando productos:", e)
+    } finally {
+        setIsSearching(false)
+    }
+  }, [])
+
   useEffect(() => {
     if (open) {
-      loadData()
+      loadBranches()
+      searchProducts("")
     }
-  }, [open, loadData])
+  }, [open, loadBranches, searchProducts])
+
+  useEffect(() => {
+    if (!open) return
+    const timer = setTimeout(() => {
+      searchProducts(searchQuery)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery, open, searchProducts])
 
   const availableSkus = useMemo(() => {
     const skus: { id: number, name: string, stock: number }[] = []
@@ -252,14 +270,25 @@ export function TransferDialog({ open, onOpenChange, onSuccess }: TransferDialog
                                     </Button>
                                   </PopoverTrigger>
                                   <PopoverContent 
-                                    className="w-[300px] sm:w-[400px] p-0 z-[100] max-h-[40vh] overflow-y-auto overflow-x-hidden" 
+                                    className="-mt-10 w-[300px] sm:w-[400px] p-0 z-[1000] max-h-[60vh] overflow-y-auto overflow-x-hidden" 
                                     align="start"
                                   >
-                                    <Command>
-                                      <CommandInput placeholder="Buscar producto..." />
+                                    <Command shouldFilter={false}>
+                                      <CommandInput 
+                                        placeholder="Buscar producto..." 
+                                        value={searchQuery}
+                                        onValueChange={setSearchQuery}
+                                      />
                                       <CommandList>
-                                        <CommandEmpty>No se encontraron productos.</CommandEmpty>
-                                        <CommandGroup>
+                                        {isSearching ? (
+                                            <div className="p-4 text-center">
+                                                <Loader2 className="h-4 w-4 animate-spin mx-auto text-muted-foreground" />
+                                                <span className="text-xs text-muted-foreground mt-2 block">Buscando...</span>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <CommandEmpty>No se encontraron productos.</CommandEmpty>
+                                                <CommandGroup>
                                           {availableSkus.map(sku => (
                                             <CommandItem
                                               key={sku.id}
@@ -289,6 +318,8 @@ export function TransferDialog({ open, onOpenChange, onSuccess }: TransferDialog
                                             </CommandItem>
                                           ))}
                                         </CommandGroup>
+                                      </>
+                                    )}
                                       </CommandList>
                                     </Command>
                                   </PopoverContent>

@@ -74,7 +74,78 @@ export function RegistrationTab() {
     const [deliveryAddress, setDeliveryAddress] = useState("")
     const [completedSale, setCompletedSale] = useState<any>(null) 
 
+    const [isSearchingProducts, setIsSearchingProducts] = useState(false)
+    const [searchResults, setSearchResults] = useState<Product[]>([])
+
+    const trulyActiveEvents = useMemo(() => {
+        return activeEvents.filter(e => {
+            const now = new Date();
+            const isActiveFlag = e.active;
+            const isWithinDates = (!e.startDate || now >= new Date(e.startDate)) && 
+                                  (!e.endDate || now <= new Date(e.endDate));
+            return isActiveFlag && isWithinDates;
+        });
+    }, [activeEvents]);
+
+    const currentEvent = useMemo(() => trulyActiveEvents[0] || null, [trulyActiveEvents]);
+    const isShippingDisabledByEvent = useMemo(() => currentEvent?.shippingEnabled === false, [currentEvent]);
+
     const ticketRef = useRef<HTMLDivElement>(null);
+
+    const grossSubtotal = useMemo(() => {
+        return items.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
+    }, [items]);
+
+    const itemsDiscountTotal = useMemo(() => {
+        const { getItemDiscount } = useCartStore.getState();
+        return items.reduce((acc, item) => {
+            const { amount } = getItemDiscount(item);
+            return acc + amount;
+        }, 0);
+    }, [items, activeEvents, activeDiscounts]);
+
+    const netItemsSubtotal = useMemo(() => {
+        return Math.max(0, grossSubtotal - itemsDiscountTotal);
+    }, [grossSubtotal, itemsDiscountTotal]);
+
+    const calculatedShipping = useMemo(() => {
+        if (deliveryType !== 'DELIVERY' || !storeConfig?.enableShipping || isShippingDisabledByEvent) {
+            return 0;
+        }
+
+        let cost = shippingCost;
+        const threshold = Number(storeConfig?.freeShippingThreshold);
+
+        if (threshold > 0 && netItemsSubtotal >= threshold) {
+            return 0;
+        }
+
+        if (currentEvent?.shippingConfig) {
+            if (currentEvent.shippingConfig.type === 'FREE') {
+                return 0;
+            } else if (currentEvent.shippingConfig.type === 'DISCOUNT') {
+                const disc = Number(currentEvent.shippingConfig.value) || 0;
+                cost = Math.max(0, cost * (1 - disc / 100));
+            }
+        }
+        return cost;
+    }, [deliveryType, storeConfig, isShippingDisabledByEvent, shippingCost, netItemsSubtotal, currentEvent]);
+    const calculatedTax = useMemo(() => {
+        if (!storeConfig?.taxRate || Number(storeConfig.taxRate) <= 0) return 0;
+        
+        const couponValue = appliedCoupon ? (Number(appliedCoupon.value) || 0) : 0;
+        const couponDiscount = appliedCoupon?.type === 'PERCENTAGE' 
+            ? (netItemsSubtotal * (couponValue / 100))
+            : Math.min(couponValue, netItemsSubtotal);
+        
+        const afterC = Math.max(0, netItemsSubtotal - couponDiscount);
+        const manualD = manualDiscount > 0 ? parseFloat((afterC * (manualDiscount / 100)).toFixed(2)) : 0;
+        const pointsD = (pointsToUse > 0 && storeConfig?.enablePointsRedemption) ? (pointsToUse * (Number(storeConfig.moneyPerPoint) || 0)) : 0;
+        
+        const taxBase = Math.max(0, afterC - manualD - pointsD);
+        return taxBase * (Number(storeConfig.taxRate) / 100);
+    }, [netItemsSubtotal, appliedCoupon, manualDiscount, pointsToUse, storeConfig]);
+
     const handlePrintTicket = useReactToPrint({
         contentRef: ticketRef,
     });
@@ -112,9 +183,11 @@ export function RegistrationTab() {
              }
              
             
-             if (zonesData) {
-                 setShippingZones(zonesData.filter((z: any) => z.active));
-             }
+              if (zonesData?.data && Array.isArray(zonesData.data)) {
+                  setShippingZones(zonesData.data.filter((z: any) => z.active));
+              } else if (Array.isArray(zonesData)) {
+                  setShippingZones(zonesData.filter((z: any) => z.active));
+              }
 
              
              if (productsData?.data?.data && Array.isArray(productsData.data.data)) {
@@ -160,6 +233,34 @@ export function RegistrationTab() {
         
         loadPOSData();
     }, []);
+
+    useEffect(() => {
+        if (!productQuery) {
+            setSearchResults([]);
+            return;
+        }
+
+        const delayDebounceFn = setTimeout(async () => {
+            setIsSearchingProducts(true);
+            try {
+                const results = await ProductsAPI.getAll({ 
+                    search: productQuery,
+                    limit: 100,
+                    adminView: true,
+                    branchId: activeBranch?.id
+                });
+                
+                const data = results?.data?.data || results?.data || results || [];
+                setSearchResults(Array.isArray(data) ? data : []);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setIsSearchingProducts(false);
+            }
+        }, 500);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [productQuery, activeBranch]);
 
     // --- LÓGICA DEL ESCÁNER DE CÓDIGO DE BARRAS ---
     useEffect(() => {
@@ -225,10 +326,12 @@ export function RegistrationTab() {
     }), [products])
 
     const filteredProducts = useMemo(() => {
+        if (productQuery.trim()) {
+            return searchResults;
+        }
         if (!products || !Array.isArray(products)) return []
-        if (!productQuery) return products.slice(0, 12) 
-        return productFuse.search(productQuery).map(r => r.item)
-    }, [productQuery, products, productFuse])
+        return products.slice(0, 20) 
+    }, [productQuery, products, searchResults])
 
     const filteredUsers = useMemo(() => {
         if (!users || !Array.isArray(users)) return []
@@ -324,18 +427,7 @@ export function RegistrationTab() {
         
         setIsProcessing(true);
         
-        // Calcular envío efectivo (manejando la lógica de envío gratis)
-        let finalShipping = shippingCost;
-        if (deliveryType === 'DELIVERY' && storeConfig?.enableShipping) {
-            if (storeConfig.freeShippingThreshold && getSubtotal() >= storeConfig.freeShippingThreshold) {
-                finalShipping = 0;
-            }
-             
-             const eventFreeShip = activeEvents.some(e => e.shippingConfig?.type === 'FREE');
-             if(eventFreeShip) finalShipping = 0;
-        } else if (deliveryType !== 'DELIVERY') {
-             finalShipping = 0;
-        }
+        const finalShipping = calculatedShipping;
 
         // Preparar Payload
         const saleData = {
@@ -403,11 +495,9 @@ export function RegistrationTab() {
               clearCart();
               setObservations("");
               setManualTotal("");
-              setIsQuickSale(false);
+
               setManualDiscount(0);
               setAppliedCoupon(null);
-              setCouponCode("");
-              setIsDelivered(true);
               setCouponCode("");
               setIsDelivered(true);
               setDeliveryAddress("");
@@ -456,46 +546,15 @@ export function RegistrationTab() {
         })
     }
 
-    const getSubtotal = () => {
-        const { getItemDiscount } = useCartStore.getState();
-        const total = items.reduce((acc, item) => {
-            const { amount } = getItemDiscount(item);
-            return acc + Math.max(0, (item.unitPrice * item.quantity) - amount);
-        }, 0);
-        return total;
-    }
+    const getSubtotal = () => netItemsSubtotal;
 
 
     const getTotal = () => {
-        // 1. Subtotal Bruto de Ítems (sin descuentos - como lo calcula el backend)
-        const { getItemDiscount } = useCartStore.getState();
-        let grossSubtotal = 0;
-        let totalItemEventDiscounts = 0;
-        
-        items.forEach(item => {
-            const itemGross = item.unitPrice * item.quantity;
-            const { amount } = getItemDiscount(item);
-            grossSubtotal += itemGross;
-            totalItemEventDiscounts += amount;
-        });
+        // 1. Subtotal Neto de Ítems (ya filtrado por descuentos de eventos)
+        const netItemsTotal = netItemsSubtotal;
 
-       
-        const netItemsTotal = Math.max(0, grossSubtotal - totalItemEventDiscounts);
-
-        // 2. Cálculo de Envío
-        let effectiveShipping = 0;
-        if (deliveryType === 'DELIVERY' && storeConfig?.enableShipping) {
-            effectiveShipping = shippingCost;
-            
-          
-            const threshold = Number(storeConfig.freeShippingThreshold);
-            if (threshold > 0 && netItemsTotal >= threshold) {
-                 effectiveShipping = 0;
-            }
-           
-             const eventFreeShip = activeEvents.some(e => e.shippingConfig?.type === 'FREE');
-             if(eventFreeShip) effectiveShipping = 0;
-        }
+        // 2. Envío Calculado (con reglas de evento y envío gratis)
+        const effectiveShipping = calculatedShipping;
 
         // 3. Cupón (Aplicado ÚNICAMENTE sobre el total neto de ítems, no sobre el envío)
         let couponDiscount = 0;
@@ -512,16 +571,8 @@ export function RegistrationTab() {
         const afterCoupon = Math.max(0, netItemsTotal - couponDiscount);
         const manualDiscountAmount = manualDiscount > 0 ? parseFloat((afterCoupon * (manualDiscount / 100)).toFixed(2)) : 0;
 
-        // 5. Impuestos — misma base que el backend:
-        // tax = (grossSubtotal - allDiscounts) * rate
-        // "allDiscounts" = itemEventDiscounts + couponDiscount + manualDiscountAmount
-        let taxAmount = 0;
-        if (storeConfig?.taxRate && Number(storeConfig.taxRate) > 0) {
-            const pointsDiscountAmount = (pointsToUse > 0 && storeConfig?.enablePointsRedemption) ? (pointsToUse * (Number(storeConfig.moneyPerPoint) || 0)) : 0;
-            const totalAllDiscounts = totalItemEventDiscounts + couponDiscount + manualDiscountAmount + pointsDiscountAmount;
-            const taxBase = Math.max(0, grossSubtotal - totalAllDiscounts);
-            taxAmount = parseFloat((taxBase * (Number(storeConfig.taxRate) / 100)).toFixed(2));
-        }
+        // 5. Impuestos
+        const taxAmount = calculatedTax;
 
         let final = afterCoupon - manualDiscountAmount;
         final += effectiveShipping + taxAmount;
@@ -543,7 +594,7 @@ export function RegistrationTab() {
             const res = await CouponsAPI.validate(couponCode, getSubtotal(), client?.id);
             if (res.success) {
                 setAppliedCoupon(res.data);
-                toast.success(`✅ Cupón "${couponCode}" aplicado con éxito`);
+                toast.success(`Cupón "${couponCode}" aplicado con éxito`);
             } else {
                 toast.error(res.message || "Cupón inválido");
                 setAppliedCoupon(null);
@@ -560,7 +611,7 @@ export function RegistrationTab() {
     const handleRefreshProducts = async () => {
         setIsLoading(true);
         try {
-            const productsData = await ProductsAPI.getAll();
+            const productsData = await ProductsAPI.getAll({ limit: 20, adminView: true });
             
             // 1. Paginado
             if (productsData?.data?.data && Array.isArray(productsData.data.data)) {
@@ -616,6 +667,12 @@ export function RegistrationTab() {
                                 value={productQuery}
                                 onChange={(e) => setProductQuery(e.target.value)}
                             />
+                            {isSearchingProducts && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                    <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                                    <span className="text-[10px] font-bold text-primary animate-pulse">BUSCANDO...</span>
+                                </div>
+                            )}
                         </div>
                     </CardHeader>
                     <CardContent className="flex-1 overflow-y-auto p-3 bg-muted/30">
@@ -838,7 +895,7 @@ export function RegistrationTab() {
                                 >
                                     RETIRO LOCAL
                                 </Button>
-                                {storeConfig?.enableShipping && (
+                                {storeConfig?.enableShipping && !isShippingDisabledByEvent && (
                                     <Button 
                                         variant="outline"
                                         className={cn("h-12 border-2 font-bold hover:cursor-pointer", deliveryType === 'DELIVERY' ? "bg-secondary text-secondary-foreground border-secondary hover:bg-secondary/90" : "border-input text-muted-foreground hover:bg-muted")}
@@ -1000,10 +1057,10 @@ export function RegistrationTab() {
                              {/* Envío */}
                              <div className="flex justify-between items-center text-muted-foreground">
                                 <span className="text-xs font-bold uppercase">Envío</span>
-                                {shippingCost === 0 && deliveryType === 'DELIVERY' ? (
+                                {calculatedShipping === 0 && deliveryType === 'DELIVERY' ? (
                                     <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold border-0">GRATIS</Badge>
                                 ) : (
-                                    <span className="font-mono text-foreground">{formatCurrency(shippingCost)}</span>
+                                    <span className="font-mono text-foreground">{formatCurrency(calculatedShipping)}</span>
                                 )}
                              </div>
 

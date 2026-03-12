@@ -2,32 +2,32 @@
 
 import { Badge } from "@/components/ui/badge";
 import {
-   Breadcrumb,
-   BreadcrumbItem,
-   BreadcrumbLink,
-   BreadcrumbList,
-   BreadcrumbSeparator,
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { GenericTable } from "@/components/ui/generic-table";
 import { ColumnDef } from "@tanstack/react-table";
-import { Loader2, RefreshCw, Save, Ticket, Trash } from "lucide-react";
+import { RefreshCw, Save, Ticket, Trash } from "lucide-react";
 
 import {
-   Dialog,
-   DialogContent,
-   DialogFooter,
-   DialogHeader,
-   DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-   Select,
-   SelectContent,
-   SelectItem,
-   SelectTrigger,
-   SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { CouponsAPI } from "@/services/api";
@@ -48,14 +48,12 @@ export default function CouponsPage() {
     maxUses: 100,
     active: true,
   });
-  const [loading, setLoading] = useState(true)
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [limit] = useState(20)
-  const [search, setSearch] = useState("")
-  const { toast } = useToast()
-;
-
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(20);
+  const [search, setSearch] = useState("");
+  const { toast } = useToast();
   useEffect(() => {
     if (editingCoupon) {
       setFormData({
@@ -76,37 +74,41 @@ export default function CouponsPage() {
     }
   }, [editingCoupon]);
 
-  const loadCoupons = useCallback(async (pageNum = page) => {
-    setLoading(true)
-    try {
+  const loadCoupons = useCallback(
+    async (pageNum = page) => {
+      setLoading(true);
+      try {
         const response = await CouponsAPI.getAll({
-            page: pageNum,
-            limit,
-            search
-        })
-        const paginatedData = response.data
-        setCoupons(paginatedData?.data || [])
-        setTotalPages(paginatedData?.totalPages || 1)
-        setPage(paginatedData?.page || 1)
-    } catch (error) {
-        toast({ title: "Error", description: "No se pudieron cargar los cupones.", variant: "destructive" })
-    } finally {
-        setLoading(false)
-    }
-}, [toast, page, limit, search])
-;
+          page: pageNum,
+          limit,
+          search,
+        });
+        const paginatedData = response.data;
+        setCoupons(paginatedData?.data || []);
+        setTotalPages(paginatedData?.totalPages || 1);
+        setPage(paginatedData?.page || 1);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar los cupones.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [toast, page, limit, search],
+  );
+  useEffect(() => {
+    loadCoupons(1);
+  }, []);
 
   useEffect(() => {
-    loadCoupons(1)
-  }, [])
-
-  useEffect(() => {
-      const timer = setTimeout(() => {
-          loadCoupons(1)
-      }, 500)
-      return () => clearTimeout(timer)
-  }, [search])
-;
+    const timer = setTimeout(() => {
+      loadCoupons(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const handleSave = async () => {
     if (formData.validFrom && formData.validUntil) {
@@ -138,7 +140,7 @@ export default function CouponsPage() {
         });
       }
       setIsDialogOpen(false);
-      loadCoupons();
+      loadCoupons(page);
     } catch (error: any) {
       const message =
         error.response?.data?.message || "No se pudo guardar el cupón.";
@@ -156,7 +158,7 @@ export default function CouponsPage() {
           description: "El cupón ha sido eliminado.",
         });
         setIsDialogOpen(false);
-        loadCoupons();
+        loadCoupons(page);
       } catch (error: any) {
         toast({
           title: "Error",
@@ -240,32 +242,26 @@ export default function CouponsPage() {
         </Button>
       </div>
 
-      {loading ? (
-        <div className="flex flex-col items-center justify-center h-64 space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-secondary" />
-          <p className="text-muted-foreground">Cargando cupones...</p>
-        </div>
-      ) : (
-        <GenericTable
-            data={coupons}
-            columns={columns}
-            searchKey="code"
-            onEdit={userRole === "EMPLOYEE" ? undefined : openEdit}
-            onDelete={userRole === "EMPLOYEE" ? undefined : handleDelete}
-            onCreate={userRole === "EMPLOYEE" ? undefined : openCreate}
-            createText="Nuevo Cupón"
-            search={search}
-            onSearchChange={setSearch}
-            pagination={{
-                page,
-                totalPages,
-                onPageChange: (newPage: number) => {
-                    setPage(newPage)
-                    loadCoupons(newPage)
-                }
-            }}
-        />
-      )}
+      <GenericTable
+        data={coupons}
+        columns={columns}
+        searchKey="code"
+        onEdit={userRole === "EMPLOYEE" ? undefined : openEdit}
+        onDelete={userRole === "EMPLOYEE" ? undefined : handleDelete}
+        onCreate={userRole === "EMPLOYEE" ? undefined : openCreate}
+        createText="Nuevo Cupón"
+        search={search}
+        onSearchChange={setSearch}
+        loading={loading}
+        pagination={{
+          page,
+          totalPages,
+          onPageChange: (newPage: number) => {
+            setPage(newPage);
+            loadCoupons(newPage);
+          },
+        }}
+      />
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-background border-4 border-secondary/60 text-foreground sm:max-w-[425px]">

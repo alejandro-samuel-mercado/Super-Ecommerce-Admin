@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useAuthStore } from "@/store/use-auth-store"
 import { User, UserRole } from "@/types/schema"
 import { CellContext, ColumnDef, ColumnFiltersState, HeaderContext, SortingState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
-import { ArrowUpDown, Edit, Search, Settings2, ShoppingCart, Trash } from "lucide-react"
+import { ArrowUpDown, Edit, Loader2, Search, Settings2, ShoppingCart, Trash } from "lucide-react"
 import { useState } from "react"
 
 interface UserTableProps {
@@ -34,9 +34,10 @@ interface UserTableProps {
        totalPages: number
        onPageChange: (page: number) => void
    }
+   loading?: boolean
 }
 
-export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit, onDelete, onViewCart, search, onSearchChange, pagination }: UserTableProps) {
+export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit, onDelete, onViewCart, search, onSearchChange, pagination, loading }: UserTableProps) {
    const [sorting, setSorting] = useState<SortingState>([])
    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
    const rawColumns: ColumnDef<User>[] = [
@@ -70,8 +71,8 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
            header: "Branch(es)",
            cell: ({ row }: CellContext<User, unknown>) => {
                const user = row.original;
-               if (user.roleId === 5 || user.roleId === 6) {
-                   if (user.roleId === 5 && (!user.adminBranches || user.adminBranches.length === 0)) {
+               if (user.roleId === 1 || user.roleId === 2) {
+                   if (user.roleId === 1 && (!user.adminBranches || user.adminBranches.length === 0)) {
                         return <Badge variant="outline" className="border-borderH text-purple-600 dark:text-purple-400 text-[10px]">Global</Badge>
                    }
                    if (user.adminBranches && user.adminBranches.length > 0) {
@@ -88,7 +89,7 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
                     return <span className="text-muted-foreground text-xs italic">Sin asignar</span>
                }
               
-               if (user.roleId === 7) {
+               if (user.roleId === 3) {
                     if (user.branch) {
                         return <Badge variant="secondary" className="bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border-blue-200 dark:border-blue-800">{user.branch.name}</Badge>
                     }
@@ -147,7 +148,7 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
                                        <Edit className="mr-3 h-5 w-5" /> Editar
                                    </DropdownMenuItem>
                                   
-                                   {(currentUserRole !== 'EMPLOYEE' || user.roleId === 8) && (
+                                   {(currentUserRole !== 'EMPLOYEE' || user.roleId === 4) && (
                                        <>
                                            <DropdownMenuItem
                                                onClick={(e) => {
@@ -184,7 +185,7 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
            return rawColumns.filter(col => col.id !== 'branches');
        }
        return rawColumns;
-   // eslint-disable-next-line react-hooks/exhaustive-deps
+   
    }, [currentFilter]);
 
    const table = useReactTable({
@@ -243,8 +244,26 @@ export function UserTable({ data, currentUserRole, currentFilter, onView, onEdit
                            </TableRow>
                        ))}
                    </TableHeader>
-                   <TableBody>
-                       {table.getRowModel().rows?.length ? (
+                   <TableBody className="relative min-h-[200px]">
+                       {loading && (
+                           <TableRow className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+                               <TableCell colSpan={columns.length} className="border-none flex flex-col items-center gap-2">
+                                   <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+                                   <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest animate-pulse">Cargando...</p>
+                               </TableCell>
+                           </TableRow>
+                       )}
+                       {loading ? (
+                           Array.from({ length: 5 }).map((_, i) => (
+                               <TableRow key={`loading-${i}`} className="border-border">
+                                   {columns.map((_, j) => (
+                                       <TableCell key={`loading-cell-${j}`} className="h-16">
+                                            <div className="h-4 bg-muted animate-pulse rounded w-full" />
+                                       </TableCell>
+                                   ))}
+                               </TableRow>
+                           ))
+                       ) : table.getRowModel().rows?.length ? (
                            table.getRowModel().rows.map((row) => (
                                <TableRow
                                    key={row.id}
