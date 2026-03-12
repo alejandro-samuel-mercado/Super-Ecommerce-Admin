@@ -179,7 +179,7 @@ export function EventForm({ initialData, onSuccess, onCancel }: EventFormProps) 
                     ? [{ type: 'GLOBAL' }] 
                     : [{ type: disc.scope, value: disc.targetIds }];
 
-                // Sanitize payload: remove frontend-only states
+             
                 const { q, results, searching, isNew, ...rest } = disc;
 
                 const discPayload = {

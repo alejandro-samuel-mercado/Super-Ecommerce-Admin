@@ -259,8 +259,8 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
             if (!val) handleCancelEdit()
             onOpenChange(val)
         }}>
-            <DialogContent className="sm:w-auto w-[100%] max-h-[90vh] overflow-y-auto overflow-x-hidden text-foreground border-4 border-secondary/60 shadow-2xl">
-                <DialogHeader className="sm:w-full w-[80%]">
+            <DialogContent className="sm:w-auto w-[100%] max-h-[90vh] overflow-y-auto overflow-x-auto text-foreground border-4 border-secondary/60 shadow-2xl">
+                <DialogHeader className="sm:w-full w-[100%]">
                     <DialogTitle className="text-xl font-bold text-foreground">Gestión de Variantes</DialogTitle>
                     <DialogDescription className="text-muted-foreground">
                         Administre las variantes (SKUs) para: <span className="font-semibold text-secondary">{product.name}</span>
