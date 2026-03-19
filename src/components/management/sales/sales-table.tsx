@@ -113,7 +113,7 @@ export function SalesTable({ data, onView, hideSearch = false, search, onSearchC
                         break
                     case 'PENDING':
                     default:
-                        if (paymentType !== 'CASH' && paymentType !== 'TRANSFER') {
+                        if (paymentType !== 'CASH' && paymentType !== 'TRANSFER' && paymentType !== 'QR') {
                             if (mpPaymentId) {
                                 variant = 'secondary'
                                 className = 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800'
@@ -126,7 +126,7 @@ export function SalesTable({ data, onView, hideSearch = false, search, onSearchC
                         } else {
                             variant = 'secondary'
                             className = 'bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 hover:bg-amber-200 border-amber-200 dark:border-amber-800'
-                            label = "Pendiente Pago"
+                            label = paymentType === 'QR' ? "Esperando Pago QR" : "Pendiente Pago"
                         }
                 }
 

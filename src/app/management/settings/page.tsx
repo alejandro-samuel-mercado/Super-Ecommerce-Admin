@@ -2,28 +2,28 @@
 
 import { Badge } from "@/components/ui/badge";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
@@ -32,20 +32,20 @@ import { useToast } from "@/components/ui/use-toast";
 import { ConfigAPI, CurrenciesAPI } from "@/services/api";
 import { StoreConfig } from "@/types/extended";
 import {
-  AlertCircle,
-  Archive,
-  ArrowLeftRight,
-  Award,
-  CreditCard,
-  LayoutGrid,
-  Loader2,
-  Ruler,
-  Save,
-  Settings,
-  ShieldCheck,
-  StopCircle,
-  Store,
-  Truck,
+    AlertCircle,
+    Archive,
+    ArrowLeftRight,
+    Award,
+    CreditCard,
+    LayoutGrid,
+    Loader2,
+    Ruler,
+    Save,
+    Settings,
+    ShieldCheck,
+    StopCircle,
+    Store,
+    Truck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -1275,6 +1275,7 @@ export default function SettingsPage() {
                   { id: "DEBIT", label: "Tarjeta de Débito", icon: "💳" },
                   { id: "TRANSFER", label: "Transferencia", icon: "🏦" },
                   { id: "MERCADO_PAGO", label: "Mercado Pago", icon: "📲" },
+                  { id: "QR", label: "Pago por QR", icon: "📱" },
                 ].map((method) => {
                   const isEnabled = config.enabledPaymentMethods
                     ? (config.enabledPaymentMethods as string[]).includes(

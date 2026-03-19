@@ -149,8 +149,7 @@ export default function DiscountsPage() {
         const newScope = newData.scope;
         const newTargets = newData.targetIds || [];
 
-        // If no targets selected for non-global scope, we should probably warn, 
-        // but it shouldn't cause a crash here. 
+      
         if (newScope !== 'GLOBAL' && newTargets.length === 0) return null;
 
         if (!Array.isArray(discounts)) return null;

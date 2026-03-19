@@ -13,7 +13,7 @@ import { useBranchStore } from "@/store/branch.store"
 import { Sale } from "@/types/schema"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { AlertCircle, Calendar, CreditCard, Download, ExternalLink, Eye, FileText, Loader2, MapPin, Package, Printer, Store, User, XCircle } from "lucide-react"
+import { AlertCircle, Calendar, CreditCard, Download, ExternalLink, Eye, FileText, Loader2, MapPin, Package, Printer, QrCode, Store, Trash2, Upload, User, XCircle } from "lucide-react"
 import Link from "next/link"
 import { useRef, useState } from "react"
 import { useReactToPrint } from "react-to-print"
@@ -44,6 +44,9 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
     const [isRefundDialogOpen, setIsRefundDialogOpen] = useState(false)
     const [refundReason, setRefundReason] = useState("")
     const [isRefunding, setIsRefunding] = useState(false)
+    const [isUploadingQr, setIsUploadingQr] = useState(false)
+    const [isDeletingQr, setIsDeletingQr] = useState(false)
+    const [localQrUrl, setLocalQrUrl] = useState<string | null>(sale.qrPaymentUrl || null)
 
     const handleRefund = async () => {
         if (!refundReason.trim()) {
@@ -204,6 +207,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                                 <SelectItem value="DEBIT">DEBITO</SelectItem>
                                                 <SelectItem value="MERCADO_PAGO">MERCADO PAGO</SelectItem>
                                                 <SelectItem value="POINTS">PUNTOS</SelectItem>
+                                                <SelectItem value="QR">QR</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -322,6 +326,149 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                     Subido el {sale.paymentProofUploadedAt ? format(new Date(sale.paymentProofUploadedAt), "dd/MM/yyyy HH:mm", { locale: es }) : 'desconocido'}
                                 </p>
                             </div>
+                        </div>
+                    )}
+
+                    {/* Sección QR de Pago */}
+                    {(sale.paymentType === 'QR' || paymentType === 'QR') && (
+                        <div className="bg-card p-4 rounded-lg border-2 border-purple-200 dark:border-purple-800 shadow-sm mt-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300 flex items-center gap-2">
+                                    <QrCode size={14} /> Imagen QR de Pago
+                                </h3>
+                                {localQrUrl ? (
+                                    <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 text-[10px]">
+                                        QR Cargado
+                                    </Badge>
+                                ) : (
+                                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-[10px]">
+                                        Sin QR
+                                    </Badge>
+                                )}
+                            </div>
+
+                            {localQrUrl ? (
+                                <div className="space-y-3">
+                                    <div className="relative rounded-lg border-2 border-purple-200 dark:border-purple-700 overflow-hidden bg-white dark:bg-slate-900 group flex items-center justify-center p-4">
+                                        <img 
+                                            src={localQrUrl} 
+                                            alt="QR de Pago" 
+                                            className="max-w-[280px] w-full rounded-md transition-transform group-hover:scale-105"
+                                        />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                            <Button 
+                                                variant="secondary" 
+                                                size="sm" 
+                                                className="font-bold flex gap-2"
+                                                onClick={() => window.open(localQrUrl!, '_blank')}
+                                            >
+                                                <Eye size={14} /> Ampliar
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    
+                                    {sale.paymentStatus !== 'PAID' && (
+                                        <div className="flex gap-2">
+                                            <label className="flex-1">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="hidden"
+                                                    onChange={async (e) => {
+                                                        const file = e.target.files?.[0]
+                                                        if (!file || !sale.id) return
+                                                        setIsUploadingQr(true)
+                                                        try {
+                                                            const res = await SalesAPI.uploadQrImage(sale.id, file)
+                                                            setLocalQrUrl(res.data?.url || res.url)
+                                                            toast.success("QR actualizado")
+                                                            onSaleUpdated()
+                                                        } catch (err: any) {
+                                                            toast.error(err?.response?.data?.message || "Error al subir QR")
+                                                        } finally {
+                                                            setIsUploadingQr(false)
+                                                            e.target.value = ''
+                                                        }
+                                                    }}
+                                                />
+                                                <Button variant="outline" className="w-full font-bold text-xs border-purple-300 text-purple-700 hover:bg-purple-50 hover:cursor-pointer" disabled={isUploadingQr} asChild>
+                                                    <span>
+                                                        {isUploadingQr ? <Loader2 size={14} className="animate-spin mr-2" /> : <Upload size={14} className="mr-2" />}
+                                                        Cambiar QR
+                                                    </span>
+                                                </Button>
+                                            </label>
+                                            <Button 
+                                                variant="outline" 
+                                                className="font-bold text-xs border-red-300 text-red-600 hover:bg-red-50 hover:cursor-pointer"
+                                                disabled={isDeletingQr}
+                                                onClick={async () => {
+                                                    if (!sale.id) return
+                                                    setIsDeletingQr(true)
+                                                    try {
+                                                        await SalesAPI.deleteQrImage(sale.id)
+                                                        setLocalQrUrl(null)
+                                                        toast.success("QR eliminado")
+                                                        onSaleUpdated()
+                                                    } catch (err: any) {
+                                                        toast.error(err?.response?.data?.message || "Error al eliminar QR")
+                                                    } finally {
+                                                        setIsDeletingQr(false)
+                                                    }
+                                                }}
+                                            >
+                                                {isDeletingQr ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    <div className="p-6 border-2 border-dashed border-purple-200 dark:border-purple-700 rounded-lg text-center bg-purple-50/50 dark:bg-purple-900/10">
+                                        <QrCode size={40} className="mx-auto text-purple-300 mb-2" />
+                                        <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+                                            Aún no se ha subido un código QR para esta venta.
+                                        </p>
+                                        {sale.paymentStatus !== 'PAID' && (
+                                            <p className="text-[10px] text-muted-foreground mt-1">
+                                                Sube la imagen QR para que el cliente pueda escanearla y pagar.
+                                            </p>
+                                        )}
+                                    </div>
+                                    
+                                    {sale.paymentStatus !== 'PAID' && (
+                                        <label>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={async (e) => {
+                                                    const file = e.target.files?.[0]
+                                                    if (!file || !sale.id) return
+                                                    setIsUploadingQr(true)
+                                                    try {
+                                                        const res = await SalesAPI.uploadQrImage(sale.id, file)
+                                                        setLocalQrUrl(res.data?.url || res.url)
+                                                        toast.success("QR subido con éxito. Se notificará al cliente por email.")
+                                                        onSaleUpdated()
+                                                    } catch (err: any) {
+                                                        toast.error(err?.response?.data?.message || "Error al subir QR")
+                                                    } finally {
+                                                        setIsUploadingQr(false)
+                                                        e.target.value = ''
+                                                    }
+                                                }}
+                                            />
+                                            <Button variant="default" className="w-full font-bold text-xs bg-purple-600 hover:bg-purple-700 text-white hover:cursor-pointer" disabled={isUploadingQr} asChild>
+                                                <span>
+                                                    {isUploadingQr ? <Loader2 size={14} className="animate-spin mr-2" /> : <Upload size={14} className="mr-2" />}
+                                                    Subir Imagen QR
+                                                </span>
+                                            </Button>
+                                        </label>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

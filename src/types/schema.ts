@@ -1,5 +1,5 @@
 export type PaymentStatus = 'PENDING' | 'PAID' | 'CANCELLED' | 'REJECTED' |'SHIPPED';
-export type PaymentType = 'CASH' | 'DEBIT' | 'CARD' | 'TRANSFER' | 'MERCADO_PAGO' | 'POINTS';
+export type PaymentType = 'CASH' | 'DEBIT' | 'CARD' | 'TRANSFER' | 'MERCADO_PAGO' | 'POINTS' | 'QR';
 export type DeliveryType = 'PICKUP' | 'DELIVERY';
 export type DeliveryStatus = 'PENDING_DELIVERY' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'EMPLOYEE' | 'CUSTOMER';
@@ -168,6 +168,7 @@ export interface Sale {
   items: SaleItem[];
   paymentProofUrl?: string | null;
   paymentProofUploadedAt?: string | null;
+  qrPaymentUrl?: string | null;
   branch?: Branch;
   receipt?: any; 
   createdAt?: string;

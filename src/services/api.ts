@@ -256,6 +256,18 @@ export const SalesAPI = {
     getInvoice: async (id: number) => {
         const response = await api.get(`/sales/${id}/invoice`, { responseType: 'blob' })
         return response.data
+    },
+    uploadQrImage: async (id: number, file: File) => {
+        const formData = new FormData()
+        formData.append('image', file)
+        const { data } = await api.post(`/sales/${id}/qr-image`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        return data
+    },
+    deleteQrImage: async (id: number) => {
+        const { data } = await api.delete(`/sales/${id}/qr-image`)
+        return data
     }
 }
 

@@ -476,7 +476,7 @@ export function RegistrationTab() {
              branchId: activeBranch?.id || 1, 
              
          
-             paymentStatus: 'PAID', 
+             paymentStatus: paymentType === 'QR' ? 'PENDING' : 'PAID', 
              deliveryStatus: isDelivered ? 'DELIVERED' : 'PENDING_DELIVERY'
         }
         try {
@@ -1002,7 +1002,7 @@ export function RegistrationTab() {
                                         )}
                                         onClick={() => setPaymentType(type as any)}
                                     >
-                                        {(type=='DEBIT' && 'Débito') ||(type=='CASH' && 'Efectivo')||(type=='CARD' && 'Tarjeta') ||(type===  'TRANSFER' &&'Transferencia')|| (type === 'MERCADO_PAGO' ? 'Mercado Pago' : type.replace(/_/g, ' ')) }
+                                        {(type=='DEBIT' && 'Débito') ||(type=='CASH' && 'Efectivo')||(type=='CARD' && 'Tarjeta') ||(type===  'TRANSFER' &&'Transferencia')|| (type === 'QR' && 'Pago QR') || (type === 'MERCADO_PAGO' ? 'Mercado Pago' : type.replace(/_/g, ' ')) }
                                     </div>
                                 ))}
                              </div>
