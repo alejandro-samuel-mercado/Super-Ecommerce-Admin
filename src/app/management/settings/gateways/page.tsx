@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
-import { CurrenciesAPI } from '@/services/api'
+import { ConfigAPI, CurrenciesAPI } from '@/services/api'
 import { PaymentGatewaysAPI } from '@/services/payment.service'
 import { GatewayCurrencySupport, PaymentGateway } from '@/types/payment'
 import { CreditCard, Globe, Loader2, RefreshCw, Settings2 } from 'lucide-react'
@@ -20,6 +20,7 @@ import { useCallback, useEffect, useState } from 'react'
 export default function GatewayManagementPage() {
     const [gateways, setGateways] = useState<PaymentGateway[]>([])
     const [currencySupport, setCurrencySupport] = useState<GatewayCurrencySupport[]>([])
+    const [config, setConfig] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [editingGateway, setEditingGateway] = useState<PaymentGateway | null>(null)
@@ -27,21 +28,20 @@ export default function GatewayManagementPage() {
     const { toast } = useToast()
 
     const [availableCurrencies, setAvailableCurrencies] = useState<any[]>([])
-    const currencies = availableCurrencies.map(c => c.code)
-
-
-
+    
     const loadData = useCallback(async () => {
         setLoading(true)
         try {
-            const [gwData, csData, currData] = await Promise.all([
+            const [gwData, csData, currData, confData] = await Promise.all([
                 PaymentGatewaysAPI.getAll(),
                 PaymentGatewaysAPI.getCurrencySupport(),
-                CurrenciesAPI.getAll(true)
+                CurrenciesAPI.getAll(true),
+                ConfigAPI.get()
             ])
             setGateways(gwData)
             setCurrencySupport(csData)
             setAvailableCurrencies(currData)
+            setConfig(confData)
         } catch (error) {
             toast({ title: "Error", description: "No se pudieron cargar los datos de pagos.", variant: "destructive" })
         } finally {
@@ -88,17 +88,20 @@ export default function GatewayManagementPage() {
         }
     }
 
-    const handlePrimaryChange = async (currency: string, gatewayId: string) => {
+    const handleSupportChange = async (currency: string, gatewayId: string, type: 'isPrimary' | 'isSecondary') => {
         try {
-            await PaymentGatewaysAPI.updateCurrencySupport({
+            const payload: any = {
                 currencyCode: currency,
                 gatewayId: parseInt(gatewayId)
-            })
+            };
+            payload[type] = true;
+
+            await PaymentGatewaysAPI.updateCurrencySupport(payload)
             
             const csData = await PaymentGatewaysAPI.getCurrencySupport()
             setCurrencySupport(csData)
             
-            toast({ title: "Actualizado", description: `Pasarela principal para ${currency} actualizada.` })
+            toast({ title: "Actualizado", description: `Pasarela para ${currency} actualizada.` })
         } catch (error) {
             toast({ title: "Error", description: "No se pudo actualizar la configuración de moneda.", variant: "destructive" })
         }
@@ -160,7 +163,7 @@ export default function GatewayManagementPage() {
                                         <TableRow key={gateway.id}>
                                             <TableCell className="font-medium flex items-center gap-2">
                                                 {gateway.name}
-                                                {gateway.isGlobalFallback && <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">Principal (Local)</span>}
+                                                
                                             </TableCell>
                                             <TableCell className="text-muted-foreground font-mono text-xs">{gateway.slug}</TableCell>
                                             <TableCell className="text-center">
@@ -199,50 +202,72 @@ export default function GatewayManagementPage() {
                             <CardTitle className="flex items-center gap-2">
                                 <Globe className="h-5 w-5" /> Matriz de Monedas
                             </CardTitle>
-                            <CardDescription>Define qué pasarela es la PRINCIPAL para cada moneda.</CardDescription>
+                            <CardDescription>Configura la pasarela principal para tus monedas de operación.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {currencies.map(currency => {
-                                  
-                                    const primarySupport = currencySupport.find(cs => cs.currencyCode === currency && cs.isPrimary);
-                                    
-                                    return (
-                                        <div key={currency} className="p-4 border rounded-xl bg-card shadow-sm space-y-4">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center font-bold text-secondary">
-                                                        {currency.substring(0, 1)}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                                {availableCurrencies
+                                    .filter(c => c.code === config?.baseCurrency || c.code === config?.defaultCurrency)
+                                    .sort((a, b) => a.code === config?.baseCurrency ? -1 : 1)
+                                    .map(currObj => {
+                                        const currency = currObj.code;
+                                        const isBase = currency === config?.baseCurrency;
+                                        const primarySupport = currencySupport.find(cs => cs.currencyCode === currency && cs.isPrimary);
+                                        
+                                        return (
+                                            <div key={currency} className="p-6 border-2 border-secondary/20 rounded-3xl bg-card shadow-sm space-y-6">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center font-bold text-secondary text-lg">
+                                                            {currency.substring(0, 1)}
+                                                        </div>
+                                                        <div>
+                                                            <span className="font-bold text-xl block">{currency}</span>
+                                                            <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                                                                {isBase ? 'Primaria (Local)' : 'Secundaria (Default)'}
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                    <span className="font-bold text-lg">{currency}</span>
+                                                </div>
+                                                
+                                                <div className="grid grid-cols-1 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs font-bold text-muted-foreground uppercase">
+                                                            Pasarela Principal
+                                                        </Label>
+                                                        <Select 
+                                                            value={primarySupport?.gatewayId.toString() || ''} 
+                                                            onValueChange={(val) => handleSupportChange(currency, val, 'isPrimary')}
+                                                        >
+                                                            <SelectTrigger className="rounded-xl border-secondary/30">
+                                                                <SelectValue placeholder="Elegir pasarela..." />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {gateways.filter(g => g.isActive).map(g => (
+                                                                    <SelectItem key={`p-${currency}-${g.id}`} value={g.id.toString()}>
+                                                                        {g.name}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="pt-2">
+                                                    <div className="bg-muted/50 p-3 rounded-2xl text-[11px] text-muted-foreground leading-relaxed">
+                                                        <p className="font-semibold mb-1 text-secondary">
+                                                            {isBase ? 'Para Clientes Locales:' : 'Para Clientes Internacionales:'}
+                                                        </p>
+                                                        <p>
+                                                            {isBase 
+                                                                ? `Verán ${primarySupport?.gatewayId ? gateways.find(g => g.id === primarySupport.gatewayId)?.name : 'su pasarela'} y PayPal.` 
+                                                                : 'Verán PayPal y Stripe de forma global.'}
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            
-                                            <div className="space-y-2">
-                                                <Label className="text-xs text-muted-foreground uppercase">Pasarela Principal</Label>
-                                                <Select 
-                                                    value={primarySupport?.gatewayId.toString() || ''} 
-                                                    onValueChange={(val) => handlePrimaryChange(currency, val)}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Seleccionar..." />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {gateways.filter(g => g.isActive).map(g => (
-                                                            <SelectItem key={g.id} value={g.id.toString()}>
-                                                                {g.name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            
-                                            <div className="text-xs text-muted-foreground">
-                                                <p>Los clientes fuera del país del negocio verán las pasarelas Internacionales.</p>
-                                            </div>
-                                        </div>
-                                    )
-                                })}
+                                        )
+                                    })}
                             </div>
                         </CardContent>
                     </Card>

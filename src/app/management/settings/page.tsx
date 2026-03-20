@@ -1134,6 +1134,35 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <div className="space-y-2">
+                  <Label>Moneda por Defecto (Internacional)</Label>
+                  <Select
+                    value={config.defaultCurrency || "USD"}
+                    onValueChange={(val) =>
+                      setConfig({ ...config, defaultCurrency: val })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar moneda internacional" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-80 overflow-y-auto">
+                      {currencies &&
+                        currencies.map((c) => (
+                          <SelectItem key={`default-${c.code}`} value={c.code}>
+                            {c.name} ({c.code})
+                          </SelectItem>
+                        ))}
+                      <div className="h-px bg-muted my-1" />
+                      <SelectItem value="USD">
+                        Dólar Estadounidense (USD)
+                      </SelectItem>
+                      <SelectItem value="ARS">Peso Argentino (ARS)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-[10px] text-muted-foreground">
+                    Esta es la moneda secundaria que verán los clientes internacionales.
+                  </p>
+                </div>
+                <div className="space-y-2">
                   <Label>Símbolo de Moneda (Visual)</Label>
                   <Input
                     value={config.currencySymbol || "$"}
@@ -1179,7 +1208,7 @@ export default function SettingsPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {currencies &&
                       currencies
-                        .filter((c) => c.code !== config.baseCurrency)
+                        .filter((c) => (c.code === config.defaultCurrency || c.code === "USD") && c.code !== config.baseCurrency)
                         .map((c) => (
                           <div
                             key={c.id}
@@ -1328,6 +1357,137 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+
+          {config.enabledPaymentMethods && (config.enabledPaymentMethods as string[]).includes("QR") && (
+            <Card className="border-purple-200 dark:border-purple-800">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 ">
+                  QR Persistente
+                </CardTitle>
+                <CardDescription>
+                  Si está activo, se usará una sola imagen QR para todas las ventas por QR. Si no, deberás subir un QR manualmente en cada venta pendiente.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-xl">🔁</span>
+                    <div>
+                      <Label className="font-semibold">Habilitar QR Persistente</Label>
+                      <p className="text-xs text-muted-foreground">
+                        El mismo QR se mostrará automáticamente a todos los clientes.
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={config.enablePersistentQr || false}
+                    onCheckedChange={(c) =>
+                      setConfig({ ...config, enablePersistentQr: c })
+                    }
+                  />
+                </div>
+
+                {config.enablePersistentQr && (
+                  <div className="space-y-3 p-4 border-2 border-dashed border-purple-200 dark:border-purple-700 rounded-lg bg-purple-50/50 dark:bg-purple-900/10">
+                    <Label className="text-sm font-bold text-purple-700 dark:text-purple-300">Imagen QR</Label>
+                    {config.persistentQrUrl ? (
+                      <div className="space-y-3">
+                        <div className="flex justify-center">
+                          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border-2 border-purple-200 dark:border-purple-700 inline-block">
+                            <img
+                              src={config.persistentQrUrl}
+                              alt="QR Persistente"
+                              className="max-w-[250px] w-full rounded-md"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <label className="flex-1">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                try {
+                                  const { UploadAPI } = await import("@/services/api");
+                                  const url = await UploadAPI.upload(file);
+                                  setConfig({ ...config, persistentQrUrl: url });
+                                  toast({
+                                    title: "QR actualizado",
+                                    description: "Recuerda guardar los cambios.",
+                                  });
+                                } catch {
+                                  toast({
+                                    title: "Error",
+                                    description: "No se pudo subir la imagen.",
+                                    variant: "destructive",
+                                  });
+                                }
+                                e.target.value = "";
+                              }}
+                            />
+                            <Button
+                              variant="outline"
+                              className="w-full font-bold text-xs border-purple-300 text-purple-700 hover:bg-purple-50 hover:cursor-pointer"
+                              asChild
+                            >
+                              <span>Cambiar Imagen</span>
+                            </Button>
+                          </label>
+                          <Button
+                            variant="outline"
+                            className="font-bold text-xs border-red-300 text-red-600 hover:bg-red-50 hover:cursor-pointer"
+                            onClick={() =>
+                              setConfig({ ...config, persistentQrUrl: undefined })
+                            }
+                          >
+                            Eliminar
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              const { UploadAPI } = await import("@/services/api");
+                              const url = await UploadAPI.upload(file);
+                              setConfig({ ...config, persistentQrUrl: url });
+                              toast({
+                                title: "QR subido",
+                                description: "Recuerda guardar los cambios.",
+                              });
+                            } catch {
+                              toast({
+                                title: "Error",
+                                description: "No se pudo subir la imagen.",
+                                variant: "destructive",
+                              });
+                            }
+                            e.target.value = "";
+                          }}
+                        />
+                        <Button
+                          variant="default"
+                          className="w-full font-bold text-xs bg-purple-600 hover:bg-purple-700 text-white hover:cursor-pointer"
+                          asChild
+                        >
+                          <span>Subir Imagen QR</span>
+                        </Button>
+                      </label>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* CONFIGURACIÓN AVANZADA DE ENVÍOS */}
           {config.enableShipping && (

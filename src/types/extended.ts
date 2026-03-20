@@ -67,6 +67,7 @@ export interface StoreConfig {
   enableCoupons?: boolean;
   maintenanceMode: boolean;
   baseCurrency?: string;
+  defaultCurrency?: string;
   country?: string;
 
   storeName?: string;
@@ -111,6 +112,9 @@ export interface StoreConfig {
 
   enableAutoBackup?: boolean;
   backupFrequency?: "DAILY" | "WEEKLY" | "MONTHLY";
+
+  enablePersistentQr?: boolean;
+  persistentQrUrl?: string;
 
   activeEvent?: Event;
   overriddenByEvent?: {

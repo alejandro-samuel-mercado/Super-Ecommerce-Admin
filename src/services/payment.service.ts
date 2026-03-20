@@ -17,7 +17,12 @@ export const PaymentGatewaysAPI = {
         return data.data as GatewayCurrencySupport[];
     },
 
-    updateCurrencySupport: async (payload: { currencyCode: string; gatewayId: number }) => {
+    updateCurrencySupport: async (payload: { 
+        currencyCode: string; 
+        gatewayId: number; 
+        isPrimary?: boolean; 
+        isSecondary?: boolean; 
+    }) => {
         const { data } = await api.post('/payments/admin/gateways/currency-support', payload);
         return data.data;
     }
