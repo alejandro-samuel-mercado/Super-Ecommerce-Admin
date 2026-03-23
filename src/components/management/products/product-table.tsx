@@ -278,7 +278,7 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
-                                    onClick={() => router.push(`/management/products/${row.original.id}`)}
+                                    onClick={() => router.push(`/management/products/detail?id=${row.original.id}`)}
                                     className="hover:bg-gray-800/20  hover:rounded-2xl    transition-colors border-border cursor-pointer"
                                 >
                                     {row.getVisibleCells().map((cell) => (
