@@ -19,6 +19,7 @@ import { useEffect, useRef, useState } from "react"
 import { useReactToPrint } from "react-to-print"
 import { toast } from "sonner"
 import { TicketTemplate } from "../../sales/ticket-template"
+import { useConfigStore } from "@/store/config.store"
 
 interface SaleDetailsDialogProps {
     open: boolean
