@@ -84,18 +84,18 @@ const POSProductCard = ({ product, onAdd }: { product: Product, onAdd: (p: Produ
                     </div>
                 )}
                 <div className="absolute top-1 left-1 flex flex-col gap-1">
-                     {stock <= 0 && <Badge variant="destructive" className="text-[7px] font-black uppercase px-1 h-4">Agotado</Badge>}
-                     {product.skus && product.skus.length > 1 && <Badge variant="outline" className="text-[7px] font-black bg-white/80 uppercase px-1 h-4 border-primary/20">{product.skus.length} Variantes</Badge>}
+                     {stock <= 0 && <Badge variant="destructive" className="text-[9px] font-black uppercase px-2 h-5">Agotado</Badge>}
+                     {product.skus && product.skus.length > 1 && <Badge variant="outline" className="text-[9px] font-black bg-white/80 uppercase px-2 h-5 border-primary/20">{product.skus.length} Variantes</Badge>}
                 </div>
             </div>
             
             <div className="flex-1 flex flex-col">
                 <h4 className="font-black text-[11px] text-foreground uppercase line-clamp-2 leading-tight mb-2 group-hover:text-primary transition-colors">{product.name}</h4>
-                <div className="mt-auto flex max-sm:flex-col items-center justify-between">
-                     <span className={cn("text-[8px] font-black uppercase px-1.5 py-0.5 rounded", stock > 0 ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700")}>
-                        Stock: {stock}
+                <div className="mt-auto flex max-sm:flex-col items-center justify-between gap-1">
+                     <span className={cn("text-[9px] font-black uppercase px-2 py-0.5 rounded", stock > 0 ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700")}>
+                        {Number(stock).toFixed(product.allowFractional ? 2 : 0)} {product.measurementUnit === 'UNIT' ? 'UN' : (product.measurementUnit?.toLowerCase() || 'UN')} DISP.
                      </span>
-                     <p className="font-black text-xs text-secondary">{formatCurrency(minPrice)}</p>
+                     <p className="font-black text-sm text-secondary">{formatCurrency(minPrice)}</p>
                 </div>
             </div>
             <Button size="sm" variant="secondary" className="w-full h-8 text-[9px] font-black uppercase mt-1 group-hover:bg-primary group-hover:text-white transition-colors">AÑADIR</Button>
