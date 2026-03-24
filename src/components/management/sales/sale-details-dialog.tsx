@@ -28,6 +28,7 @@ interface SaleDetailsDialogProps {
 }
 
 export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: SaleDetailsDialogProps) {
+    const { config } = useConfigStore()
     const { activeBranch } = useBranchStore()
     const [loading, setLoading] = useState(false)
     const [paymentStatus, setPaymentStatus] = useState(sale.paymentStatus)
@@ -440,8 +441,8 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                                 {item.skuCode && <span className="inline-block px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-[10px] font-mono border border-border mt-1">SKU: {item.skuCode}</span>}
                                             </td>
                                             <td className="px-4 py-3 text-center text-muted-foreground">{item.quantity}</td>
-                                            <td className="px-4 py-3 text-right text-muted-foreground">{formatCurrency(item.unitPrice, sale.currencyCode)}</td>
-                                            <td className="px-4 py-3 text-right font-bold text-foreground border-l border-border bg-muted/20">{formatCurrency(item.subtotal, sale.currencyCode)}</td>
+                                            <td className="px-4 py-3 text-right text-muted-foreground">{formatCurrency(item.unitPrice, sale.currencyCode || config?.baseCurrency || "USD", config?.currencySymbol)}</td>
+                                            <td className="px-4 py-3 text-right font-bold text-foreground border-l border-border bg-muted/20">{formatCurrency(item.subtotal, sale.currencyCode || config?.baseCurrency || "USD", config?.currencySymbol)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -453,7 +454,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                     <div className="flex flex-col gap-2 ml-auto w-full md:w-1/2">
                         <div className="flex justify-between text-zinc-500 text-sm">
                             <span>Subtotal Productos</span>
-                             <span>{formatCurrency(sale.subtotal, sale.currencyCode)}</span>
+                             <span>{formatCurrency(sale.subtotal, sale.currencyCode || config?.baseCurrency || "USD", config?.currencySymbol)}</span>
                         </div>
                         
                         {/* Descuento */}
@@ -462,7 +463,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                 <span>
                                     Descuento {sale.coupon ? `(Cupón: ${sale.coupon.code})` : ''}
                                 </span>
-                                 <span>-{formatCurrency(sale.discount, sale.currencyCode)}</span>
+                                 <span>-{formatCurrency(sale.discount, sale.currencyCode || config?.baseCurrency || "USD", config?.currencySymbol)}</span>
                             </div>
                         ) : null}
 
@@ -470,13 +471,13 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                          {Number(sale.shippingCost) > 0 ? (
                             <div className="flex justify-between text-zinc-600 dark:text-zinc-400 text-sm bg-zinc-50 px-2 py-1 rounded">
                                 <span>Costo de Envío</span>
-                                 <span>+{formatCurrency(sale.shippingCost, sale.currencyCode)}</span>
+                                 <span>+{formatCurrency(sale.shippingCost, sale.currencyCode || config?.baseCurrency || "USD", config?.currencySymbol)}</span>
                             </div>
                         ) : null}
                         
                         <div className="flex justify-between text-2xl font-bold  dark:text-zinc-100 border-t border-zinc-200 dark:border-zinc-800 pt-3 mt-2">
                             <span>Total Final</span>
-                             <span>{formatCurrency(sale.total, sale.currencyCode)}</span>
+                             <span>{formatCurrency(sale.total, sale.currencyCode || config?.baseCurrency || "USD", config?.currencySymbol)}</span>
                         </div>
                     </div>
                 </div>

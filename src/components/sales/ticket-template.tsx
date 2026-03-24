@@ -58,10 +58,10 @@ export const TicketTemplate = forwardRef<HTMLDivElement, TicketTemplateProps>(({
                                <div className="text-[10px]">{item.skuCode}</div>
                            </td>
                            <td className="pt-1 text-right align-top pr-1">
-                                {Number(item.quantity)} x {formatCurrency(item.unitPrice)}
+                                {Number(item.quantity)} x {formatCurrency(item.unitPrice, config?.baseCurrency || "USD", config?.currencySymbol)}
                            </td>
                            <td className="pt-1 text-right align-top font-bold pr-1">
-                                {formatCurrency(item.subtotal)}
+                                {formatCurrency(item.subtotal, config?.baseCurrency || "USD", config?.currencySymbol)}
                            </td>
                        </tr>
                    ))}
@@ -72,26 +72,26 @@ export const TicketTemplate = forwardRef<HTMLDivElement, TicketTemplateProps>(({
            <div className="border-t border-black pt-2 space-y-1 text-right pr-1">
                <div className="flex justify-between">
                    <span>Subtotal:</span>
-                    <span>{formatCurrency(sale.subtotal)}</span>
+                    <span>{formatCurrency(sale.subtotal, config?.baseCurrency || "USD", config?.currencySymbol)}</span>
                </div>
               
                {Number(sale.discount) > 0 && (
                    <div className="flex justify-between font-bold">
                        <span>Descuento:</span>
-                        <span>-{formatCurrency(sale.discount)}</span>
+                        <span>-{formatCurrency(sale.discount, config?.baseCurrency || "USD", config?.currencySymbol)}</span>
                    </div>
                )}
 
                {Number(sale.shippingCost) > 0 && (
                     <div className="flex justify-between">
                        <span>Envío:</span>
-                        <span>+{formatCurrency(sale.shippingCost)}</span>
+                        <span>+{formatCurrency(sale.shippingCost, config?.baseCurrency || "USD", config?.currencySymbol)}</span>
                    </div>
                )}
 
                <div className="flex justify-between text-base font-bold border-t border-dashed border-black pt-1 mt-1">
                    <span>TOTAL:</span>
-                    <span>{formatCurrency(sale.total)}</span>
+                    <span>{formatCurrency(sale.total, config?.baseCurrency || "USD", config?.currencySymbol)}</span>
                </div>
            </div>
 

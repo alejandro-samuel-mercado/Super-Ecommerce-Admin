@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { InventoryItem, formatPrice, formatStock } from "@/services/stock-control.service"
+import { useConfigStore } from "@/store/config.store"
 import { useAuthStore } from "@/store/use-auth-store"
 import { UserRole } from "@/types/schema"
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
@@ -35,6 +36,7 @@ export function StockTable({
     loading
 }: StockTableProps) {
     const { user } = useAuthStore()
+    const { config } = useConfigStore()
     const currentUserRole = (user?.role?.name || 'EMPLOYEE') as UserRole
     const [sorting, setSorting] = useState<any>([])
     const [columnFilters, setColumnFilters] = useState<any>([])
@@ -117,7 +119,7 @@ export function StockTable({
             cell: ({ row }: { row: any }) => {
                 const item = row.original
                 return (
-                    <span className="font-mono">{formatPrice(parseFloat(item.price), item.measurementUnit)}</span>
+                    <span className="font-mono">{formatPrice(parseFloat(item.price), item.measurementUnit, config?.baseCurrency || 'USD', config?.currencySymbol)}</span>
                 )
             }
         },

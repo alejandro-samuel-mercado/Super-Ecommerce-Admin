@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { formatCurrency } from "@/lib/utils"
+import { useConfigStore } from "@/store/config.store"
 import { Sale } from "@/types/schema"
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
 import { format } from "date-fns"
@@ -31,6 +32,7 @@ interface SalesTableProps {
 }
 
 export function SalesTable({ data, onView, hideSearch = false, search, onSearchChange, pagination, loading }: SalesTableProps) {
+    const { config } = useConfigStore()
     const [sorting, setSorting] = useState<any>([])
     const [columnFilters, setColumnFilters] = useState<any>([])
     
@@ -86,7 +88,7 @@ export function SalesTable({ data, onView, hideSearch = false, search, onSearchC
         {
             accessorKey: "total",
             header: "Total",
-            cell: ({ row }) => <span className="font-bold text-emerald-600">{formatCurrency(row.getValue<number>("total"), row.original.currencyCode)}</span>
+            cell: ({ row }) => <span className="font-bold text-emerald-600">{formatCurrency(row.getValue<number>("total"), row.original.currencyCode || config?.baseCurrency || "USD", config?.currencySymbol)}</span>
         },
         {
             accessorKey: "paymentStatus",

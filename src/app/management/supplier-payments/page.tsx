@@ -11,16 +11,17 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
-   Table,
-   TableBody,
-   TableCell,
-   TableHead,
-   TableHeader,
-   TableRow,
+      Table,
+      TableBody,
+      TableCell,
+      TableHead,
+      TableHeader,
+      TableRow,
 } from "@/components/ui/table"
 import { cn, formatCurrency } from "@/lib/utils"
 import supplierPaymentService from "@/services/supplier-payment.service"
 import { supplierService } from "@/services/supplier.service"
+import { useConfigStore } from "@/store/config.store"
 import { useAuthStore } from "@/store/use-auth-store"
 import { SupplierPayment } from "@/types/schema"
 import { format } from "date-fns"
@@ -30,6 +31,7 @@ import { useSearchParams } from "next/navigation"
 import { Suspense, useCallback, useEffect, useState } from "react"
 
 function SupplierPaymentsContent() {
+  const { config: storeConfig } = useConfigStore();
     const searchParams = useSearchParams()
     const { user } = useAuthStore()
     const [payments, setPayments] = useState<SupplierPayment[]>([])
@@ -286,7 +288,7 @@ function SupplierPaymentsContent() {
                                             {payment.supplier?.tradeName || 'Desconocido'}
                                         </TableCell>
                                         <TableCell className="text-emerald-600 dark:text-emerald-400 font-bold font-mono">
-                                            {formatCurrency(payment.amount)}
+                                            {formatCurrency(payment.amount, storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol)}
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className="border-border text-foreground bg-muted/50">

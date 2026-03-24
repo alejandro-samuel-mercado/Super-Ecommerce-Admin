@@ -37,9 +37,9 @@ import {
     ArrowDown,
     ArrowUp,
     DollarSign,
+    Receipt,
     RefreshCcw,
     TrendingUp,
-    Receipt,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -211,7 +211,7 @@ export default function ReportsPage() {
                                         <div className="text-2xl font-bold">
                                             {formatCurrency(
                                                 financialStats.totalGrossRevenue || 0,
-                                                config?.baseCurrency || "ARS",
+                                                config?.baseCurrency || "USD",
                                             )}
                                         </div>
                                         <p className="text-xs text-muted-foreground">
@@ -230,7 +230,7 @@ export default function ReportsPage() {
                                         <div className="text-2xl font-bold">
                                             {formatCurrency(
                                                 financialStats.totalCOGS || 0,
-                                                config?.baseCurrency || "ARS",
+                                                config?.baseCurrency || "USD",
                                             )}
                                         </div>
                                         <p className="text-xs text-muted-foreground">
@@ -249,7 +249,7 @@ export default function ReportsPage() {
                                         <div className="text-2xl font-bold">
                                             {formatCurrency(
                                                 financialStats.totalCashOutflow || 0,
-                                                config?.baseCurrency || "ARS",
+                                                config?.baseCurrency || "USD",
                                             )}
                                         </div>
                                         <p className="text-xs text-muted-foreground">
@@ -268,7 +268,7 @@ export default function ReportsPage() {
                                         <div className="text-2xl font-bold text-rose-600">
                                             {formatCurrency(
                                                 financialStats.totalOperatingExpenses || 0,
-                                                config?.baseCurrency || "ARS",
+                                                config?.baseCurrency || "USD",
                                             )}
                                         </div>
                                         <p className="text-xs text-muted-foreground">
@@ -289,7 +289,7 @@ export default function ReportsPage() {
                                         >
                                             {formatCurrency(
                                                 financialStats.netProfit || 0,
-                                                config?.baseCurrency || "ARS",
+                                                config?.baseCurrency || "USD",
                                             )}
                                         </div>
                                         <p className="text-xs text-muted-foreground">

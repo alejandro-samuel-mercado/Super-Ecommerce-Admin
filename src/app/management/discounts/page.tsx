@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/components/ui/use-toast"
 import { CategoriesAPI, ProductsAPI, PromosAPI } from '@/services/api'
+import { useConfigStore } from '@/store/config.store'
 import { useAuthStore } from '@/store/use-auth-store'
 import { ColumnDef } from '@tanstack/react-table'
 import { AlertCircle, Loader2, Percent, Plus, RefreshCw, Save, Trash } from 'lucide-react'
@@ -18,6 +19,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 export default function DiscountsPage() {
     const { user } = useAuthStore()
+    const { config } = useConfigStore()
     const userRole = user?.role?.name || ''
     const [discounts, setDiscounts] = useState<any[]>([])
     const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -435,7 +437,7 @@ export default function DiscountsPage() {
                                         <span className="text-xs text-muted-foreground">Unidades necesarias para activar</span>
                                     </div>
                                     <div className="grid gap-2">
-                                        <Label>Monto Mínimo ($)</Label>
+                                        <Label>Monto Mínimo ({config?.currencySymbol || '$'})</Label>
                                         <Input 
                                             type="number" 
                                             inputMode="decimal"

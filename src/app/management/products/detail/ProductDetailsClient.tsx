@@ -10,12 +10,13 @@ import { Separator } from "@/components/ui/separator"
 import { formatCurrency } from "@/lib/utils"
 import { ProductsAPI } from "@/services/api"
 import { useBranchStore } from "@/store/branch.store"
+import { useConfigStore } from "@/store/config.store"
 import { useAuthStore } from "@/store/use-auth-store"
 import { Product, UserRole } from "@/types/schema"
+import { useQuery } from "@tanstack/react-query"
 import { ArrowLeft, Boxes, Calendar, Edit, Package, QrCode, Tag, Trash, TrendingUp } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useState } from "react"
 
 interface ProductDetailsClientProps {
     id: string;
@@ -25,6 +26,7 @@ interface ProductDetailsClientProps {
 export function ProductDetailsClient({ id, initialData }: ProductDetailsClientProps) {
     const router = useRouter()
     const { user } = useAuthStore()
+    const { config } = useConfigStore()
     const { activeBranch } = useBranchStore()
     const currentUserRole = (user?.role?.name || 'EMPLOYEE') as UserRole
 
@@ -119,12 +121,12 @@ export function ProductDetailsClient({ id, initialData }: ProductDetailsClientPr
                                 <div>
                                     <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Precio Base</h3>
                                     <div className="text-3xl font-bold text-foreground mt-1">
-                                        {formatCurrency(product.basePrice)}
+                                        {formatCurrency(product.basePrice, config?.baseCurrency || 'USD')}
                                         <span className="text-lg font-normal text-muted-foreground ml-1">/ {product.measurementUnit}</span>
                                     </div>
                                     {(product.costPrice || (product.skus && product.skus[0]?.costPrice)) ? (
                                         <div className="mt-2 text-sm text-muted-foreground">
-                                            Costo Ref: <span className="font-medium text-foreground">{formatCurrency(Number(product.costPrice || product.skus?.[0]?.costPrice))}</span>
+                                            Costo Ref: <span className="font-medium text-foreground">{formatCurrency(Number(product.costPrice || product.skus?.[0]?.costPrice), config?.baseCurrency || 'USD')}</span>
                                         </div>
                                     ) : null}
                                     <p className="text-sm text-muted-foreground mt-1">
@@ -272,8 +274,8 @@ export function ProductDetailsClient({ id, initialData }: ProductDetailsClientPr
                                                 ))}
                                                 {(!sku.variantOptions || sku.variantOptions.length === 0) && <span className="text-muted-foreground italic">Por defecto</span>}
                                             </td>
-                                            <td className="px-6 py-4 text-foreground font-medium">${sku.price}</td>
-                                            <td className="px-6 py-4 text-foreground font-medium">${sku.costPrice || 0}</td>
+                                            <td className="px-6 py-4 text-foreground font-medium">{config?.currencySymbol || "$"}{sku.price}</td>
+                                            <td className="px-6 py-4 text-foreground font-medium">{config?.currencySymbol || "$"}{sku.costPrice || 0}</td>
                                             <td className="px-6 py-4">
                                                 <Badge variant={sku.stock > 0 ? 'outline' : 'destructive'} className={sku.stock > 0 ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' : ''}>
                                                     {sku.stock} unid.

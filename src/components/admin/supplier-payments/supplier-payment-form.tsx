@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
@@ -13,6 +13,7 @@ import { cn, formatCurrency } from "@/lib/utils"
 import { Purchase, purchaseService } from "@/services/purchase.service"
 import supplierPaymentService from "@/services/supplier-payment.service"
 import { supplierService } from "@/services/supplier.service"
+import { useConfigStore } from "@/store/config.store"
 
 import { format } from "date-fns"
 import { Check, ChevronsUpDown, Loader2, Save } from "lucide-react"
@@ -27,6 +28,7 @@ interface SupplierPaymentFormProps {
 
 export function SupplierPaymentForm({ onSuccess, onCancel, initialPurchaseId, initialSupplierId }: SupplierPaymentFormProps) {
     const { toast } = useToast()
+    const { config } = useConfigStore()
     
   
     const [supplierId, setSupplierId] = useState<string>(initialSupplierId || "")
@@ -250,7 +252,7 @@ export function SupplierPaymentForm({ onSuccess, onCancel, initialPurchaseId, in
                         <div className="space-y-2">
                             <Label className="text-foreground">Monto <span className="text-destructive">*</span></Label>
                             <div className="relative">
-                                <span className="absolute left-3 top-2.5 text-muted-foreground font-semibold">$</span>
+                                <span className="absolute left-3 top-2.5 text-muted-foreground font-semibold">{config?.currencySymbol || "$"}</span>
                                 <Input 
                                     type="number" 
                                     className={`pl-8 border-input text-lg font-bold text-foreground placeholder:text-muted-foreground ${purchaseId !== "none" ? "bg-muted" : "bg-background"}`}

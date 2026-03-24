@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { SkuAPI } from "@/services/api"
+import { useConfigStore } from "@/store/config.store"
 import { Product, SKU } from "@/types/schema"
 import { Edit, ScanLine, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -236,6 +237,7 @@ function SkuForm({
 }
 
 export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManagerProps) {
+    const { config } = useConfigStore()
     const [skus, setSkus] = useState<SKU[]>(product.skus || [])
     const [editingSkuId, setEditingSkuId] = useState<number | null>(null)
     const [skuToDelete, setSkuToDelete] = useState<number | null>(null)
@@ -325,8 +327,8 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
                                         <td className="px-4 py-3 font-medium text-foreground">
                                             {sku.variantOptions?.map(v => `${v.name}: ${v.value}`).join(', ') || 'Default'}
                                         </td>
-                                        <td className="px-4 py-3 text-foreground">${sku.price}</td>
-                                        <td className="px-4 py-3 text-foreground">${sku.costPrice || 0}</td>
+                                        <td className="px-4 py-3 text-foreground">{config?.currencySymbol || "$"}{sku.price}</td>
+                                        <td className="px-4 py-3 text-foreground">{config?.currencySymbol || "$"}{sku.costPrice || 0}</td>
                                         <td className="px-4 py-3 text-foreground">{Number(sku.stock).toFixed(3).replace(/\.?0+$/, '')}</td>
                                         <td className="px-4 py-3 text-right space-x-2">
                                             <Button 

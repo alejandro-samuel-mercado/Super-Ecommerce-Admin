@@ -66,7 +66,7 @@ const SafeNumericInput = ({
     );
 };
 
-const POSProductCard = ({ product, onAdd }: { product: Product, onAdd: (p: Product) => void }) => {
+const POSProductCard = ({ product, onAdd, storeConfig }: { product: Product, onAdd: (p: Product) => void, storeConfig: any }) => {
     const minPrice = product.skus?.reduce((min, s) => Math.min(min, Number(s.price)), Infinity) || 0;
     const stock = product.skus?.[0]?.stock || 0;
     
@@ -95,7 +95,7 @@ const POSProductCard = ({ product, onAdd }: { product: Product, onAdd: (p: Produ
                      <span className={cn("text-[9px] font-black uppercase px-2 py-0.5 rounded", stock > 0 ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700")}>
                         {Number(stock).toFixed(product.allowFractional ? 2 : 0)} {product.measurementUnit === 'UNIT' ? 'UN' : (product.measurementUnit?.toLowerCase() || 'UN')} DISP.
                      </span>
-                     <p className="font-black text-sm text-secondary">{formatCurrency(minPrice)}</p>
+                     <p className="font-black text-sm text-secondary">{formatCurrency(minPrice, storeConfig?.baseCurrency || 'USD', storeConfig?.currencySymbol)}</p>
                 </div>
             </div>
             <Button size="sm" variant="secondary" className="w-full h-8 text-[9px] font-black uppercase mt-1 group-hover:bg-primary group-hover:text-white transition-colors">AÑADIR</Button>
@@ -759,6 +759,7 @@ export function RegistrationTab() {
                                                     <POSProductCard
                                                         key={product.id}
                                                         product={product}
+                                                        storeConfig={storeConfig}
                                                         onAdd={(p) => {
                                                             if (p.skus && p.skus.length === 1 && p.skus[0]) {
                                                                 handleAddProduct(p, p.skus[0]);
@@ -812,17 +813,17 @@ export function RegistrationTab() {
                                                 if (amount > 0) {
                                                     return (
                                                         <div className="text-right flex flex-col">
-                                                            <span className="text-xs text-muted-foreground line-through decoration-red-500 decoration-2">{formatCurrency(unitPrice * item.quantity)}</span>
-                                                            <span className="font-mono text-lg text-emerald-600">{formatCurrency(finalUnitPrice * item.quantity)}</span>
+                                                            <span className="text-xs text-muted-foreground line-through decoration-red-500 decoration-2">{formatCurrency(unitPrice * item.quantity, storeConfig?.baseCurrency || 'USD', storeConfig?.currencySymbol)}</span>
+                                                            <span className="font-mono text-lg text-emerald-600">{formatCurrency(finalUnitPrice * item.quantity, storeConfig?.baseCurrency || 'USD', storeConfig?.currencySymbol)}</span>
                                                         </div>
                                                     )
                                                 }
                                                 return (
                                                     <div className="text-right flex flex-col items-end">
-                                                        <span className="font-mono text-lg">{formatCurrency(unitPrice * item.quantity)}</span>
+                                                        <span className="font-mono text-lg">{formatCurrency(unitPrice * item.quantity, storeConfig?.baseCurrency || 'USD', storeConfig?.currencySymbol)}</span>
                                                         {item.allowFractional && item.measurementUnit && (
                                                             <span className="text-[10px] text-muted-foreground">
-                                                                {formatCurrency(unitPrice)}/{item.measurementUnit === 'KG' ? 'kg' : item.measurementUnit === 'LITRO' ? 'L' : item.measurementUnit === 'METRO' ? 'm' : item.measurementUnit.toLowerCase()}
+                                                                {formatCurrency(unitPrice, storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol)}/{item.measurementUnit === 'KG' ? 'kg' : item.measurementUnit === 'LITRO' ? 'L' : item.measurementUnit === 'METRO' ? 'm' : item.measurementUnit.toLowerCase()}
                                                             </span>
                                                         )}
                                                     </div>
@@ -836,7 +837,7 @@ export function RegistrationTab() {
                                                     const { amount, label } = useCartStore.getState().getItemDiscount(item);
                                                     if (amount > 0) return (
                                                         <Badge variant="default" className="text-[10px] h-5 bg-green-600/90 hover:bg-green-600 text-white border-0 flex items-center gap-1">
-                                                            <Tag className="w-3 h-3" /> {label || 'Descuento'} (-{formatCurrency(amount)})
+                                                            <Tag className="w-3 h-3" /> {label || 'Descuento'} (-{formatCurrency(amount, storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol)})
                                                         </Badge>
                                                     )
                                                 })()}
@@ -949,7 +950,7 @@ export function RegistrationTab() {
                                                 {shippingZones.map(z => (
                                                     <SelectItem key={z.id} value={z.id.toString()}>
                                                         <span className="font-bold">{z.city || z.province || "Zona General"}</span>
-                                                        <span className="ml-2 text-zinc-500 font-mono">- ${Number(z.cost)}</span>
+                                                        <span className="ml-2 text-zinc-500 font-mono">- {formatCurrency(Number(z.cost), storeConfig?.baseCurrency || 'USD', storeConfig?.currencySymbol)}</span>
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -1147,7 +1148,7 @@ export function RegistrationTab() {
                             {/* Subtotal */}
                             <div className="flex justify-between items-center text-muted-foreground">
                                 <span className="text-xs font-bold uppercase">Subtotal</span>
-                                <span className="font-mono text-sm">{formatCurrency(getSubtotal())}</span>
+                                <span className="font-mono text-sm">{formatCurrency(getSubtotal(), storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol)}</span>
                             </div>
 
                             {/* Envío */}
@@ -1156,7 +1157,7 @@ export function RegistrationTab() {
                                 {calculatedShipping === 0 && deliveryType === 'DELIVERY' ? (
                                     <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold border-0">GRATIS</Badge>
                                 ) : (
-                                    <span className="font-mono text-foreground">{formatCurrency(calculatedShipping)}</span>
+                                    <span className="font-mono text-foreground">{formatCurrency(calculatedShipping, storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol)}</span>
                                 )}
                             </div>
 
@@ -1186,7 +1187,7 @@ export function RegistrationTab() {
 
                                                 return Math.max(0, finalPreTax) * (Number(storeConfig.taxRate) / 100);
                                             })()
-                                        ))}
+                                        ), storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol)}
                                     </span>
                                 </div>
                             )}
@@ -1230,7 +1231,7 @@ export function RegistrationTab() {
                                         {appliedCoupon && (
                                             <div className="flex justify-between text-emerald-400">
                                                 <span>🎫 CUPÓN: {appliedCoupon.code}</span>
-                                                <span>-{appliedCoupon.type === 'PERCENTAGE' ? `${Number(appliedCoupon.value)}%` : `$${Number(appliedCoupon.value)}`}</span>
+                                                <span>-{appliedCoupon.type === 'PERCENTAGE' ? `${Number(appliedCoupon.value)}%` : formatCurrency(Number(appliedCoupon.value), storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol)}</span>
                                             </div>
                                         )}
 
@@ -1268,10 +1269,10 @@ export function RegistrationTab() {
                                                 <div className="pb-1">
                                                     {pointsToUse > 0 ? (
                                                         <Badge variant="outline" className="text-xs border-indigo-500 text-indigo-400 font-mono">
-                                                            -{formatCurrency(pointsToUse * (Number(storeConfig.moneyPerPoint) || 0))}
+                                                            -{formatCurrency(pointsToUse * (Number(storeConfig.moneyPerPoint) || 0), storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol)}
                                                         </Badge>
                                                     ) : (
-                                                        <span className="text-[10px] text-muted-foreground">Valor: {formatCurrency(Number(storeConfig?.moneyPerPoint || 0))}/pt</span>
+                                                        <span className="text-[10px] text-muted-foreground">Valor: {formatCurrency(Number(storeConfig?.moneyPerPoint || 0), storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol)}/pt</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -1292,7 +1293,7 @@ export function RegistrationTab() {
                         <div className="flex justify-between items-end">
                             <span className="text-2xl font-black text-muted-foreground uppercase block">Total Final</span>
                             <span className="font-black text-4xl xl:text-5xl tracking-tighter text-foreground">
-                                {formatCurrency(total)}
+                                {formatCurrency(total, storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol)}
                             </span>
                         </div>
                         {storeConfig?.enablePoints && (
@@ -1366,14 +1367,14 @@ export function RegistrationTab() {
                                         if (amount > 0) {
                                             return (
                                                 <div className="flex flex-col items-end leading-tight mb-1">
-                                                    <span className="text-[10px] text-muted-foreground line-through decoration-red-500/50">{formatCurrency(realSkuPrice)}</span>
-                                                    <span className="font-black text-lg text-emerald-600">{formatCurrency(realSkuPrice - amount)}</span>
+                                                    <span className="text-[10px] text-muted-foreground line-through decoration-red-500/50">{formatCurrency(realSkuPrice, storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol)}</span>
+                                                    <span className="font-black text-lg text-emerald-600">{formatCurrency(realSkuPrice - amount, storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol)}</span>
                                                 </div>
                                             );
                                         }
                                         return (
                                             <p className="font-black text-lg text-foreground">
-                                                {formatCurrency(realSkuPrice)}
+                                                {formatCurrency(realSkuPrice, storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol)}
                                             </p>
                                         );
                                     })()}
@@ -1428,7 +1429,7 @@ export function RegistrationTab() {
                         </div>
                         <div className="space-y-1">
                             <p className="text-sm font-bold text-muted-foreground uppercase">Total Cobrado</p>
-                            <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(completedSale?.total || 0)}</p>
+                            <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(completedSale?.total || 0, storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol)}</p>
                         </div>
                         <div className="space-y-1">
                             <p className="text-sm font-bold text-muted-foreground uppercase">Ticket</p>

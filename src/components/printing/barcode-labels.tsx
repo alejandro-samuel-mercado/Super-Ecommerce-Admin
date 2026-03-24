@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from '@/components/ui/button';
+import { useConfigStore } from '@/store/config.store';
 import { Product, SKU } from '@/types/schema';
 import { Document, Image, Page, StyleSheet, Text, View, usePDF } from '@react-pdf/renderer';
 import JsBarcode from 'jsbarcode';
@@ -57,14 +58,14 @@ interface BarcodeLabelsProps {
   skus: (SKU & { product?: Product })[];
 }
 
-const BarcodeLabelsDocument = ({ items }: { items: any[] }) => {
+const BarcodeLabelsDocument = ({ items, currencySymbol }: { items: any[], currencySymbol: string }) => {
     return (
         <Document>
             <Page size="A4" style={styles.page}>
                 {items.map((item, index) => (
                     <View key={index} style={styles.labelContainer}>
                         <View style={styles.labelContent}>
-                            <Text style={styles.price}>${Number(item.price).toFixed(2)}</Text>
+                            <Text style={styles.price}>{currencySymbol}{Number(item.price).toFixed(2)}</Text>
                             {item.barcodeSrc ? (
                                 <Image src={item.barcodeSrc} style={styles.barcode} />
                             ) : (
@@ -86,6 +87,7 @@ const BarcodeLabelsDocument = ({ items }: { items: any[] }) => {
 };
 
 export const BarcodePrintButton = ({ skus }: { skus: any[] }) => {
+    const { config } = useConfigStore();
     const [isClient, setIsClient] = useState(false);
     const [readyToPrint, setReadyToPrint] = useState(false);
     const [itemsWithBarcodes, setItemsWithBarcodes] = useState<any[]>([]);
@@ -123,15 +125,15 @@ export const BarcodePrintButton = ({ skus }: { skus: any[] }) => {
     }, [skus]);
 
     const [instance, updateInstance] = usePDF({ 
-        document: readyToPrint ? <BarcodeLabelsDocument items={itemsWithBarcodes} /> : <Document><Page></Page></Document> 
+        document: readyToPrint ? <BarcodeLabelsDocument items={itemsWithBarcodes} currencySymbol={config?.currencySymbol || "$"} /> : <Document><Page></Page></Document> 
     });
 
     
     useEffect(() => {
         if (readyToPrint) {
-            updateInstance(<BarcodeLabelsDocument items={itemsWithBarcodes} />);
+            updateInstance(<BarcodeLabelsDocument items={itemsWithBarcodes} currencySymbol={config?.currencySymbol || "$"} />);
         }
-    }, [readyToPrint, itemsWithBarcodes, updateInstance]);
+    }, [readyToPrint, itemsWithBarcodes, updateInstance, config?.currencySymbol]);
 
     if (!isClient) return null;
 

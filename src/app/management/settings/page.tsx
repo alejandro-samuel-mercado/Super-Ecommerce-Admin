@@ -356,19 +356,42 @@ export default function SettingsPage() {
                       <SelectValue placeholder="Seleccionar país" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="AG">Antigua y Barbuda</SelectItem>
                       <SelectItem value="AR">Argentina</SelectItem>
-                      <SelectItem value="UY">Uruguay</SelectItem>
-                      <SelectItem value="CL">Chile</SelectItem>
-                      <SelectItem value="PY">Paraguay</SelectItem>
+                      <SelectItem value="BS">Bahamas</SelectItem>
+                      <SelectItem value="BB">Barbados</SelectItem>
+                      <SelectItem value="BZ">Belice</SelectItem>
                       <SelectItem value="BO">Bolivia</SelectItem>
                       <SelectItem value="BR">Brasil</SelectItem>
+                      <SelectItem value="CA">Canadá</SelectItem>
+                      <SelectItem value="CL">Chile</SelectItem>
                       <SelectItem value="CO">Colombia</SelectItem>
-                      <SelectItem value="PE">Perú</SelectItem>
+                      <SelectItem value="CR">Costa Rica</SelectItem>
+                      <SelectItem value="CU">Cuba</SelectItem>
+                      <SelectItem value="DM">Dominica</SelectItem>
                       <SelectItem value="EC">Ecuador</SelectItem>
-                      <SelectItem value="VE">Venezuela</SelectItem>
-                      <SelectItem value="MX">México</SelectItem>
-                      <SelectItem value="ES">España</SelectItem>
+                      <SelectItem value="SV">El Salvador</SelectItem>
                       <SelectItem value="US">Estados Unidos</SelectItem>
+                      <SelectItem value="GD">Granada</SelectItem>
+                      <SelectItem value="GT">Guatemala</SelectItem>
+                      <SelectItem value="GY">Guyana</SelectItem>
+                      <SelectItem value="HT">Haití</SelectItem>
+                      <SelectItem value="HN">Honduras</SelectItem>
+                      <SelectItem value="JM">Jamaica</SelectItem>
+                      <SelectItem value="MX">México</SelectItem>
+                      <SelectItem value="NI">Nicaragua</SelectItem>
+                      <SelectItem value="PA">Panamá</SelectItem>
+                      <SelectItem value="PY">Paraguay</SelectItem>
+                      <SelectItem value="PE">Perú</SelectItem>
+                      <SelectItem value="DO">República Dominicana</SelectItem>
+                      <SelectItem value="KN">San Cristóbal y Nieves</SelectItem>
+                      <SelectItem value="VC">San Vicente y las Granadinas</SelectItem>
+                      <SelectItem value="LC">Santa Lucía</SelectItem>
+                      <SelectItem value="SR">Surinam</SelectItem>
+                      <SelectItem value="TT">Trinidad y Tobago</SelectItem>
+                      <SelectItem value="UY">Uruguay</SelectItem>
+                      <SelectItem value="VE">Venezuela</SelectItem>
+                      <SelectItem value="ES">España</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-[10px] text-muted-foreground">

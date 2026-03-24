@@ -27,6 +27,7 @@ import {
     StockControlService,
 } from "@/services/stock-control.service";
 import { useBranchStore } from "@/store/branch.store";
+import { useConfigStore } from "@/store/config.store";
 import { Download, Package, RefreshCw, Search, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -36,6 +37,7 @@ interface Category {
 }
 
 export default function StockControlPage() {
+  const { config: storeConfig } = useConfigStore();
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { activeBranch } = useBranchStore();
@@ -145,7 +147,7 @@ export default function StockControlPage() {
         Variante: item.variant || "Standard",
         Stock: item.stock,
         Stock_Minimo: item.minStock,
-        Precio: formatCurrency(item.price, config?.baseCurrency),
+        Precio: formatCurrency(item.price, storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol),
         Estado:
           item.stock <= 0
             ? "AGOTADO"

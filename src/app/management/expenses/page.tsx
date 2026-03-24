@@ -2,13 +2,10 @@
 
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
+    Card
 } from "@/components/ui/card"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import {
     Dialog,
     DialogContent,
@@ -39,8 +36,8 @@ import api from "@/services/api"
 import { useBranchStore } from "@/store/branch.store"
 import { useConfigStore } from "@/store/config.store"
 import { format } from "date-fns"
-import { Plus, RefreshCcw, Trash2, Filter } from "lucide-react"
-import { useEffect, useState, useCallback } from "react"
+import { Plus, RefreshCcw, Trash2 } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
 
 const CATEGORIES = [
     "Luz", "Agua", "Gas", "Internet", "Sueldos",
@@ -115,7 +112,7 @@ export default function ExpensesPage() {
             await api.post('/expenses', payload)
             toast({ title: "Gasto registrado exitosamente" })
             setOpenAdd(false)
-            setFormData({ amount: "", currencyCode: "ARS", category: "", notes: "", expenseDate: new Date().toISOString().split('T')[0] })
+            setFormData({ amount: "", currencyCode: config?.baseCurrency || "ARS", category: "", notes: "", expenseDate: new Date().toISOString().split('T')[0] })
             fetchExpenses()
         } catch (error: any) {
             toast({ title: "Error al registrar gasto", description: error.response?.data?.message, variant: "destructive" })
@@ -311,7 +308,7 @@ export default function ExpensesPage() {
                                 <TableCell className="text-muted-foreground max-w-[200px] truncate">{expense.notes || '-'}</TableCell>
                                 <TableCell>{expense.admin?.name || 'Admin'}</TableCell>
                                 <TableCell className="text-right font-bold text-rose-600">
-                                    -{formatCurrency(Number(expense.amount), expense.currencyCode)}
+                                    -{formatCurrency(Number(expense.amount), expense.currencyCode || config?.baseCurrency || 'ARS', config?.currencySymbol)}
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <Button variant="ghost" size="icon" onClick={() => setDeletingId(expense.id)} className="text-destructive hover:bg-destructive/10 hover:cursor-pointer">

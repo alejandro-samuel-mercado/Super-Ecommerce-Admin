@@ -12,26 +12,27 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
-   Table,
-   TableBody,
-   TableCell,
-   TableHead,
-   TableHeader,
-   TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table"
 import { cn, formatCurrency } from "@/lib/utils"
 import branchService from "@/services/branch.service"
 import { Purchase, purchaseService } from "@/services/purchase.service"
 import { supplierService } from "@/services/supplier.service"
+import { useConfigStore } from "@/store/config.store"
 import { useAuthStore } from "@/store/use-auth-store"
 import {
-   ColumnDef,
-   flexRender,
-   getCoreRowModel,
-   getFilteredRowModel,
-   getPaginationRowModel,
-   getSortedRowModel,
-   useReactTable,
+    ColumnDef,
+    flexRender,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    useReactTable,
 } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -40,6 +41,7 @@ import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 export default function PurchasesPage() {
+    const { config } = useConfigStore()
     const router = useRouter()
     const { user } = useAuthStore()
     const [suppliers, setSuppliers] = useState<any[]>([])
@@ -177,7 +179,7 @@ export default function PurchasesPage() {
             header: "Total",
             cell: ({ row }) => (
                 <span className="font-bold text-emerald-600">
-                    {formatCurrency(Number(row.original.estimatedTotal))}
+                    {formatCurrency(Number(row.original.estimatedTotal), config?.baseCurrency || "USD", config?.currencySymbol)}
                 </span>
             )
         },

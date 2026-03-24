@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/components/ui/use-toast"
 import shippingService from "@/services/shipping.service"
+import { useConfigStore } from "@/store/config.store"
 import { ShippingZone } from "@/types/schema"
 import { Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -28,6 +29,7 @@ interface ShippingZoneDialogProps {
 
 export function ShippingZoneDialog({ open, onOpenChange, zone, onSuccess }: ShippingZoneDialogProps) {
     const { toast } = useToast()
+    const { config } = useConfigStore()
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState<Partial<ShippingZone>>({
         country: 'Argentina',
@@ -134,7 +136,7 @@ export function ShippingZoneDialog({ open, onOpenChange, zone, onSuccess }: Ship
                         <div className="space-y-2">
                             <Label htmlFor="cost">Costo de Envío</Label>
                             <div className="relative">
-                                <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
+                                <span className="absolute left-3 top-2.5 text-muted-foreground">{config?.currencySymbol || "$"}</span>
                                 <Input
                                     id="cost"
                                     type="number"

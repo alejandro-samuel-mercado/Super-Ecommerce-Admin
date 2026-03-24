@@ -33,8 +33,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { CouponsAPI } from "@/services/api";
 import { useAuthStore } from "@/store/use-auth-store";
 import { useCallback, useEffect, useState } from "react";
+import { useConfigStore } from "@/store/config.store";
 
 export default function CouponsPage() {
+  const { config } = useConfigStore();
   const { user } = useAuthStore();
   const userRole = user?.role?.name || "";
 
@@ -391,7 +393,7 @@ export default function CouponsPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>Compra Mínima (Opcional)</Label>
+                <Label>Compra Mínima ({config?.currencySymbol || "\$"}) (Opcional)</Label>
                 <Input
                   type="number"
                   value={formData.minPurchase || ""}
@@ -408,7 +410,7 @@ export default function CouponsPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Tope Reintegro (Opcional)</Label>
+                <Label>Tope Reintegro ({config?.currencySymbol || "\$"}) (Opcional)</Label>
                 <Input
                   type="number"
                   value={formData.maxDiscount || ""}

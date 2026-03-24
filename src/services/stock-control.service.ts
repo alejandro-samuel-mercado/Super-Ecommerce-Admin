@@ -37,11 +37,12 @@ export function formatStock(stock: number, unit: string): string {
 }
 
 
-export function formatPrice(price: number | string, unit: string): string {
+export function formatPrice(price: number | string, unit: string, currencyCode: string = 'USD', currencySymbol?: string): string {
     const amount = typeof price === 'string' ? parseFloat(price) : price
     const formatted = isNaN(amount) ? '0' : amount.toFixed(2).replace(/\.00$/, '')
-    if (!unit || unit === 'UNIDAD') return `$${formatted}`
-    return `$${formatted}/${getUnitLabel(unit)}`
+    const symbol = currencySymbol || '$';
+    if (!unit || unit === 'UNIDAD') return `${symbol}${formatted}`
+    return `${symbol}${formatted}/${getUnitLabel(unit)}`
 }
 
 const CONVERSION: Record<string, { factor: number; baseUnit: string }> = {
