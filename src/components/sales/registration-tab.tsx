@@ -11,7 +11,7 @@ import { Printer, RefreshCcw } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -22,6 +22,86 @@ import { toast } from "sonner"
 import { Badge } from "../ui/badge"
 import { Switch } from "../ui/switch"
 import { TicketTemplate } from "./ticket-template"
+
+const SafeNumericInput = ({
+    value,
+    onChange,
+    placeholder,
+    className,
+    inputMode = "decimal"
+}: {
+    value: number,
+    onChange: (val: number) => void,
+    placeholder?: string,
+    className?: string,
+    inputMode?: "decimal" | "numeric"
+}) => {
+    const [localValue, setLocalValue] = useState(value === 0 ? "" : String(value));
+
+    useEffect(() => {
+        const stringValue = value === 0 ? "" : String(value);
+        if (parseFloat(localValue) !== value) {
+            setLocalValue(stringValue);
+        }
+    }, [value]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const raw = e.target.value.replace(',', '.');
+        if (raw === "" || raw === "." || /^\d*\.?\d*$/.test(raw)) {
+            setLocalValue(raw);
+            const parsed = parseFloat(raw);
+            onChange(isNaN(parsed) ? 0 : parsed);
+        }
+    };
+
+    return (
+        <Input
+            type="text"
+            inputMode={inputMode}
+            value={localValue}
+            onChange={handleChange}
+            placeholder={placeholder}
+            className={className}
+        />
+    );
+};
+
+const POSProductCard = ({ product, onAdd }: { product: Product, onAdd: (p: Product) => void }) => {
+    const minPrice = product.skus?.reduce((min, s) => Math.min(min, Number(s.price)), Infinity) || 0;
+    const stock = product.skus?.[0]?.stock || 0;
+    
+    return (
+        <div 
+            className="group bg-card border-2 border-border rounded-xl p-3 transition-all hover:shadow-xl hover:border-primary/40 cursor-pointer flex flex-col gap-3"
+            onClick={() => onAdd(product)}
+        >
+            <div className="relative aspect-square rounded-lg bg-white border border-border overflow-hidden p-1">
+                {product.images?.[0] ? (
+                    <img src={product.images[0]} alt="" className="w-full h-full object-contain transition-transform group-hover:scale-110" />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-muted/30 text-muted-foreground/30">
+                        <Tag className="w-8 h-8 opacity-20" />
+                    </div>
+                )}
+                <div className="absolute top-1 left-1 flex flex-col gap-1">
+                     {stock <= 0 && <Badge variant="destructive" className="text-[7px] font-black uppercase px-1 h-4">Agotado</Badge>}
+                     {product.skus && product.skus.length > 1 && <Badge variant="outline" className="text-[7px] font-black bg-white/80 uppercase px-1 h-4 border-primary/20">{product.skus.length} Variantes</Badge>}
+                </div>
+            </div>
+            
+            <div className="flex-1 flex flex-col">
+                <h4 className="font-black text-[11px] text-foreground uppercase line-clamp-2 leading-tight mb-2 group-hover:text-primary transition-colors">{product.name}</h4>
+                <div className="mt-auto flex max-sm:flex-col items-center justify-between">
+                     <span className={cn("text-[8px] font-black uppercase px-1.5 py-0.5 rounded", stock > 0 ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700")}>
+                        Stock: {stock}
+                     </span>
+                     <p className="font-black text-xs text-secondary">{formatCurrency(minPrice)}</p>
+                </div>
+            </div>
+            <Button size="sm" variant="secondary" className="w-full h-8 text-[9px] font-black uppercase mt-1 group-hover:bg-primary group-hover:text-white transition-colors">AÑADIR</Button>
+        </div>
+    );
+};
 
 export function RegistrationTab() {
     const isFractional = (p: Product) => p.allowFractional ?? false;
@@ -670,42 +750,28 @@ export function RegistrationTab() {
                                 >
                                     <RefreshCcw className={cn("h-4 w-4", isLoading ? "animate-spin" : "")} />
                                 </Button>
-                                {filteredProducts.length > 0 && (
-                                    <div className="absolute z-[100] lg:-left-20 lg:w-[150%] max-lg:w-[100%] max-sm:w-[160%]   mt-1 -left-32 max-sm:-left-32 bg-popover border-4 border-primary/60  rounded-xl shadow-2xl max-h-[70vh] overflow-y-auto  p-2 animate-in fade-in zoom-in-95 duration-200 hidden group-focus-within:block">
-                                        {filteredProducts.map(product => {
-                                            const minPrice = product.skus?.reduce((min, s) => Math.min(min, Number(s.price)), Infinity) || 0;
-                                            return (
-                                                <div
-                                                    key={product.id}
-                                                    className="p-3 border-b border-border last:border-0 hover:bg-muted cursor-pointer transition-colors flex items-center gap-4"
-                                                    onClick={() => {
-                                                        if (product.skus && product.skus.length === 1 && product.skus[0]) {
-                                                            handleAddProduct(product, product.skus[0]);
-                                                        } else {
-                                                            setSelectedProductForVariants(product);
-                                                        }
-                                                        setProductQuery("");
-                                                    }}
-                                                >
-                                                    <div className="sm:w-16 sm:h-16 max-sm:h-12 max-sm:w-12 rounded-lg bg-white border border-border flex-shrink-0 flex items-center justify-center p-1 shadow-sm">
-                                                        {product.images?.[0] ? <img src={product.images[0]} alt="" className="w-full h-full object-contain" /> : <Tag className="w-6 h-6 text-muted-foreground/30" />}
-                                                    </div>
-                                                    <div className="flex-1 min-w-0 text-left">
-                                                        <p className="font-black text-sm text-foreground uppercase leading-tight line-clamp-2">{product.name}</p>
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            {product.skus && product.skus.length > 1 && <Badge variant="outline" className="h-6 text-[10px] items-center font-black bg-muted uppercase px-2 py-0">{product.skus?.length} VARIANTES</Badge>}
-                                                            <span className={cn("text-[10px] font-black uppercase px-2 py-0.5 rounded flex items-center h-6", (product.skus?.[0]?.stock || 0) > 0 ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700")}>STOCK: {product.skus?.[0]?.stock || 0}</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-right flex flex-col items-end justify-center gap-1">
-                                                        <p className="font-black text-base text-secondary">{formatCurrency(minPrice)}</p>
-                                                        <Button size="sm" variant="secondary" className="h-7 text-[10px] font-black uppercase px-3 hover:cursor-pointer">AÑADIR</Button>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
+                                    {filteredProducts.length > 0 && (
+                                        <div className="absolute z-[100] w-[110vw] max-w-[95vw] sm:max-w-[700px] lg:max-w-[1000px] -left-4 sm:-left-32
+                                        max-sm:-left-38
+                                        p-4 mt-2 bg-popover border-4 border-primary/60 rounded-2xl shadow-2xl max-h-[600px] overflow-y-auto animate-in fade-in zoom-in-95 duration-200 hidden group-focus-within:block scrollbar-thin">
+                                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                                {filteredProducts.map(product => (
+                                                    <POSProductCard
+                                                        key={product.id}
+                                                        product={product}
+                                                        onAdd={(p) => {
+                                                            if (p.skus && p.skus.length === 1 && p.skus[0]) {
+                                                                handleAddProduct(p, p.skus[0]);
+                                                            } else {
+                                                                setSelectedProductForVariants(p);
+                                                            }
+                                                            setProductQuery("");
+                                                        }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                             </div>
                         </div>
                     </CardContent>
@@ -777,28 +843,14 @@ export function RegistrationTab() {
                                             </div>
                                             {item.allowFractional ? (
                                                 <div className="flex items-center gap-1 bg-background border-2 border-border rounded-md shadow-sm px-2 py-1">
-                                                    <Input
-                                                        type="text"
-                                                        inputMode="decimal"
-                                                        value={item.quantity === 0 ? "" : item.quantity}
-                                                        onChange={(e) => {
-                                                            const raw = e.target.value.replace(',', '.');
-                                                            if (raw === '' || raw === '.') {
-                                                                updateQuantity(item.skuCode, 0);
-                                                                return;
-                                                            }
-                                                            if (/^\d*\.?\d*$/.test(raw)) {
-                                                                const val = parseFloat(raw);
-                                                                if (!isNaN(val) && val >= 0) {
-                                                                    updateQuantity(item.skuCode, val);
-                                                                }
-                                                            }
-                                                        }}
+                                                    <SafeNumericInput
+                                                        value={item.quantity}
+                                                        onChange={(val) => updateQuantity(item.skuCode, val)}
                                                         placeholder="0.000"
                                                         className="h-7 w-20 text-xs font-bold font-mono border-none focus-visible:ring-0 p-0 text-center"
                                                     />
                                                     <span className="text-[10px] font-bold text-muted-foreground uppercase">
-                                                        {item.measurementUnit === 'KG' ? 'kg' : item.measurementUnit === 'LITRO' ? 'L' : item.measurementUnit === 'METRO' ? 'm' : item.measurementUnit?.toLowerCase() || 'u'}
+                                                        {item.measurementUnit?.toLowerCase() || 'u'}
                                                     </span>
                                                 </div>
                                             ) : (
@@ -922,20 +974,9 @@ export function RegistrationTab() {
                                 <div className="flex gap-3 items-end">
                                     <div className="flex-1 space-y-1">
                                         <Label className="text-xs font-bold text-orange-900">COSTO ENVÍO</Label>
-                                        <Input
-                                            type="text"
-                                            inputMode="decimal"
+                                         <SafeNumericInput 
                                             value={shippingCost}
-                                            onChange={(e) => {
-                                                const val = e.target.value.replace(',', '.');
-                                                if (val === '' || val === '.') {
-                                                    setShippingCost(0);
-                                                    return;
-                                                }
-                                                if (/^\d*\.?\d*$/.test(val)) {
-                                                    setShippingCost(Number(val));
-                                                }
-                                            }}
+                                            onChange={(val) => setShippingCost(val)}
                                             className="bg-background font-mono font-black border-2 border-orange-200 text-orange-900"
                                         />
                                     </div>
