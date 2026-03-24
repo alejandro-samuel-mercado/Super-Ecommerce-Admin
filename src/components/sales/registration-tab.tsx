@@ -671,7 +671,7 @@ export function RegistrationTab() {
                                     <RefreshCcw className={cn("h-4 w-4", isLoading ? "animate-spin" : "")} />
                                 </Button>
                                 {filteredProducts.length > 0 && (
-                                    <div className="absolute z-[100] lg:-left-20 md:w-[150%] max-md:w-[100%]   mt-1 -left-32  bg-popover border-4 border-primary/60  rounded-xl shadow-2xl max-h-[70vh] overflow-y-auto  p-2 animate-in fade-in zoom-in-95 duration-200 hidden group-focus-within:block">
+                                    <div className="absolute z-[100] lg:-left-20 lg:w-[150%] max-lg:w-[100%] max-sm:w-[160%]   mt-1 -left-32 max-sm:-left-32 bg-popover border-4 border-primary/60  rounded-xl shadow-2xl max-h-[70vh] overflow-y-auto  p-2 animate-in fade-in zoom-in-95 duration-200 hidden group-focus-within:block">
                                         {filteredProducts.map(product => {
                                             const minPrice = product.skus?.reduce((min, s) => Math.min(min, Number(s.price)), Infinity) || 0;
                                             return (
@@ -687,7 +687,7 @@ export function RegistrationTab() {
                                                         setProductQuery("");
                                                     }}
                                                 >
-                                                    <div className="w-16 h-16 rounded-lg bg-white border border-border flex-shrink-0 flex items-center justify-center p-1 shadow-sm">
+                                                    <div className="sm:w-16 sm:h-16 max-sm:h-12 max-sm:w-12 rounded-lg bg-white border border-border flex-shrink-0 flex items-center justify-center p-1 shadow-sm">
                                                         {product.images?.[0] ? <img src={product.images[0]} alt="" className="w-full h-full object-contain" /> : <Tag className="w-6 h-6 text-muted-foreground/30" />}
                                                     </div>
                                                     <div className="flex-1 min-w-0 text-left">
