@@ -30,6 +30,7 @@ export interface ProductPrice {
   productId: number;
   currencyCode: string;
   price: number;
+  costPrice?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -42,6 +43,7 @@ export interface Product {
   model?: string | null;
   description: string;
   basePrice: number; 
+  costPrice?: number; 
 
   pointsReward: number;
   images: string[];
@@ -66,6 +68,7 @@ export interface SKU {
   id: number;
   code: string;
   price: number; 
+  costPrice?: number;
   stock: number;
   soldQuantity: number;
   active: boolean;

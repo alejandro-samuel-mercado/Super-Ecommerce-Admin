@@ -27,7 +27,7 @@ export function ProductDetailsClient({ id, initialData }: ProductDetailsClientPr
     const { user } = useAuthStore()
     const { activeBranch } = useBranchStore()
     const currentUserRole = (user?.role?.name || 'EMPLOYEE') as UserRole
-    
+
     const [showEdit, setShowEdit] = useState(false)
     const [showSkuManager, setShowSkuManager] = useState(false)
 
@@ -80,8 +80,8 @@ export function ProductDetailsClient({ id, initialData }: ProductDetailsClientPr
                             <Badge variant={product.isActive ? 'default' : 'secondary'} className={product.isActive ? 'bg-emerald-600 hover:bg-emerald-700' : ''}>
                                 {product.isActive ? 'Activo' : 'Inactivo'}
                             </Badge>
-                             {product.isNew && <Badge className="bg-secondary hover:bg-secondary/90">Nuevo</Badge>}
-                             {product.isTrending && <Badge className="bg-borderH hover:bg-purple-600">Tendencia</Badge>}
+                            {product.isNew && <Badge className="bg-secondary hover:bg-secondary/90">Nuevo</Badge>}
+                            {product.isTrending && <Badge className="bg-borderH hover:bg-purple-600">Tendencia</Badge>}
                         </div>
                         <div className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
                             <span className="font-mono bg-muted px-1.5 py-0.5 rounded text-foreground">ID: {product.id}</span>
@@ -108,7 +108,7 @@ export function ProductDetailsClient({ id, initialData }: ProductDetailsClientPr
                     {/* Galeria */}
                     <Card className="border-border shadow-sm overflow-hidden bg-card">
                         <div className="grid md:grid-cols-2">
-                             <div className="bg-muted aspect-square flex items-center justify-center border-r border-border">
+                            <div className="bg-muted aspect-square flex items-center justify-center border-r border-border">
                                 {product.images?.[0] ? (
                                     <img src={product.images[0]} className="w-full h-full object-cover" alt={product.name} />
                                 ) : (
@@ -119,16 +119,21 @@ export function ProductDetailsClient({ id, initialData }: ProductDetailsClientPr
                                 <div>
                                     <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Precio Base</h3>
                                     <div className="text-3xl font-bold text-foreground mt-1">
-                                        {formatCurrency(product.basePrice)} 
+                                        {formatCurrency(product.basePrice)}
                                         <span className="text-lg font-normal text-muted-foreground ml-1">/ {product.measurementUnit}</span>
                                     </div>
+                                    {(product.costPrice || (product.skus && product.skus[0]?.costPrice)) ? (
+                                        <div className="mt-2 text-sm text-muted-foreground">
+                                            Costo Ref: <span className="font-medium text-foreground">{formatCurrency(Number(product.costPrice || product.skus?.[0]?.costPrice))}</span>
+                                        </div>
+                                    ) : null}
                                     <p className="text-sm text-muted-foreground mt-1">
                                         {product.allowFractional ? 'Permite fraccionamiento' : 'Solo unidades enteras'}
                                     </p>
                                 </div>
 
                                 <Separator className="bg-border" />
-                                
+
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <h4 className="text-xs font-medium text-muted-foreground uppercase">Marca</h4>
@@ -151,13 +156,13 @@ export function ProductDetailsClient({ id, initialData }: ProductDetailsClientPr
                                 </div>
 
                                 <div className="pt-2">
-                                     <h4 className="text-xs font-medium text-muted-foreground uppercase mb-2">Puntos</h4>
-                                     <div className="flex gap-4">
-                                      
+                                    <h4 className="text-xs font-medium text-muted-foreground uppercase mb-2">Puntos</h4>
+                                    <div className="flex gap-4">
+
                                         <div className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 px-3 py-1.5 rounded-md text-sm font-medium border border-emerald-100 dark:border-emerald-800">
                                             Gana: {product.pointsReward} pts
                                         </div>
-                                     </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -231,18 +236,20 @@ export function ProductDetailsClient({ id, initialData }: ProductDetailsClientPr
                             )}
                         </CardHeader>
                         <CardContent className="p-0 overflow-x-auto">
-                             <table className="w-full text-sm text-left">
+                            <table className="w-full text-sm text-left">
                                 <thead className="bg-muted text-muted-foreground font-medium uppercase text-xs">
                                     <tr>
                                         <th className="px-6 py-3">Código SKU</th>
                                         <th className="px-6 py-3">Código Barras</th>
                                         <th className="px-6 py-3">Atributos</th>
                                         <th className="px-6 py-3">Precio</th>
+                                        <th className="px-6 py-3"> Costo de compra
+                                        </th>
                                         <th className="px-6 py-3">Stock</th>
                                         <th className="px-6 py-3">Estado</th>
                                         <th className="px-6 py-3 text-right">Codigo de barras</th>
                                     </tr>
-                               </thead>
+                                </thead>
                                 <tbody className="divide-y divide-border">
                                     {product.skus?.map((sku: any) => (
                                         <tr key={sku.id} className="hover:bg-muted/50 transition-colors">
@@ -266,6 +273,7 @@ export function ProductDetailsClient({ id, initialData }: ProductDetailsClientPr
                                                 {(!sku.variantOptions || sku.variantOptions.length === 0) && <span className="text-muted-foreground italic">Por defecto</span>}
                                             </td>
                                             <td className="px-6 py-4 text-foreground font-medium">${sku.price}</td>
+                                            <td className="px-6 py-4 text-foreground font-medium">${sku.costPrice || 0}</td>
                                             <td className="px-6 py-4">
                                                 <Badge variant={sku.stock > 0 ? 'outline' : 'destructive'} className={sku.stock > 0 ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' : ''}>
                                                     {sku.stock} unid.
@@ -281,7 +289,7 @@ export function ProductDetailsClient({ id, initialData }: ProductDetailsClientPr
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                 <BarcodePrintButton skus={[{ ...sku, product }]} />
+                                                <BarcodePrintButton skus={[{ ...sku, product }]} />
                                             </td>
                                         </tr>
                                     ))}
@@ -300,7 +308,7 @@ export function ProductDetailsClient({ id, initialData }: ProductDetailsClientPr
 
                 {/* Sidebar (Right) */}
                 <div className="space-y-6">
-                 
+
                     <Card className="border-border shadow-sm bg-card">
                         <CardHeader>
                             <CardTitle className="text-sm font-bold text-foreground uppercase tracking-wide">Detalles Adicionales</CardTitle>
@@ -316,7 +324,7 @@ export function ProductDetailsClient({ id, initialData }: ProductDetailsClientPr
                                 <span className="text-sm text-muted-foreground flex items-center gap-2">
                                     <Tag className="h-4 w-4" /> Condición/ Estado
                                 </span>
-                                <span className="text-sm font-medium text-foreground">{product.condition==="NEW"?"Nuevo":product.condition==="USED"?"Usado":product.condition==="REFURBISHED"?"Reacondicionado":product.condition}</span>
+                                <span className="text-sm font-medium text-foreground">{product.condition === "NEW" ? "Nuevo" : product.condition === "USED" ? "Usado" : product.condition === "REFURBISHED" ? "Reacondicionado" : product.condition}</span>
                             </div>
                             <div className="flex items-center justify-between py-2 border-b border-border">
                                 <span className="text-sm text-muted-foreground flex items-center gap-2">
@@ -327,23 +335,23 @@ export function ProductDetailsClient({ id, initialData }: ProductDetailsClientPr
                         </CardContent>
                     </Card>
 
-                  
+
                     <Card className="bg-indigo-50 dark:bg-indigo-950/30 border-indigo-100 dark:border-indigo-900">
-                         <CardContent className="p-4">
+                        <CardContent className="p-4">
                             <p className="text-sm text-indigo-800 dark:text-indigo-300 font-medium mb-1">Total Stock (Todas variantes)</p>
                             <p className="text-2xl font-bold text-indigo-900 dark:text-indigo-100">
                                 {product.skus?.reduce((acc: number, s: any) => acc + Number(s.stock), 0)} <span className="text-sm font-normal text-indigo-600 dark:text-indigo-400">{product.measurementUnit}</span>
                             </p>
-                         </CardContent>
+                        </CardContent>
                     </Card>
 
-                     <Card className="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-900">
-                         <CardContent className="p-4">
+                    <Card className="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-900">
+                        <CardContent className="p-4">
                             <p className="text-sm text-emerald-800 dark:text-emerald-300 font-medium mb-1">Ventas Totales</p>
                             <p className="text-2xl font-bold text-emerald-900 dark:text-indigo-100">
                                 {product.skus?.reduce((acc: number, s: any) => acc + Number(s.soldQuantity), 0)} <span className="text-sm font-normal text-emerald-600 dark:text-emerald-400">unid.</span>
                             </p>
-                         </CardContent>
+                        </CardContent>
                     </Card>
                 </div>
             </div>
@@ -351,20 +359,20 @@ export function ProductDetailsClient({ id, initialData }: ProductDetailsClientPr
             {/* Modales */}
             {product && (
                 <>
-                    <ProductForm 
-                        open={showEdit} 
-                        onOpenChange={setShowEdit} 
-                        product={product} 
+                    <ProductForm
+                        open={showEdit}
+                        onOpenChange={setShowEdit}
+                        product={product}
                         onSave={async (updated: any) => {
                             await ProductsAPI.update(product.id, updated)
                             refetch()
                             setShowEdit(false)
-                        }} 
+                        }}
                     />
-                    <SkuManager 
-                        open={showSkuManager} 
-                        onOpenChange={setShowSkuManager} 
-                        product={product} 
+                    <SkuManager
+                        open={showSkuManager}
+                        onOpenChange={setShowSkuManager}
+                        product={product}
                         onUpdate={refetch}
                     />
                 </>

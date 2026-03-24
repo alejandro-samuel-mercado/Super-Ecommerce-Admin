@@ -642,9 +642,9 @@ export function RegistrationTab() {
 
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-140px)] min-h-[600px] bg-background  pb-2 pt-2 ">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:h-[calc(100vh-140px)] bg-background pb-2 pt-2  lg:overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-300">
             {/* COL IZQUIERDA: Búsqueda y Carrito  */}
-            <div className="flex flex-col h-full gap-4 ">
+            <div className="flex flex-col lg:h-full gap-4">
                 <Card className="flex-shrink-0 border-2 border-border shadow-md bg-card rounded-xl">
                     <CardContent className="p-3 relative group">
                         <div className="flex items-center gap-4">
@@ -671,7 +671,7 @@ export function RegistrationTab() {
                                     <RefreshCcw className={cn("h-4 w-4", isLoading ? "animate-spin" : "")} />
                                 </Button>
                                 {filteredProducts.length > 0 && (
-                                    <div className="absolute z-[100] lg:-left-20 w-[150%]   mt-1 -left-32  bg-popover border-4 border-primary/60  rounded-xl shadow-2xl max-h-[70vh] overflow-y-auto  p-2 animate-in fade-in zoom-in-95 duration-200 hidden group-focus-within:block">
+                                    <div className="absolute z-[100] lg:-left-20 md:w-[150%] max-md:w-[100%]   mt-1 -left-32  bg-popover border-4 border-primary/60  rounded-xl shadow-2xl max-h-[70vh] overflow-y-auto  p-2 animate-in fade-in zoom-in-95 duration-200 hidden group-focus-within:block">
                                         {filteredProducts.map(product => {
                                             const minPrice = product.skus?.reduce((min, s) => Math.min(min, Number(s.price)), Infinity) || 0;
                                             return (
@@ -712,7 +712,7 @@ export function RegistrationTab() {
                 </Card>
 
                 {/* LISTA DEL CARRITO MOVIDA A LA COLUMNA IZQUIERDA */}
-                <Card className="flex flex-col overflow-hidden border-2 border-border shadow-lg bg-card rounded-xl h-[calc(100vh-220px)] min-h-[400px]">
+                <Card className="flex flex-col overflow-hidden border-2 border-border shadow-lg bg-card rounded-xl lg:h-[calc(100vh-220px)] min-h-[400px]">
                     <CardHeader className="p-3 py-2 bg-muted/50 border-b-2 border-border flex flex-row justify-between items-center rounded-t-xl">
                         <h3 className="font-black text-sm text-foreground uppercase tracking-tight">Carrito</h3>
                         <Button variant="ghost" className="h-6 px-2 text-[10px] text-red-600 hover:text-red-700 hover:bg-red-100 font-bold uppercase hover:cursor-pointer" onClick={clearCart}>VACIAR CARRO</Button>
@@ -837,7 +837,7 @@ export function RegistrationTab() {
             </div>
 
             {/* COL CENTRAL: Formulario y Configuración */}
-            <div className="flex flex-col gap-4 h-full overflow-y-auto pr-1 pb-2 scrollbar-thin scrollbar-thumb-zinc-300">
+            <div className="flex flex-col gap-4 lg:h-full lg:overflow-y-auto pr-1 pb-2 scrollbar-thin scrollbar-thumb-zinc-300">
                 {/* Entrega y Pago */}
                 <Card className="border-2 border-border shadow-md bg-card rounded-xl">
                     <CardHeader className="p-3 py-2 bg-muted/50 border-b-2 border-border rounded-t-xl">
@@ -1000,7 +1000,7 @@ export function RegistrationTab() {
             </div>
 
             {/* COL DERECHA: Carrito y User */}
-            <div className="flex flex-col gap-4 h-full overflow-y-auto pr-1 pb-2 scrollbar-thin scrollbar-thumb-zinc-300">
+            <div className="flex flex-col gap-4 lg:h-full lg:overflow-y-auto pr-1 pb-2 scrollbar-thin scrollbar-thumb-zinc-300">
                 {/* Cliente */}
                 <Card className="border-2 border-border shadow-md bg-card rounded-xl flex-shrink-0">
                     <CardHeader className="p-3 py-2 bg-muted/50 border-b-2 border-border flex flex-row items-center justify-between rounded-t-xl">
