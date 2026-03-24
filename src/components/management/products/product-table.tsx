@@ -35,7 +35,7 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
-    
+
     const columns: ColumnDef<Product>[] = [
         {
             id: "select",
@@ -106,14 +106,22 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
             cell: ({ row }: CellContext<Product, unknown>) => <span className="font-medium text-foreground">{formatCurrency(row.getValue("basePrice") as number)}</span>
         },
         {
+            id: "costPrice",
+            header: "Precio de compra",
+            cell: ({ row }: CellContext<Product, unknown>) => {
+                const cost = row.original.costPrice || row.original.skus?.[0]?.costPrice || 0;
+                return <span className="font-medium text-foreground">{formatCurrency(Number(cost))}</span>
+            }
+        },
+        {
             accessorKey: "stock",
             header: "Stock",
             cell: ({ row }: CellContext<Product, unknown>) => {
-               
+
                 const stock = row.original.skus?.reduce((acc: number, sku: { stock: number | string }) => acc + Number(sku.stock), 0) ?? 0
                 const unit = row.original.measurementUnit?.toLowerCase() || 'unid.'
                 const displayStock = row.original.allowFractional ? stock.toFixed(3).replace(/\.?0+$/, '') : Math.floor(stock)
-                
+
                 return (
                     <Badge variant={stock > 0 ? 'outline' : 'destructive'} className={stock > 0 ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' : 'bg-destructive/10 text-destructive border-destructive/20'}>
                         {displayStock} {unit}
@@ -166,11 +174,11 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
                                 }} className="hover:bg-secondary/5 cursor-pointer p-3 text-sm font-medium transition-colors border-b border-border">
                                     <Boxes className="mr-3 h-5 w-5 text-secondary" /> Gestionar Variantes
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         onDelete(product)
-                                    }} 
+                                    }}
                                     className="hover:bg-red-500/5 cursor-pointer p-3 text-sm font-medium transition-colors text-red-600 focus:text-red-700"
                                 >
                                     <Trash className="mr-3 h-5 w-5" /> Eliminar Producto
@@ -218,8 +226,8 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
 
     return (
         <div className="space-y-4">
-             
-            
+
+
             <div className="flex items-center justify-between px-2">
                 <div className="relative w-full max-w-sm group ">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary">
@@ -233,7 +241,7 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
                     />
                 </div>
             </div>
-            
+
             <div className="sm:rounded-3xl rounded-none border-4 border-zinc-300 dark:border-zinc-600 shadow-[0_0_20px_rgba(0,0,0,0.2)] hover:shadow-[0_0_30px_rgba(0,0,0,0.2)] hover:border-borderH hover:ring-4 hover:ring-zinc-500/10 transition-all duration-300 bg-card  overflow-hidden">
                 <Table>
                     <TableHeader className="bg-muted/50">
@@ -264,11 +272,11 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
                             </TableRow>
                         )}
                         {loading ? (
-                             Array.from({ length: 5 }).map((_, i) => (
+                            Array.from({ length: 5 }).map((_, i) => (
                                 <TableRow key={`loading-${i}`} className="border-border">
                                     {columns.map((_, j) => (
                                         <TableCell key={`loading-cell-${j}`} className="h-16">
-                                             <div className="h-4 bg-muted animate-pulse rounded w-full" />
+                                            <div className="h-4 bg-muted animate-pulse rounded w-full" />
                                         </TableCell>
                                     ))}
                                 </TableRow>
@@ -278,7 +286,7 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
-                                    onClick={() => router.push(`/management/products/${row.original.id}`)}
+                                    onClick={() => router.push(`/management/products/detail?id=${row.original.id}`)}
                                     className="hover:bg-gray-800/20  hover:rounded-2xl    transition-colors border-border cursor-pointer"
                                 >
                                     {row.getVisibleCells().map((cell) => (
@@ -330,14 +338,14 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
             </div>
 
             {selectedSkuProduct && (
-                 <SkuManager 
-                    open={skuManagerOpen} 
-                    onOpenChange={setSkuManagerOpen} 
+                <SkuManager
+                    open={skuManagerOpen}
+                    onOpenChange={setSkuManagerOpen}
                     product={selectedSkuProduct}
                     onUpdate={() => {
-                      
-                         router.refresh()
-                    }} 
+
+                        router.refresh()
+                    }}
                 />
             )}
         </div>

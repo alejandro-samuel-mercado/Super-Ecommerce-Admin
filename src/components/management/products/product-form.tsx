@@ -26,7 +26,8 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
         name: "",
         description: "",
         basePrice: 0,
-        isActive: true, 
+        costPrice: 0,
+        isActive: true,
         isNew: true,
         pointsReward: 0,
         brand: "",
@@ -49,16 +50,16 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
     const [manualPrices, setManualPrices] = useState<{ currencyCode: string, price: number }[]>([])
     const [loading, setLoading] = useState(false)
 
-const router=useRouter()
+    const router = useRouter()
 
     const loadCurrencies = async () => {
         try {
             const data = await CurrenciesAPI.getAll(true)
             setCurrencies(data)
-            
+
             const base = data.find((c: any) => Number(c.exchangeRateToBase) === 1)
             if (base) setBaseCurrency(base.code)
-        } catch (error) {}
+        } catch (error) { }
     }
 
     const loadConfig = async () => {
@@ -92,17 +93,18 @@ const router=useRouter()
             try {
                 const data = await ProductsAPI.getPrices(product.id)
                 setManualPrices(data)
-            } catch (error) {}
+            } catch (error) { }
         }
 
         if (product && open) {
             setFormData(product)
             loadManualPrices()
         } else if (open) {
-             setFormData({
+            setFormData({
                 name: "",
                 description: "",
                 basePrice: 0,
+                costPrice: 0,
                 isActive: true,
                 isNew: true,
                 pointsReward: 0,
@@ -135,7 +137,7 @@ const router=useRouter()
     const isFormValid = () => {
         return !!formData.name && !!formData.categoryId && (formData.basePrice ?? 0) > 0;
     }
-    
+
     const combinedUnits = Array.from(new Set(['UNIDAD', 'KG', 'LITRO', 'METRO', ...customUnits]))
     const unitLabels: Record<string, string> = {
         UNIDAD: 'Unidad (u) — Productos normales',
@@ -155,12 +157,12 @@ const router=useRouter()
                         Complete la información general y detalles del producto.
                     </DialogDescription>
                 </DialogHeader>
-                
+
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden bg-muted/20">
                     <div className="sm:px-6 px-2 pt-4 bg-background">
                         <TabsList className="grid w-full grid-cols-4 p-0 bg-muted rounded-lg border-2  ">
-                            <TabsTrigger 
-                                value="general" 
+                            <TabsTrigger
+                                value="general"
                                 className=" data-[state=active]:bg-background data-[state=active]:text-secondary data-[state=active]:shadow-sm font-medium transition-all border-2 border-transparent data-[state=active]:border-secondary "
                             >
                                 General
@@ -172,24 +174,24 @@ const router=useRouter()
                     </div>
 
                     <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto sm:px-6 px-3 py-6 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent">
-                        
+
                         <TabsContent value="general" className="space-y-6 mt-0 animate-in fade-in-50 duration-300">
                             <div className="grid gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="name" className="text-foreground font-semibold">Nombre del Producto</Label>
-                                    <Input 
-                                        id="name" 
-                                        value={formData.name} 
-                                        onChange={(e) => setFormData({...formData, name: e.target.value})} 
+                                    <Input
+                                        id="name"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         className="bg-background border-input focus:border-secondary focus:ring-secondary/20 transition-all text-foreground"
                                         placeholder="Ej: Camiseta de Algodón"
-                                        required 
+                                        required
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="type" className="text-foreground">Tipo</Label>
-                                        <Select value={formData.type || "Producto"} onValueChange={(v) => setFormData({...formData, type: v})}>
+                                        <Select value={formData.type || "Producto"} onValueChange={(v) => setFormData({ ...formData, type: v })}>
                                             <SelectTrigger className="bg-background border-input text-foreground">
                                                 <SelectValue placeholder="Seleccione tipo" />
                                             </SelectTrigger>
@@ -202,9 +204,9 @@ const router=useRouter()
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="category" className="text-foreground">Categoría</Label>
-                                        <Select 
-                                            value={formData.categoryId ? String(formData.categoryId) : undefined} 
-                                            onValueChange={(v) => setFormData({...formData, categoryId: parseInt(v)})}
+                                        <Select
+                                            value={formData.categoryId ? String(formData.categoryId) : undefined}
+                                            onValueChange={(v) => setFormData({ ...formData, categoryId: parseInt(v) })}
                                         >
                                             <SelectTrigger className="bg-background border-input text-foreground">
                                                 <SelectValue placeholder="Seleccione una categoría" />
@@ -222,11 +224,11 @@ const router=useRouter()
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="desc" className="text-foreground">Descripción</Label>
-                                    <Textarea 
-                                        id="desc" 
+                                    <Textarea
+                                        id="desc"
                                         rows={5}
-                                        value={formData.description} 
-                                        onChange={(e) => setFormData({...formData, description: e.target.value})} 
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                         className="bg-background border-input focus:border-secondary resize-none text-foreground"
                                         placeholder="Describa las características principales del producto..."
                                     />
@@ -238,25 +240,25 @@ const router=useRouter()
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label className="text-foreground">Marca</Label>
-                                    <Input 
-                                        value={formData.brand} 
-                                        onChange={(e) => setFormData({...formData, brand: e.target.value})} 
+                                    <Input
+                                        value={formData.brand}
+                                        onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
                                         className="bg-background border-input text-foreground"
                                     />
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="text-foreground">Modelo</Label>
-                                    <Input 
-                                        value={formData.model || ''} 
-                                        onChange={(e) => setFormData({...formData, model: e.target.value})} 
+                                    <Input
+                                        value={formData.model || ''}
+                                        onChange={(e) => setFormData({ ...formData, model: e.target.value })}
                                         className="bg-background border-input text-foreground"
                                     />
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="text-foreground">Condición</Label>
-                                    <Select 
-                                        value={formData.condition || "NEW"} 
-                                        onValueChange={(v) => setFormData({...formData, condition: v as Condition})}
+                                    <Select
+                                        value={formData.condition || "NEW"}
+                                        onValueChange={(v) => setFormData({ ...formData, condition: v as Condition })}
                                     >
                                         <SelectTrigger className="bg-background border-input text-foreground">
                                             <SelectValue />
@@ -274,16 +276,16 @@ const router=useRouter()
                                         Código QR / Identificador
                                     </Label>
                                     <div className="flex gap-2">
-                                        <Input 
-                                            value={formData.qr || ''} 
-                                            onChange={(e) => setFormData({...formData, qr: e.target.value})} 
+                                        <Input
+                                            value={formData.qr || ''}
+                                            onChange={(e) => setFormData({ ...formData, qr: e.target.value })}
                                             placeholder="Escanee o ingrese código"
                                             className="bg-background border-input font-mono text-muted-foreground"
                                         />
-                                        <Button 
-                                            variant="secondary" 
-                                            type="button" 
-                                            onClick={() => setFormData({...formData, qr: `PRD-${Math.random().toString(36).substr(2, 6).toUpperCase()}`})}
+                                        <Button
+                                            variant="secondary"
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, qr: `PRD-${Math.random().toString(36).substr(2, 6).toUpperCase()}` })}
                                             className="hover:cursor-pointer"
                                         >
                                             Generar
@@ -291,18 +293,18 @@ const router=useRouter()
                                     </div>
                                     {formData.qr && (
                                         <div className="mt-4 p-4 border rounded-xl bg-card flex items-center gap-4">
-                                            <div className="bg-white p-2 rounded-lg border" onClick={() => window.open(`https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(formData.qr ||"")}` ,"_blank")}>
-                                                <img 
-                                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(formData.qr)}`} 
-                                                    alt="QR Code" 
+                                            <div className="bg-white p-2 rounded-lg border" onClick={() => window.open(`https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(formData.qr || "")}`, "_blank")}>
+                                                <img
+                                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(formData.qr)}`}
+                                                    alt="QR Code"
                                                     className="w-20 h-20"
                                                 />
                                             </div>
                                             <div className="space-y-2  hidden md:block">
                                                 <p className="text-sm font-medium">QR Generado</p>
-                                                <a 
-                                                    href={`https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(formData.qr)}`} 
-                                                    target="_blank" 
+                                                <a
+                                                    href={`https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(formData.qr)}`}
+                                                    target="_blank"
                                                     rel="noreferrer"
                                                     download={`QR-${formData.qr}.png`}
                                                     className="inline-flex items-center justify-center shrink-0 whitespace-nowrap rounded-md text-xs font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3"
@@ -328,7 +330,7 @@ const router=useRouter()
                                         className="hover:cursor-pointer"
                                         onClick={() => {
                                             const current = Array.isArray(formData.characteristics) ? formData.characteristics : [];
-                                            setFormData({...formData, characteristics: [...current, { key: '', value: '' }]});
+                                            setFormData({ ...formData, characteristics: [...current, { key: '', value: '' }] });
                                         }}
                                     >
                                         <Plus className="h-4 w-4 mr-1" /> Agregar
@@ -344,7 +346,7 @@ const router=useRouter()
                                                     const currentChars = Array.isArray(formData.characteristics) ? formData.characteristics : [];
                                                     const updated = [...currentChars];
                                                     updated[idx] = { ...updated[idx], key: e.target.value };
-                                                    setFormData({...formData, characteristics: updated});
+                                                    setFormData({ ...formData, characteristics: updated });
                                                 }}
                                                 className="flex-1 bg-background border-input text-foreground text-sm"
                                             />
@@ -355,7 +357,7 @@ const router=useRouter()
                                                     const currentChars = Array.isArray(formData.characteristics) ? formData.characteristics : [];
                                                     const updated = [...currentChars];
                                                     updated[idx] = { ...updated[idx], value: e.target.value };
-                                                    setFormData({...formData, characteristics: updated});
+                                                    setFormData({ ...formData, characteristics: updated });
                                                 }}
                                                 className="flex-1 bg-background border-input text-foreground text-sm"
                                             />
@@ -367,7 +369,7 @@ const router=useRouter()
                                                 onClick={() => {
                                                     const currentChars = Array.isArray(formData.characteristics) ? formData.characteristics : [];
                                                     const updated = currentChars.filter((_, i) => i !== idx);
-                                                    setFormData({...formData, characteristics: updated});
+                                                    setFormData({ ...formData, characteristics: updated });
                                                 }}
                                             >
                                                 <X className="h-4 w-4" />
@@ -393,7 +395,7 @@ const router=useRouter()
                                         className="hover:cursor-pointer"
                                         onClick={() => {
                                             const current = Array.isArray(formData.specifications) ? formData.specifications : [];
-                                            setFormData({...formData, specifications: [...current, { key: '', value: '' }]});
+                                            setFormData({ ...formData, specifications: [...current, { key: '', value: '' }] });
                                         }}
                                     >
                                         <Plus className="h-4 w-4 mr-1" /> Agregar
@@ -409,7 +411,7 @@ const router=useRouter()
                                                     const currentSpecs = Array.isArray(formData.specifications) ? formData.specifications : [];
                                                     const updated = [...currentSpecs];
                                                     updated[idx] = { ...updated[idx], key: e.target.value };
-                                                    setFormData({...formData, specifications: updated});
+                                                    setFormData({ ...formData, specifications: updated });
                                                 }}
                                                 className="flex-1 bg-background border-input text-foreground text-sm"
                                             />
@@ -420,7 +422,7 @@ const router=useRouter()
                                                     const currentSpecs = Array.isArray(formData.specifications) ? formData.specifications : [];
                                                     const updated = [...currentSpecs];
                                                     updated[idx] = { ...updated[idx], value: e.target.value };
-                                                    setFormData({...formData, specifications: updated});
+                                                    setFormData({ ...formData, specifications: updated });
                                                 }}
                                                 className="flex-1 bg-background border-input text-foreground text-sm"
                                             />
@@ -432,7 +434,7 @@ const router=useRouter()
                                                 onClick={() => {
                                                     const currentSpecs = Array.isArray(formData.specifications) ? formData.specifications : [];
                                                     const updated = currentSpecs.filter((_, i) => i !== idx);
-                                                    setFormData({...formData, specifications: updated});
+                                                    setFormData({ ...formData, specifications: updated });
                                                 }}
                                             >
                                                 <X className="h-4 w-4" />
@@ -441,6 +443,71 @@ const router=useRouter()
                                     ))}
                                     {(!Array.isArray(formData.specifications) || formData.specifications.length === 0) && (
                                         <p className="text-xs text-muted-foreground italic py-2">Sin especificaciones agregadas.</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 mt-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-6 w-1 bg-green-500 rounded-full"></div>
+                                        <h3 className="font-semibold text-foreground">Información Nutricional</h3>
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="hover:cursor-pointer"
+                                        onClick={() => {
+                                            const current = Array.isArray((formData as any).nutritionalInfo) ? (formData as any).nutritionalInfo : [];
+                                            setFormData({ ...formData, nutritionalInfo: [...current, { key: '', value: '' }] } as any);
+                                        }}
+                                    >
+                                        <Plus className="h-4 w-4 mr-1" /> Agregar
+                                    </Button>
+                                </div>
+                                <div className="max-h-[200px] overflow-y-auto space-y-2 pr-1">
+                                    {(Array.isArray((formData as any).nutritionalInfo) ? (formData as any).nutritionalInfo : []).map((item: any, idx: number) => (
+                                        <div key={idx} className="flex items-center gap-2">
+                                            <Input
+                                                placeholder="Ej: Valor Energético"
+                                                value={item.key}
+                                                onChange={(e) => {
+                                                    const currentInfo = Array.isArray((formData as any).nutritionalInfo) ? (formData as any).nutritionalInfo : [];
+                                                    const updated = [...currentInfo];
+                                                    updated[idx] = { ...updated[idx], key: e.target.value };
+                                                    setFormData({ ...formData, nutritionalInfo: updated } as any);
+                                                }}
+                                                className="flex-1 bg-background border-input text-foreground text-sm"
+                                            />
+                                            <Input
+                                                placeholder="Ej: 200 kcal"
+                                                value={item.value}
+                                                onChange={(e) => {
+                                                    const currentInfo = Array.isArray((formData as any).nutritionalInfo) ? (formData as any).nutritionalInfo : [];
+                                                    const updated = [...currentInfo];
+                                                    updated[idx] = { ...updated[idx], value: e.target.value };
+                                                    setFormData({ ...formData, nutritionalInfo: updated } as any);
+                                                }}
+                                                className="flex-1 bg-background border-input text-foreground text-sm"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 shrink-0 text-destructive hover:bg-destructive/10 hover:cursor-pointer"
+                                                onClick={() => {
+                                                    const currentInfo = Array.isArray((formData as any).nutritionalInfo) ? (formData as any).nutritionalInfo : [];
+                                                    const updated = currentInfo.filter((_: any, i: any) => i !== idx);
+                                                    setFormData({ ...formData, nutritionalInfo: updated } as any);
+                                                }}
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                    {(!Array.isArray((formData as any).nutritionalInfo) || (formData as any).nutritionalInfo.length === 0) && (
+                                        <p className="text-xs text-muted-foreground italic py-2">Sin información nutricional agregada.</p>
                                     )}
                                 </div>
                             </div>
@@ -454,27 +521,27 @@ const router=useRouter()
                                         <div className="h-8 w-1 bg-emerald-500 rounded-full"></div>
                                         <h3 className="font-semibold text-lg text-foreground">Precios y Unidades</h3>
                                     </div>
-                                    
+
                                     <div className="space-y-4">
                                         <div className="space-y-2">
                                             <Label className="text-foreground">Precio Base ($)</Label>
-                                            <Input 
-                                                type="text" 
+                                            <Input
+                                                type="text"
                                                 inputMode="decimal"
-                                                value={formData.basePrice} 
+                                                value={formData.basePrice}
                                                 onChange={(e) => {
                                                     const val = e.target.value.replace(',', '.');
                                                     if (val === '' || val === '.') {
-                                                        setFormData({...formData, basePrice: val as any});
+                                                        setFormData({ ...formData, basePrice: val as any });
                                                         return;
                                                     }
                                                     if (/^\d*\.?\d*$/.test(val)) {
-                                                        setFormData({...formData, basePrice: val as any});
+                                                        setFormData({ ...formData, basePrice: val as any });
                                                     }
                                                 }}
                                                 onBlur={() => {
                                                     const parsed = parseFloat(String(formData.basePrice));
-                                                    setFormData({...formData, basePrice: isNaN(parsed) ? 0 : parsed});
+                                                    setFormData({ ...formData, basePrice: isNaN(parsed) ? 0 : parsed });
                                                 }}
                                                 className="bg-muted/50 border-input text-xl font-bold text-foreground"
                                             />
@@ -484,10 +551,38 @@ const router=useRouter()
                                                 </p>
                                             )}
                                         </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-foreground">Costo de Compra (Referencia)</Label>
+                                            <Input
+                                                type="text"
+                                                inputMode="decimal"
+                                                value={(formData as any).costPrice || 0}
+                                                onChange={(e) => {
+                                                    const val = e.target.value.replace(',', '.');
+                                                    if (val === '' || val === '.') {
+                                                        setFormData({ ...formData, costPrice: val as any } as any);
+                                                        return;
+                                                    }
+                                                    if (/^\d*\.?\d*$/.test(val)) {
+                                                        setFormData({ ...formData, costPrice: val as any } as any);
+                                                    }
+                                                }}
+                                                onBlur={() => {
+                                                    const parsed = parseFloat(String((formData as any).costPrice));
+                                                    setFormData({ ...formData, costPrice: isNaN(parsed) ? 0 : parsed } as any);
+                                                }}
+                                                className="bg-muted/50 border-input text-xl font-bold text-foreground"
+                                            />
+                                            {(formData as any).costPrice && Number((formData as any).costPrice) > 0 && (
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    Margen: {formData.basePrice && Number(formData.basePrice) > 0 ? (((Number(formData.basePrice) - Number((formData as any).costPrice)) / Number((formData as any).costPrice)) * 100).toFixed(1) + '%' : 'N/A'}
+                                                </p>
+                                            )}
+                                        </div>
                                         <div className="grid grid-cols-1  sm:grid-cols-2 gap-4">
-                                             <div className="space-y-2">
+                                            <div className="space-y-2">
                                                 <Label className="text-foreground font-semibold">Unidad de Medida</Label>
-                                                <Select value={formData.measurementUnit || "UNIDAD"} onValueChange={(v) => setFormData({...formData, measurementUnit: v, allowFractional: v !== 'UNIDAD' ? true : formData.allowFractional})}>
+                                                <Select value={formData.measurementUnit || "UNIDAD"} onValueChange={(v) => setFormData({ ...formData, measurementUnit: v, allowFractional: v !== 'UNIDAD' ? true : formData.allowFractional })}>
                                                     <SelectTrigger className="bg-background border-input text-foreground">
                                                         <SelectValue />
                                                     </SelectTrigger>
@@ -502,13 +597,13 @@ const router=useRouter()
                                             <div className="space-y-2">
                                                 <Label htmlFor="fractional" className="text-foreground font-semibold">¿Venta Fraccionada?</Label>
                                                 <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
-                                                    <Switch checked={formData.allowFractional ?? false} onCheckedChange={(c:any) => setFormData({...formData, allowFractional: c})} id="fractional" />
+                                                    <Switch checked={formData.allowFractional ?? false} onCheckedChange={(c: any) => setFormData({ ...formData, allowFractional: c })} id="fractional" />
                                                     <div>
                                                         <Label htmlFor="fractional" className="cursor-pointer text-foreground text-sm font-medium">
                                                             {formData.allowFractional ? '✓ Habilitado' : 'Deshabilitado'}
                                                         </Label>
                                                         <p className="text-xs text-muted-foreground mt-0.5">
-                                                            {formData.allowFractional 
+                                                            {formData.allowFractional
                                                                 ? `Clientes pueden pedir ej: 0.500 ${formData.measurementUnit === 'KG' ? 'kg' : formData.measurementUnit === 'LITRO' ? 'L' : formData.measurementUnit === 'METRO' ? 'm' : 'u'}`
                                                                 : 'Solo cantidades enteras (1, 2, 3...)'}
                                                         </p>
@@ -521,18 +616,18 @@ const router=useRouter()
 
                                 {/* Tarjeta de Puntos */}
                                 <div className="space-y-4 p-5 rounded-xl bg-card border border-border shadow-sm">
-                                     <div className="flex items-center gap-2 mb-2">
+                                    <div className="flex items-center gap-2 mb-2">
                                         <div className="h-8 w-1 bg-borderH rounded-full"></div>
                                         <h3 className="font-semibold text-lg text-foreground">Sistema de Puntos</h3>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2 col-span-2">
                                             <Label className="text-foreground">Puntos que Otorga al Comprador</Label>
-                                            <Input 
-                                                type="number" 
+                                            <Input
+                                                type="number"
                                                 inputMode="numeric"
-                                                value={formData.pointsReward} 
-                                                onChange={(e) => setFormData({...formData, pointsReward: parseInt(e.target.value)})} 
+                                                value={formData.pointsReward}
+                                                onChange={(e) => setFormData({ ...formData, pointsReward: parseInt(e.target.value) })}
                                                 className="bg-background border-input text-foreground"
                                             />
                                             <p className="text-xs text-muted-foreground">Al comprar</p>
@@ -542,24 +637,24 @@ const router=useRouter()
                             </div>
 
                             {/* Etiquetas */}
-                             <div className="space-y-4 p-5 rounded-xl bg-muted/20 border border-border">
+                            <div className="space-y-4 p-5 rounded-xl bg-muted/20 border border-border">
                                 <h3 className="font-medium text-foreground mb-2">Etiquetas de Marketing</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     <div className="flex flex-col gap-2 p-3 bg-card rounded-lg border border-border shadow-sm">
                                         <Label className="cursor-pointer font-medium text-foreground">Activo</Label>
-                                        <Switch checked={formData.isActive ?? true} onCheckedChange={(c) => setFormData({...formData, isActive: c})} />
+                                        <Switch checked={formData.isActive ?? true} onCheckedChange={(c) => setFormData({ ...formData, isActive: c })} />
                                     </div>
                                     <div className="flex flex-col gap-2 p-3 bg-card rounded-lg border border-border shadow-sm">
                                         <Label className="cursor-pointer font-medium text-foreground">Es Nuevo</Label>
-                                        <Switch checked={formData.isNew ?? false} onCheckedChange={(c) => setFormData({...formData, isNew: c})} />
+                                        <Switch checked={formData.isNew ?? false} onCheckedChange={(c) => setFormData({ ...formData, isNew: c })} />
                                     </div>
                                     <div className="flex flex-col gap-2 p-3 bg-card rounded-lg border border-border shadow-sm">
                                         <Label className="cursor-pointer font-medium text-foreground">Tendencia</Label>
-                                        <Switch checked={formData.isTrending ?? false} onCheckedChange={(c) => setFormData({...formData, isTrending: c})} />
+                                        <Switch checked={formData.isTrending ?? false} onCheckedChange={(c) => setFormData({ ...formData, isTrending: c })} />
                                     </div>
                                     <div className="flex flex-col gap-2 p-3 bg-card rounded-lg border border-border shadow-sm">
                                         <Label className="cursor-pointer font-medium text-foreground">Recomendado</Label>
-                                        <Switch checked={formData.isRecommended ?? false} onCheckedChange={(c) => setFormData({...formData, isRecommended: c})} />
+                                        <Switch checked={formData.isRecommended ?? false} onCheckedChange={(c) => setFormData({ ...formData, isRecommended: c })} />
                                     </div>
                                 </div>
                             </div>
@@ -579,7 +674,7 @@ const router=useRouter()
                                             <div key={curr.code} className="flex items-center gap-4 p-3 border rounded-lg bg-muted/20">
                                                 <div className="w-16 font-bold">{curr.code}</div>
                                                 <div className="flex-1">
-                                                    <Input 
+                                                    <Input
                                                         type="text"
                                                         inputMode="decimal"
                                                         placeholder={`Precio en ${curr.code}`}
@@ -613,18 +708,18 @@ const router=useRouter()
                             <div className="space-y-4 p-5 rounded-xl  dark:bg-zinc-900 border border-zinc-400 dark:border-zinc-700 shadow-sm min-h-[400px]">
                                 <h3 className="font-semibolddark:text-zinc-200">Galería de Imágenes</h3>
                                 <div className="flex sm:flex-row flex-col gap-2 items-center">
-                                    <Input 
-                                        type="file" 
+                                    <Input
+                                        type="file"
                                         accept="image/*"
-                                        className="hidden" 
+                                        className="hidden"
                                         id="image-upload"
                                         onChange={async (e) => {
                                             const file = e.target.files?.[0]
                                             if (file) {
                                                 try {
-                                                    const { UploadAPI } = require("@/services/api") 
+                                                    const { UploadAPI } = require("@/services/api")
                                                     const url = await UploadAPI.upload(file)
-                                                    setFormData(prev => ({...prev, images: [...(prev.images || []), url]}))
+                                                    setFormData(prev => ({ ...prev, images: [...(prev.images || []), url] }))
                                                 } catch (error) {
                                                     alert("Error al subir imagen")
                                                 }
@@ -636,14 +731,14 @@ const router=useRouter()
                                         Subir Imagen
                                     </Label>
                                     <span className="text-sm dark:text-zinc-400 font-medium">o enlace externo:</span>
-                                    <Input 
+                                    <Input
                                         placeholder="https://ejemplo.com/imagen.jpg"
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
                                                 e.preventDefault();
                                                 const val = e.currentTarget.value.trim();
                                                 if (val) {
-                                                    setFormData(prev => ({...prev, images: [...(prev.images || []), val]}));
+                                                    setFormData(prev => ({ ...prev, images: [...(prev.images || []), val] }));
                                                     e.currentTarget.value = '';
                                                 }
                                             }
@@ -656,9 +751,9 @@ const router=useRouter()
                                     {formData.images?.map((img, idx) => (
                                         <div key={idx} className="group relative aspect-square rounded-xl border border-zinc-400 dark:border-zinc-700 overflow-hidden  dark:bg-zinc-800 flex items-center justify-center shadow-sm">
                                             <img src={img} alt={`Product ${idx}`} className="w-full h-full object-cover" />
-                                            <button 
+                                            <button
                                                 type="button"
-                                                onClick={() => setFormData(prev => ({...prev, images: prev.images?.filter((_, i) => i !== idx)}))}
+                                                onClick={() => setFormData(prev => ({ ...prev, images: prev.images?.filter((_, i) => i !== idx) }))}
                                                 className="absolute top-2 right-2 p-1.5 bg-white text-red-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all transform scale-90 group-hover:scale-100 hover:cursor-pointer"
                                             >
                                                 <X className="h-4 w-4" />
@@ -675,8 +770,66 @@ const router=useRouter()
                                     )}
                                 </div>
                             </div>
+
+                            <div className="space-y-4 p-5 rounded-xl dark:bg-zinc-900 border border-zinc-400 dark:border-zinc-700 shadow-sm mt-6">
+                                <h3 className="font-semibold dark:text-zinc-200">Video y Octágonos</h3>
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label>URL de Video de YouTube</Label>
+                                        <Input
+                                            placeholder="Ej: https://youtube.com/watch?v=..."
+                                            value={(formData as Record<string, any>).youtubeVideo || ''}
+                                            onChange={(e) => setFormData({ ...formData, youtubeVideo: e.target.value } as any)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Imagen de Octágonos</Label>
+                                        <div className="flex sm:flex-row flex-col gap-2 items-center">
+                                            <Input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                id="octagons-upload"
+                                                onChange={async (e) => {
+                                                    const file = e.target.files?.[0]
+                                                    if (file) {
+                                                        try {
+                                                            const { UploadAPI } = require("@/services/api")
+                                                            const url = await UploadAPI.upload(file)
+                                                            setFormData({ ...formData, octagonsImage: url } as any)
+                                                        } catch (error) {
+                                                            alert("Error al subir imagen de octágonos")
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                            <Label htmlFor="octagons-upload" className="cursor-pointer bg-black dark:bg-zinc-800 hover:bg-zinc-800 dark:hover:bg-zinc-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors ">
+                                                <Plus className="h-4 w-4" />
+                                                Subir Octágonos
+                                            </Label>
+                                            <Input
+                                                placeholder="O introduce enlace externo..."
+                                                value={(formData as Record<string, any>).octagonsImage || ''}
+                                                onChange={(e) => setFormData({ ...formData, octagonsImage: e.target.value } as any)}
+                                            />
+                                        </div>
+                                        {(formData as Record<string, any>).octagonsImage && (
+                                            <div className="relative inline-block mt-2 border rounded-md overflow-hidden bg-white">
+                                                <img src={(formData as Record<string, any>).octagonsImage} alt="Octagons" className="h-16 object-contain" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, octagonsImage: '' } as any)}
+                                                    className="absolute top-1 right-1 p-0.5 bg-white text-red-600 rounded-full shadow-md hover:cursor-pointer"
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
                         </TabsContent>
-                        
+
                         <div className="h-8"></div> {/* Espaciador */}
                     </form>
                 </Tabs>

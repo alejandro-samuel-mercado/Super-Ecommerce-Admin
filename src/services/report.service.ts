@@ -4,13 +4,16 @@ export interface FinancialStats {
   totalGrossRevenue: number;
   totalNetRevenue: number;
   totalCOGS: number;
+  totalOperatingExpenses: number;
   grossProfit: number;
+  netProfit: number;
   netMargin: number;
   totalCashOutflow: number;
   chartData: {
     name: string;
     revenue: number;
     cogs: number;
+    operatingExpenses?: number;
     profit: number;
     cashOutflow: number;
   }[];

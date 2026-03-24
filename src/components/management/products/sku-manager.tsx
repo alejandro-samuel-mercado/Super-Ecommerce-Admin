@@ -26,6 +26,7 @@ function SkuForm({
 }) {
     const [attributes, setAttributes] = useState("")
     const [price, setPrice] = useState("")
+    const [costPrice, setCostPrice] = useState("")
     const [stock, setStock] = useState("")
     const [skuCode, setSkuCode] = useState("")
     const [barcode, setBarcode] = useState("")
@@ -42,6 +43,7 @@ function SkuForm({
                 const attrString = sku.variantOptions?.map(v => `${v.name}: ${v.value}`).join(', ') || ""
                 setAttributes(attrString)
                 setPrice(String(sku.price))
+                setCostPrice(sku.costPrice ? String(sku.costPrice) : "")
                 setStock(String(sku.stock))
                 setBarcode(sku.barcode || "")
                 setBarcodeType(sku.barcodeType || "INTERNO")
@@ -51,6 +53,7 @@ function SkuForm({
             setSkuCode("")
             setAttributes("")
             setPrice("")
+            setCostPrice("")
             setStock("")
             setBarcode("")
             setBarcodeType("INTERNO")
@@ -71,6 +74,7 @@ function SkuForm({
 
             const payload = {
                 price: parseFloat(price) || product.basePrice,
+                costPrice: parseFloat(costPrice) || 0,
                 ...(editingSkuId ? {} : { stock: parseInt(stock) || 0 }),
                 attributes: validAttributes,
                 ...(editingSkuId && skuCode ? { code: skuCode } : {}),
@@ -133,6 +137,17 @@ function SkuForm({
                         value={price} 
                         onChange={(e) => setPrice(e.target.value)} 
                         placeholder={String(product.basePrice)} 
+                        className="bg-background border-input placeholder:text-muted-foreground text-foreground font-medium" 
+                    />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                    <Label className="text-foreground">Costo Compra</Label>
+                    <Input 
+                        type="number" 
+                        inputMode="decimal"
+                        value={costPrice} 
+                        onChange={(e) => setCostPrice(e.target.value)} 
+                        placeholder="Costo" 
                         className="bg-background border-input placeholder:text-muted-foreground text-foreground font-medium" 
                     />
                 </div>
@@ -298,6 +313,7 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
                                     <th className="px-4 py-3">Código</th>
                                     <th className="px-4 py-3">Atributos</th>
                                     <th className="px-4 py-3">Precio</th>
+                                    <th className="px-4 py-3">Costo</th>
                                     <th className="px-4 py-3">Stock</th>
                                     <th className="px-4 py-3 text-right"></th>
                                 </tr>
@@ -310,6 +326,7 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
                                             {sku.variantOptions?.map(v => `${v.name}: ${v.value}`).join(', ') || 'Default'}
                                         </td>
                                         <td className="px-4 py-3 text-foreground">${sku.price}</td>
+                                        <td className="px-4 py-3 text-foreground">${sku.costPrice || 0}</td>
                                         <td className="px-4 py-3 text-foreground">{Number(sku.stock).toFixed(3).replace(/\.?0+$/, '')}</td>
                                         <td className="px-4 py-3 text-right space-x-2">
                                             <Button 

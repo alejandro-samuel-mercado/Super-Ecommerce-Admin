@@ -158,7 +158,11 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                                 
                                 {isOpen && (
                                     <div className="space-y-1 relative before:absolute before:left-[1.65rem] before:top-0 before:bottom-0 before:w-[1px] before:bg-white/10 ml-2">
-                                        {item.children.filter(child => !child.hidden).map(child => {
+                                        {item.children.filter(child => {
+                                            if (child.hidden) return false;
+                                            if (child.roles && !child.roles.includes(userRole as any)) return false;
+                                            return true;
+                                        }).map(child => {
                                             const isChildActive = pathname === child.href;
                                             return (
                                             <Link key={child.title} href={child.href!} className="block pl-4">

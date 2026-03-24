@@ -94,7 +94,7 @@ export function PurchaseForm({ onSuccess, onCancel }: PurchaseFormProps) {
         if (field === 'skuId') {
             const catalogItem = supplierSkus.find(s => s.skuId.toString() === value.toString())
             if (catalogItem) {
-                newItems[index].unitPrice = catalogItem.precio_compra_base
+                newItems[index].unitPrice = catalogItem.sku?.costPrice || catalogItem.basePurchasePrice || 0
             }
         }
         

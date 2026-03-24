@@ -62,6 +62,18 @@ export function SupplierSkuManager({ supplierId, initialSkus = [] }: SupplierSku
         }
     }
 
+    useEffect(() => {
+        const fetchBaseCurrency = async () => {
+            try {
+                const { data } = await api.get('/config/public');
+                if (data?.data?.baseCurrency || data?.baseCurrency) {
+                    setCurrency(data?.data?.baseCurrency || data?.baseCurrency);
+                }
+            } catch (error) {}
+        }
+        fetchBaseCurrency();
+    }, []);
+
 
     useEffect(() => {
         if (!skuCodeSearch) {
@@ -156,7 +168,13 @@ export function SupplierSkuManager({ supplierId, initialSkus = [] }: SupplierSku
                                                 <div 
                                                     key={item.id} 
                                                     className={`p-3 text-sm cursor-pointer hover:bg-muted rounded-md border border-transparent transition-colors ${selectedSkuId === item.id ? 'bg-secondary/10 border-secondary/20 text-secondary' : 'text-foreground'}`}
-                                                    onClick={() => setSelectedSkuId(item.id)}
+                                                    onClick={() => {
+                                                        setSelectedSkuId(item.id)
+                                                        const defaultPrice = item.costPrice || item.price || 0;
+                                                        if (defaultPrice) {
+                                                            setPrice(defaultPrice.toString());
+                                                        }
+                                                    }}
                                                 >
                                                     <div className="font-mono text-xs font-bold opacity-70">{item.code}</div>
                                                     <div className="font-medium">{item.product?.name}{variantText}</div>

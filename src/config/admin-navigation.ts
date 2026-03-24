@@ -129,6 +129,12 @@ export const adminNavigation: NavItem[] = [
                 icon: DollarSign,
                 href: "/management/supplier-payments",
                 roles: ['SUPER_ADMIN', 'ADMIN'],
+            },
+            {
+                title: "Otros Gastos",
+                icon: FileText,
+                href: "/management/expenses",
+                roles: ['SUPER_ADMIN', 'ADMIN'],
             }
         ]
     },
