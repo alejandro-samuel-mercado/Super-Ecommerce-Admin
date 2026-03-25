@@ -100,6 +100,9 @@ export interface StoreConfig {
   customMeasurementUnits?: string[];
 
   logoUrl?: string;
+  ticketFooter?: string;
+  showLogoOnTicket?: boolean;
+  showLogoOnInvoice?: boolean;
   marqueeText?: string[];
   bannerImage?: BannerSlide[];
   adImage?: string;

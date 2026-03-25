@@ -56,9 +56,12 @@ const styles = StyleSheet.create({
 
 interface BarcodeLabelsProps {
   skus: (SKU & { product?: Product })[];
+  fillPage?: boolean;
+  type?: 'BARCODE' | 'QR';
 }
 
-const BarcodeLabelsDocument = ({ items, currencySymbol }: { items: any[], currencySymbol: string }) => {
+const BarcodeLabelsDocument = ({ items, currencySymbol, type = 'BARCODE' }: { items: any[], currencySymbol: string, type?: 'BARCODE' | 'QR' }) => {
+    const isQR = type === 'QR';
     return (
         <Document>
             <Page size="A4" style={styles.page}>
@@ -66,7 +69,12 @@ const BarcodeLabelsDocument = ({ items, currencySymbol }: { items: any[], curren
                     <View key={index} style={styles.labelContainer}>
                         <View style={styles.labelContent}>
                             <Text style={styles.price}>{currencySymbol}{Number(item.price).toFixed(2)}</Text>
-                            {item.barcodeSrc ? (
+                            {isQR ? (
+                                <Image 
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(item.qr || item.barcode || item.code)}&size=150x150`} 
+                                    style={{ width: 50, height: 50 }} 
+                                />
+                            ) : item.barcodeSrc ? (
                                 <Image src={item.barcodeSrc} style={styles.barcode} />
                             ) : (
                                 <View style={{alignItems: 'center', justifyContent: 'center', height: 40}}>
@@ -86,7 +94,7 @@ const BarcodeLabelsDocument = ({ items, currencySymbol }: { items: any[], curren
     );
 };
 
-export const BarcodePrintButton = ({ skus }: { skus: any[] }) => {
+export const BarcodePrintButton = ({ skus, fillPage = false, type = 'BARCODE' }: BarcodeLabelsProps) => {
     const { config } = useConfigStore();
     const [isClient, setIsClient] = useState(false);
     const [readyToPrint, setReadyToPrint] = useState(false);
@@ -95,45 +103,54 @@ export const BarcodePrintButton = ({ skus }: { skus: any[] }) => {
     useEffect(() => { 
         setIsClient(true);
         if (skus && skus.length > 0) {
-            const processed = skus.map(sku => {
-                let barcodeSrc = "";
-                try {
-                    const canvas = document.createElement("canvas");
-                    const code = sku.barcode || sku.code;
-                    if (code) {
-                        const isNumeric = /^\d+$/.test(code);
-                        const useEan = sku.barcodeType === 'EAN13' && code.length === 13 && isNumeric;
+            let itemsToProcess = [...skus];
+            
+            if (fillPage && skus.length === 1) {
+                // Llenar una hoja A4 (aprox 24 etiquetas para un grid de 3x8)
+                itemsToProcess = Array(24).fill(skus[0]);
+            }
 
-                        JsBarcode(canvas, code, {
-                            format: useEan ? "EAN13" : "CODE128",
-                            displayValue: true,
-                            fontSize: 14,
-                            marginBottom: 5,
-                            height: 40,
-                            width: 1.5,
-                            margin: 0
-                        });
-                        barcodeSrc = canvas.toDataURL();
+            const processed = itemsToProcess.map(sku => {
+                let barcodeSrc = "";
+                if (type === 'BARCODE') {
+                    try {
+                        const canvas = document.createElement("canvas");
+                        const code = sku.barcode || sku.code;
+                        if (code) {
+                            const isNumeric = /^\d+$/.test(code);
+                            const useEan = sku.barcodeType === 'EAN13' && code.length === 13 && isNumeric;
+
+                            JsBarcode(canvas, code, {
+                                format: useEan ? "EAN13" : "CODE128",
+                                displayValue: true,
+                                fontSize: 14,
+                                marginBottom: 5,
+                                height: 40,
+                                width: 1.5,
+                                margin: 0
+                            });
+                            barcodeSrc = canvas.toDataURL();
+                        }
+                    } catch (e) {
                     }
-                } catch (e) {
                 }
                 return { ...sku, barcodeSrc };
             });
             setItemsWithBarcodes(processed);
             setReadyToPrint(true);
         }
-    }, [skus]);
+    }, [skus, fillPage, type]);
 
     const [instance, updateInstance] = usePDF({ 
-        document: readyToPrint ? <BarcodeLabelsDocument items={itemsWithBarcodes} currencySymbol={config?.currencySymbol || "$"} /> : <Document><Page></Page></Document> 
+        document: readyToPrint ? <BarcodeLabelsDocument items={itemsWithBarcodes} currencySymbol={config?.currencySymbol || "$"} type={type} /> : <Document><Page></Page></Document> 
     });
 
     
     useEffect(() => {
         if (readyToPrint) {
-            updateInstance(<BarcodeLabelsDocument items={itemsWithBarcodes} currencySymbol={config?.currencySymbol || "$"} />);
+            updateInstance(<BarcodeLabelsDocument items={itemsWithBarcodes} currencySymbol={config?.currencySymbol || "$"} type={type} />);
         }
-    }, [readyToPrint, itemsWithBarcodes, updateInstance, config?.currencySymbol]);
+    }, [readyToPrint, itemsWithBarcodes, updateInstance, config?.currencySymbol, type]);
 
     if (!isClient) return null;
 
@@ -143,8 +160,9 @@ export const BarcodePrintButton = ({ skus }: { skus: any[] }) => {
 
     return (
         <a href={instance.url!} target="_blank" rel="noreferrer">
-            <Button size="sm" variant="outline" title="Imprimir Etiquetas" className="hover:cursor-pointer">
-                <Printer className="w-4 h-4" />
+            <Button size="sm" variant="outline" title={type === 'QR' ? "Imprimir QRs" : "Imprimir Etiquetas"} className="hover:cursor-pointer">
+                <Printer className="w-4 h-4 mr-1" />
+                {type === 'QR'? <span className="text-[10px] font-bold">QR</span>:<span className="text-[10px] font-bold">Etiqueta</span>}
             </Button>
         </a>
     );

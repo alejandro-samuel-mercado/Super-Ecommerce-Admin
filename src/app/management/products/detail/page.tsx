@@ -1,7 +1,7 @@
 "use client"
 
-import { useSearchParams } from "next/navigation"
 import { ProductDetailsClient } from "@/app/management/products/detail/ProductDetailsClient"
+import { useSearchParams } from "next/navigation"
 import { Suspense } from "react"
 
 function ProductDetailContent() {
@@ -12,7 +12,7 @@ function ProductDetailContent() {
         return <div className="p-8 text-center">ID de producto no proporcionado.</div>
     }
 
-    return <ProductDetailsClient id={id} />
+    return <ProductDetailsClient />
 }
 
 export default function ProductDetailPage() {

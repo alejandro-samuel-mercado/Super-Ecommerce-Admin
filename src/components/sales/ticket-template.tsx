@@ -21,7 +21,19 @@ export const TicketTemplate = forwardRef<HTMLDivElement, TicketTemplateProps>(({
        <div ref={ref} className="ticket-container print-area p-4 bg-white text-black text-xs font-mono w-[80mm] mx-auto">
            {/* Header */}
            <div className="text-center mb-4">
-               <h2 className="font-bold text-lg uppercase">{config?.storeName|| "MI NEGOCIO"}</h2>
+               {/* Logo de la tienda si está habilitado */}
+               {config?.showLogoOnTicket && config?.logoUrl && (
+                    <div className="flex justify-center mb-4">
+                        <img 
+                            src={config.logoUrl} 
+                            alt={config.storeName || "Logo"} 
+                            className="max-w-[120px] max-h-[60px] object-contain"
+                        />
+                    </div>
+               )}
+
+               <h2 className="text-xl font-bold uppercase tracking-tight leading-none mb-1">
+{config?.storeName|| "MI NEGOCIO"}</h2>
                <p>{branch?.address}</p>
                <p>{branch?.city}, {branch?.state}</p>
                <p>Tel: {branch?.phone}</p>
@@ -103,11 +115,14 @@ export const TicketTemplate = forwardRef<HTMLDivElement, TicketTemplateProps>(({
            </div>
 
            {/* Footer */}
-           <div className="mt-6 text-center text-[10px] font-bold">
-               <p>*** NO VÁLIDO COMO FACTURA ***</p>
-               <p>Comprobante de control interno</p>
-               <p className="mt-2">¡Gracias por su compra!</p>
-           </div>
+           <div className="mt-6 pt-4 border-t border-dashed border-zinc-300 text-center">
+                   <p className="text-sm font-bold uppercase tracking-widest mb-1">
+                       {config?.ticketFooter || "¡Gracias por su compra!"}
+                   </p>
+                   <p className="text-[10px] text-zinc-500 italic">
+                       Vuelve pronto a {branch?.name || config?.storeName || 'nuestra tienda'}
+                   </p>
+               </div>
           
            <style jsx global>{`
                @media print {

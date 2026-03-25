@@ -17,7 +17,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/utils";
-import { AdminAPI, CurrenciesAPI, ConfigAPI } from "@/services/api";
+import { AdminAPI, ConfigAPI, CurrenciesAPI } from "@/services/api";
 import { useBranchStore } from "@/store/branch.store";
 import {
     DollarSign,
@@ -171,6 +171,7 @@ export default function ManagementPage() {
                                 </SelectTrigger>
                                 <SelectContent className="bg-white dark:bg-zinc-950 border shadow-md z-[200]">
                                     <SelectItem value="today">Hoy</SelectItem>
+                                    <SelectItem value="yesterday">Ayer</SelectItem>
                                     <SelectItem value="week">Última Semana</SelectItem>
                                     <SelectItem value="month">Último Mes</SelectItem>
                                     <SelectItem value="year">Último Año</SelectItem>

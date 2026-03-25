@@ -2,28 +2,28 @@
 
 import { Badge } from "@/components/ui/badge";
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbSeparator,
+      Breadcrumb,
+      BreadcrumbItem,
+      BreadcrumbLink,
+      BreadcrumbList,
+      BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+      Card,
+      CardContent,
+      CardDescription,
+      CardHeader,
+      CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+      Select,
+      SelectContent,
+      SelectItem,
+      SelectTrigger,
+      SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
@@ -32,20 +32,22 @@ import { useToast } from "@/components/ui/use-toast";
 import { ConfigAPI, CurrenciesAPI } from "@/services/api";
 import { StoreConfig } from "@/types/extended";
 import {
-    AlertCircle,
-    Archive,
-    ArrowLeftRight,
-    Award,
-    CreditCard,
-    LayoutGrid,
-    Loader2,
-    Ruler,
-    Save,
-    Settings,
-    ShieldCheck,
-    StopCircle,
-    Store,
-    Truck,
+      AlertCircle,
+      Archive,
+      ArrowLeftRight,
+      Award,
+      CreditCard,
+      FileText,
+      LayoutGrid,
+      Loader2,
+      Printer,
+      Ruler,
+      Save,
+      Settings,
+      ShieldCheck,
+      StopCircle,
+      Store,
+      Truck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -73,6 +75,9 @@ export default function SettingsPage() {
     moneyPerPoint: 1,
     webSafetyStock: 0,
     logoUrl: "",
+    ticketFooter: "¡Gracias por su compra!",
+    showLogoOnTicket: true,
+    showLogoOnInvoice: true,
     adImage: "",
     adText: "",
     enableAutoBackup: false,
@@ -265,7 +270,7 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="general" className="w-full ">
-        <TabsList className="grid w-full grid-cols-2 border-2 border-gray-300 dark:border-gray-700 sm:grid-cols-4 mb-8  text-slate-700 dark:text-slate-400 p-1 rounded-lg h-auto">
+        <TabsList className="grid w-full grid-cols-2 border-2 border-gray-300 dark:border-gray-700 sm:grid-cols-5 mb-8  text-slate-700 dark:text-slate-400 p-1 rounded-lg h-auto">
           <TabsTrigger
             className="hover:cursor-pointer data-[state=active]:bg-secondary/60 dark:data-[state=active]:bg-secondary/60"
             value="general"
@@ -282,7 +287,13 @@ export default function SettingsPage() {
             className="hover:cursor-pointer data-[state=active]:bg-secondary/60 dark:data-[state=active]:bg-secondary/60"
             value="features"
           >
-            Características y Módulos
+      Módulos y Caracterist.
+          </TabsTrigger>
+          <TabsTrigger
+            className="hover:cursor-pointer data-[state=active]:bg-secondary/60 dark:data-[state=active]:bg-secondary/60"
+            value="ticket"
+          >
+            Ticket y Factura
           </TabsTrigger>
           <TabsTrigger
             className="hover:cursor-pointer data-[state=active]:bg-secondary/60 dark:data-[state=active]:bg-secondary/60"
@@ -594,73 +605,69 @@ export default function SettingsPage() {
               </div>
 
               <div className="dark:bg-slate-950/50 p-4 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[100px]">
-                {(!config.customMeasurementUnits ||
-                  config.customMeasurementUnits.length === 0) && (
-                  <p className="text-sm text-muted-foreground text-center py-2">
-                    No hay unidades personalizadas agregadas aún.
-                  </p>
-                )}
-                <div className="space-y-4">
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      "UNIDAD",
-                      "CAJA",
-                      "KG",
-                      "LITRO",
-                      "METRO",
-                      "PAR",
-                      "PACK",
-                    ].map((unit) => (
-                      <div
-                        key={unit}
-                        title="Unidad base (No se puede borrar)"
-                        className="flex items-center bg-slate-100/50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/50 rounded-full px-3 py-1 shadow-sm opacity-60"
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    "UNIDAD",
+                    "CAJA",
+                    "KG",
+                    "LITRO",
+                    "METRO",
+                    "PAR",
+                    "PACK",
+                  ].map((unit) => (
+                    <div
+                      key={unit}
+                      title="Unidad estándar (Sistema)"
+                      className="flex items-center bg-slate-100/50 dark:bg-slate-800/30 border-2 border-slate-200 dark:border-slate-700/50 rounded-full px-3 py-1 shadow-sm"
+                    >
+                      <span className="text-sm font-bold opacity-70">{unit}</span>
+                    </div>
+                  ))}
+
+                  {/* Custom Units */}
+                  {config.customMeasurementUnits?.map((unit) => (
+                    <div
+                      key={unit}
+                      className="flex items-center dark:bg-slate-800 border-2 border-indigo-200 dark:border-indigo-800/50 rounded-full px-3 py-1 shadow-sm group hover:border-indigo-400 dark:hover:border-indigo-500 transition-colors"
+                    >
+                      <span className="text-sm font-bold text-indigo-800 dark:text-indigo-300 mr-2">
+                        {unit}
+                      </span>
+                      <button
+                        onClick={() =>
+                          setConfig({
+                            ...config,
+                            customMeasurementUnits:
+                              config.customMeasurementUnits?.filter(
+                                (u) => u !== unit,
+                              ),
+                          })
+                        }
+                        className="text-slate-400 hover:text-red-500 transition-colors hover:cursor-pointer"
                       >
-                        <span className="text-sm font-medium">{unit}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Separator />
-                  <div className="flex flex-wrap gap-2">
-                    {/* Custom Units */}
-                    {config.customMeasurementUnits?.map((unit) => (
-                      <div
-                        key={unit}
-                        className="flex items-center dark:bg-slate-800 border-2 border-indigo-200 dark:border-indigo-800/50 rounded-full px-3 py-1 shadow-sm group hover:border-indigo-400 dark:hover:border-indigo-500 transition-colors"
-                      >
-                        <span className="text-sm font-bold text-indigo-800 dark:text-indigo-300 mr-2">
-                          {unit}
-                        </span>
-                        <button
-                          onClick={() =>
-                            setConfig({
-                              ...config,
-                              customMeasurementUnits:
-                                config.customMeasurementUnits?.filter(
-                                  (u) => u !== unit,
-                                ),
-                            })
-                          }
-                          className="text-slate-400 hover:text-red-500 transition-colors hover:cursor-pointer"
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M18 6 6 18" />
-                            <path d="m6 6 12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                          <line x1="18" y1="6" x2="6" y2="18"></line>
+                          <line x1="6" y1="6" x2="12" y2="18"></line>
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                  
+                  {(!config.customMeasurementUnits || config.customMeasurementUnits.length === 0) && (
+                    <div className="w-full mt-2">
+                       <p className="text-[10px] text-muted-foreground italic text-center">No hay unidades personalizadas agregadas.</p>
+                    </div>
+                  )}
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -1631,6 +1638,83 @@ export default function SettingsPage() {
                   <Archive className="h-4 w-4" />
                   Generar y Descargar Respaldo Ahora
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* TAB 5: TICKET Y FACTURA */}
+        <TabsContent value="ticket" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <div className="p-2 rounded-full bg-slate-100 dark:bg-slate-800">
+                  <Printer className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                </div>
+                <div className="space-y-1">
+                  <CardTitle>Personalización de Comprobantes</CardTitle>
+                  <CardDescription>
+                    Configura el diseño y mensajes de tus tickets y facturas.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Mensaje al pie del ticket</Label>
+                  <textarea
+                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={config.ticketFooter || ""}
+                    onChange={(e) =>
+                      setConfig({ ...config, ticketFooter: e.target.value })
+                    }
+                    placeholder="Ej: ¡Gracias por su compra! Tienes 30 días para cambios..."
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Este mensaje aparecerá al final de todos los tickets impresos.
+                  </p>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="flex items-center justify-between p-4 rounded-lg border bg-slate-50/50 dark:bg-slate-900/20">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <Printer className="h-4 w-4 text-muted-foreground" />
+                      <Label className="font-semibold">Logo en Ticket</Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Mostrar el logo de la tienda en el encabezado del ticket.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={config.showLogoOnTicket ?? true}
+                    onCheckedChange={(c) =>
+                      setConfig({ ...config, showLogoOnTicket: c })
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-lg border bg-slate-50/50 dark:bg-slate-900/20">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <Label className="font-semibold">Logo en Factura PDF</Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Incluir el logo de la empresa en la factura descargable.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={config.showLogoOnInvoice ?? true}
+                    onCheckedChange={(c) =>
+                      setConfig({ ...config, showLogoOnInvoice: c })
+                    }
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

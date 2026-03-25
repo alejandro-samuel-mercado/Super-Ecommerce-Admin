@@ -143,6 +143,7 @@ export function RegistrationTab() {
     const [quickUserName, setQuickUserName] = useState("")
     const [quickUserPhone, setQuickUserPhone] = useState("")
     const [quickUserDni, setQuickUserDni] = useState("")
+    const [quickUserRnt, setQuickUserRnt] = useState("")
 
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -441,6 +442,7 @@ export function RegistrationTab() {
             setQuickUserName("");
             setQuickUserPhone("");
             setQuickUserDni("");
+            setQuickUserRnt("");
             toast(`Cliente existente encontrado: ${existingLocal.name}`);
             return;
         }
@@ -452,7 +454,8 @@ export function RegistrationTab() {
                 password: identifier,
                 role: 'CLIENT',
                 phone: quickUserPhone,
-                dni: quickUserDni
+                dni: quickUserDni,
+                rnt: quickUserRnt
             });
 
 
@@ -1109,6 +1112,10 @@ export function RegistrationTab() {
                                                         <Input id="dni" inputMode="numeric" className="border-2 border-zinc-300" value={quickUserDni} onChange={e => setQuickUserDni(e.target.value)} placeholder="Ej: 30123456" />
                                                     </div>
                                                 </div>
+                                                <div className="grid gap-2">
+                                                    <Label htmlFor="rnt" className="font-bold">RNT (Opcional)</Label>
+                                                    <Input id="rnt" className="border-2 border-zinc-300" value={quickUserRnt} onChange={e => setQuickUserRnt(e.target.value)} placeholder="Número Tributario..." />
+                                                </div>
                                                 <div className="text-xs text-zinc-500 bg-zinc-100 p-3 rounded border border-zinc-200">
                                                     <strong>Credenciales Automáticas:</strong> <br />
                                                     Email: cliente.[tel/dni]@local.pos <br />
@@ -1124,8 +1131,11 @@ export function RegistrationTab() {
                             <div className="p-4 bg-emerald-100 dark:bg-emerald-900/30 border-2 border-emerald-500 dark:border-emerald-700 rounded-lg flex justify-between items-center shadow-sm">
                                 <div>
                                     <p className="font-black text-base text-emerald-900 dark:text-emerald-100 uppercase">{client.name}</p>
-                                    <p className="text-xs text-emerald-800 dark:text-emerald-400 font-mono mt-1 font-bold">{client.email}</p>
-                                    {client.dni && <Badge variant="outline" className="mt-2 text-[10px] border-emerald-600 text-emerald-800 bg-white/50 font-bold">DNI: {client.dni}</Badge>}
+                                     <p className="text-xs text-emerald-800 dark:text-emerald-400 font-mono mt-1 font-bold">{client.email}</p>
+                                     <div className="flex gap-2 flex-wrap">
+                                        {client.dni && <Badge variant="outline" className="mt-2 text-[10px] border-emerald-600 text-emerald-800 bg-white/50 font-bold">DNI: {client.dni}</Badge>}
+                                        {client.rnt && <Badge variant="outline" className="mt-2 text-[10px] border-blue-600 text-blue-800 bg-white/50 font-bold uppercase">RNT: {client.rnt}</Badge>}
+                                     </div>
                                 </div>
                                 <Button variant="ghost" size="sm" onClick={() => setClient(null)} className="text-red-600 hover:text-red-700 hover:bg-red-100 font-bold border border-red-200 hover:cursor-pointer">QUITAR</Button>
                             </div>

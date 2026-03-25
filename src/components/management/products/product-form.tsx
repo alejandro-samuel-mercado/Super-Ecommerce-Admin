@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { formatCurrency } from "@/lib/utils"
 import { CategoriesAPI, ConfigAPI, CurrenciesAPI, ProductsAPI } from "@/services/api"
+import { useConfigStore } from "@/store/config.store"
 import { Category, Condition, Currency, Product } from "@/types/schema"
 import { Plus, X } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -22,6 +23,7 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ open, onOpenChange, product, onSave }: ProductFormProps) {
+    const { config } = useConfigStore()
     const [formData, setFormData] = useState<Partial<Product>>(product || {
         name: "",
         description: "",
@@ -138,7 +140,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
         return !!formData.name && !!formData.categoryId && (formData.basePrice ?? 0) > 0;
     }
 
-    const combinedUnits = Array.from(new Set(['UNIDAD', 'KG', 'LITRO', 'METRO', ...customUnits]))
+    const combinedUnits = Array.from(new Set(['UNIDAD', 'CAJA', 'KG', 'LITRO', 'METRO', 'PAR', 'PACK', ...customUnits]))
     const unitLabels: Record<string, string> = {
         UNIDAD: 'Unidad (u) — Productos normales',
         KG: 'Kilogramo (kg) — Venta por peso',
@@ -524,7 +526,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
 
                                     <div className="space-y-4">
                                         <div className="space-y-2">
-                                            <Label className="text-foreground">Precio Base ($)</Label>
+                                            <Label htmlFor="basePrice" className="text-foreground">Precio Base ({config?.currencySymbol || '$'})</Label>
                                             <Input
                                                 type="text"
                                                 inputMode="decimal"
@@ -547,7 +549,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                                             />
                                             {formData.basePrice && Number(formData.basePrice) > 0 && (
                                                 <p className="text-xs text-muted-foreground mt-1">
-                                                    {formatCurrency(Number(formData.basePrice) || 0)}
+                                                    {formatCurrency(Number(formData.basePrice) || 0, config?.baseCurrency || 'USD', config?.currencySymbol)}
                                                 </p>
                                             )}
                                         </div>

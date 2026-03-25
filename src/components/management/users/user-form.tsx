@@ -55,6 +55,7 @@ export function UserForm({
       zipCode: "",
       country: "",
       dni: "",
+      rnt: "",
       password: "",
     },
   );
@@ -85,6 +86,7 @@ export function UserForm({
         zipCode: "",
         country: "",
         dni: "",
+        rnt: "",
         password: "",
       });
     }
@@ -176,6 +178,20 @@ export function UserForm({
                       setFormData({ ...formData, dni: e.target.value })
                     }
                     className="bg-background border-input"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="rnt">RNT (Registro Nacional Tributario)</Label>
+                  <Input
+                    id="rnt"
+                    value={formData.rnt || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, rnt: e.target.value })
+                    }
+                    className="bg-background border-input"
+                    placeholder="Ingrese el número tributario si aplica..."
                   />
                 </div>
               </div>

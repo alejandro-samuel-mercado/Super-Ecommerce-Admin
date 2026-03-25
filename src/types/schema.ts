@@ -103,6 +103,7 @@ export interface User {
   role?: Role; 
   status: UserStatus;
   dni?: string | null;
+  rnt?: string | null;
   phone?: string | null;
   address?: string | null;
   city?: string | null;

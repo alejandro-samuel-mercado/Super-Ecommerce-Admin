@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { formatCurrency } from "@/lib/utils"
+import { useConfigStore } from "@/store/config.store"
 import { Product, UserRole } from "@/types/schema"
 import { CellContext, ColumnDef, ColumnFiltersState, HeaderContext, SortingState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
 import { ArrowUpDown, Boxes, Edit, Loader2, Search, Settings2, Trash } from "lucide-react"
@@ -32,6 +33,7 @@ interface ProductTableProps {
 
 export function ProductTable({ data, onEdit, onDelete, onSelectionChange, currentUserRole, pagination, search, onSearchChange, loading }: ProductTableProps) {
     const router = useRouter()
+    const { config } = useConfigStore()
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
@@ -103,14 +105,14 @@ export function ProductTable({ data, onEdit, onDelete, onSelectionChange, curren
         {
             accessorKey: "basePrice",
             header: "Precio Base",
-            cell: ({ row }: CellContext<Product, unknown>) => <span className="font-medium text-foreground">{formatCurrency(row.getValue("basePrice") as number)}</span>
+            cell: ({ row }: CellContext<Product, unknown>) => <span className="font-medium text-foreground">{formatCurrency(row.getValue("basePrice") as number, config?.baseCurrency, config?.currencySymbol)}</span>
         },
         {
             id: "costPrice",
             header: "Precio de compra",
             cell: ({ row }: CellContext<Product, unknown>) => {
                 const cost = row.original.costPrice || row.original.skus?.[0]?.costPrice || 0;
-                return <span className="font-medium text-foreground">{formatCurrency(Number(cost))}</span>
+                return <span className="font-medium text-foreground">{formatCurrency(Number(cost), config?.baseCurrency, config?.currencySymbol)}</span>
             }
         },
         {
