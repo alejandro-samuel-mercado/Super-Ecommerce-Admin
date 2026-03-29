@@ -82,11 +82,10 @@ export default function StockControlPage() {
 
   const loadInventory = useCallback(
     async (pageNum = page) => {
-      if (!activeBranch) return;
       setLoading(true);
       try {
         const response = await StockControlService.getInventory(
-          activeBranch.id,
+          activeBranch?.id || null,
           {
             search,
             stockLevel: stockLevel === "ALL" ? undefined : stockLevel,
@@ -175,16 +174,6 @@ export default function StockControlPage() {
     setSupplierId("ALL");
     setBrand("ALL");
   };
-
-  if (!activeBranch) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[50vh] space-y-4">
-        <p className="text-muted-foreground">
-          Selecciona una sucursal para gestionar su stock.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="sm:p-5 p-0 pt-2 space-y-8 ">

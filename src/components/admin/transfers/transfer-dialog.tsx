@@ -328,9 +328,8 @@ export function TransferDialog({ open, onOpenChange, onSuccess }: TransferDialog
                             <div className="w-24 space-y-1">
                                 <Label className="text-xs">Cantidad</Label>
                                 <Input 
-                                    type="number" 
-                                    min="0" 
-                                    step="any"
+                                    type="text" 
+                                    inputMode="decimal"
                                     className="h-9"
                                     value={item.quantity} 
                                     onChange={(e) => handleRowChange(index, "quantity", e.target.value)} 

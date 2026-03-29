@@ -269,10 +269,9 @@ export function PurchaseForm({ onSuccess, onCancel }: PurchaseFormProps) {
                             <div className="col-span-4 md:col-span-2 space-y-1">
                                 <Label className="text-xs text-muted-foreground">Cantidad</Label>
                                 <Input 
-                                    type="number" 
+                                    type="text" 
+                                    inputMode="decimal"
                                     className="h-9 bg-background border-input"
-                                    min="0.001"
-                                    step="0.001"
                                     value={item.quantity} 
                                     onChange={e => updateItem(idx, 'quantity', e.target.value)} 
                                 />
@@ -281,10 +280,9 @@ export function PurchaseForm({ onSuccess, onCancel }: PurchaseFormProps) {
                              <div className="col-span-4 md:col-span-3 space-y-1">
                                 <Label className="text-xs text-muted-foreground">Precio Unit. ({items[idx].skuId && supplierSkus.find(s => s.skuId == items[idx].skuId)?.moneda})</Label>
                                 <Input 
-                                    type="number" 
+                                    type="text" 
+                                    inputMode="decimal"
                                     className="h-9 bg-background border-input"
-                                    min="0"
-                                    step="0.01"
                                     value={item.unitPrice} 
                                     onChange={e => updateItem(idx, 'unitPrice', e.target.value)} 
                                 />

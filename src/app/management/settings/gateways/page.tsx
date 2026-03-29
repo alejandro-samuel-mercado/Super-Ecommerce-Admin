@@ -28,7 +28,7 @@ export default function GatewayManagementPage() {
     const { toast } = useToast()
 
     const [availableCurrencies, setAvailableCurrencies] = useState<any[]>([])
-    
+
     const loadData = useCallback(async () => {
         setLoading(true)
         try {
@@ -78,10 +78,10 @@ export default function GatewayManagementPage() {
             toast({ title: "Guardado", description: "Configuración actualizada correctamente." })
             setEditingGateway(null)
         } catch (error: any) {
-            toast({ 
-                title: "Error de Formato", 
-                description: "Asegúrate de que el JSON sea válido.", 
-                variant: "destructive" 
+            toast({
+                title: "Error de Formato",
+                description: "Asegúrate de que el JSON sea válido.",
+                variant: "destructive"
             })
         } finally {
             setSaving(false)
@@ -97,10 +97,10 @@ export default function GatewayManagementPage() {
             payload[type] = true;
 
             await PaymentGatewaysAPI.updateCurrencySupport(payload)
-            
+
             const csData = await PaymentGatewaysAPI.getCurrencySupport()
             setCurrencySupport(csData)
-            
+
             toast({ title: "Actualizado", description: `Pasarela para ${currency} actualizada.` })
         } catch (error) {
             toast({ title: "Error", description: "No se pudo actualizar la configuración de moneda.", variant: "destructive" })
@@ -111,7 +111,7 @@ export default function GatewayManagementPage() {
 
     return (
         <div className="sm:p-8 pt-2 space-y-8  pb-40 sm:pb-20">
-             <Breadcrumb className="px-2">
+            <Breadcrumb className="px-2">
                 <BreadcrumbList>
                     <BreadcrumbItem><BreadcrumbLink href="/management">Inicio</BreadcrumbLink></BreadcrumbItem>
                     <BreadcrumbSeparator />
@@ -120,8 +120,8 @@ export default function GatewayManagementPage() {
                     <BreadcrumbItem><BreadcrumbLink>Pasarelas de Pago</BreadcrumbLink></BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
-            
-            <div className="flex flex-col sm:flex-row gap-6 sm:gap-0 items-center justify-between top-0  z-10 py-4 px-4 ">
+
+            <div className="flex flex-col sm:flex-row gap-6 sm:gap-0 items-center justify-between top-0  z-10 py-0 sm:py-4 px-4 ">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
                         <CreditCard className="h-6 w-6" />
@@ -135,7 +135,7 @@ export default function GatewayManagementPage() {
             </div>
 
             <Tabs defaultValue="gateways" className="w-full">
-                <TabsList className="grid sm:w-full w-[80%] mx-auto sm:mx-0 sm:grid-cols-2 grid-cols-1 mb-6 max-w-md gap-3 sm_mb-0">
+                <TabsList className="grid sm:w-full w-[80%] mx-auto h-auto sm:mx-0 sm:grid-cols-2 grid-cols-1 mb-6 max-w-md gap-3 sm_mb-0">
                     <TabsTrigger className="border-2 border-secondary/40 hover:border-secondary/40 data-[state=active]:border-secondary/80 data-[state=active]:bg-secondary/30" value="gateways">Pasarelas Disponibles</TabsTrigger>
                     <TabsTrigger className="border-2 border-secondary/40 hover:border-secondary/40 data-[state=active]:border-secondary/80 data-[state=active]:bg-secondary/30" value="currencies">Configuración por Moneda</TabsTrigger>
                 </TabsList>
@@ -163,7 +163,7 @@ export default function GatewayManagementPage() {
                                         <TableRow key={gateway.id}>
                                             <TableCell className="font-medium flex items-center gap-2">
                                                 {gateway.name}
-                                                
+
                                             </TableCell>
                                             <TableCell className="text-muted-foreground font-mono text-xs">{gateway.slug}</TableCell>
                                             <TableCell className="text-center">
@@ -172,9 +172,9 @@ export default function GatewayManagementPage() {
                                                 </span>
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Button 
+                                                <Button
                                                     variant="ghost" className="cursor-pointer"
-                                                    size="sm" 
+                                                    size="sm"
                                                     onClick={() => handleEditConfig(gateway)}
                                                 >
                                                     <Settings2 className="h-4 w-4 mr-2" />
@@ -182,7 +182,7 @@ export default function GatewayManagementPage() {
                                                 </Button>
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Switch 
+                                                <Switch
                                                     checked={gateway.isActive}
                                                     onCheckedChange={(c) => toggleGateway(gateway.id, c)}
                                                 />
@@ -213,7 +213,7 @@ export default function GatewayManagementPage() {
                                         const currency = currObj.code;
                                         const isBase = currency === config?.baseCurrency;
                                         const primarySupport = currencySupport.find(cs => cs.currencyCode === currency && cs.isPrimary);
-                                        
+
                                         return (
                                             <div key={currency} className="p-6 border-2 border-secondary/20 rounded-3xl bg-card shadow-sm space-y-6">
                                                 <div className="flex items-center justify-between">
@@ -229,14 +229,14 @@ export default function GatewayManagementPage() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div className="grid grid-cols-1 gap-4">
                                                     <div className="space-y-2">
                                                         <Label className="text-xs font-bold text-muted-foreground uppercase">
                                                             Pasarela Principal
                                                         </Label>
-                                                        <Select 
-                                                            value={primarySupport?.gatewayId.toString() || ''} 
+                                                        <Select
+                                                            value={primarySupport?.gatewayId.toString() || ''}
                                                             onValueChange={(val) => handleSupportChange(currency, val, 'isPrimary')}
                                                         >
                                                             <SelectTrigger className="rounded-xl border-secondary/30">
@@ -252,15 +252,15 @@ export default function GatewayManagementPage() {
                                                         </Select>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div className="pt-2">
                                                     <div className="bg-muted/50 p-3 rounded-2xl text-[11px] text-muted-foreground leading-relaxed">
                                                         <p className="font-semibold mb-1 text-secondary">
                                                             {isBase ? 'Para Clientes Locales:' : 'Para Clientes Internacionales:'}
                                                         </p>
                                                         <p>
-                                                            {isBase 
-                                                                ? `Verán ${primarySupport?.gatewayId ? gateways.find(g => g.id === primarySupport.gatewayId)?.name : 'su pasarela'} y PayPal.` 
+                                                            {isBase
+                                                                ? `Verán ${primarySupport?.gatewayId ? gateways.find(g => g.id === primarySupport.gatewayId)?.name : 'su pasarela'} y PayPal.`
                                                                 : 'Verán PayPal y Stripe de forma global.'}
                                                         </p>
                                                     </div>
@@ -283,11 +283,11 @@ export default function GatewayManagementPage() {
                             Edita las credenciales y parámetros técnicos en formato JSON.
                         </DialogDescription>
                     </DialogHeader>
-                    
+
                     <div className="grid gap-4 py-4">
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="config-json">Parámetros (JSON)</Label>
-                            <Textarea 
+                            <Textarea
                                 id="config-json"
                                 value={configString}
                                 onChange={(e) => setConfigString(e.target.value)}

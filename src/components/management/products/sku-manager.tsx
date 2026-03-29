@@ -134,7 +134,7 @@ function SkuForm({
                 <div className="md:col-span-2 space-y-2">
                     <Label className="text-foreground">Precio</Label>
                     <Input 
-                        type="number" 
+                        type="text" 
                         inputMode="decimal"
                         value={price} 
                         onChange={(e) => setPrice(e.target.value)} 
@@ -145,7 +145,7 @@ function SkuForm({
                 <div className="md:col-span-2 space-y-2">
                     <Label className="text-foreground">Costo Compra</Label>
                     <Input 
-                        type="number" 
+                        type="text" 
                         inputMode="decimal"
                         value={costPrice} 
                         onChange={(e) => setCostPrice(e.target.value)} 
@@ -156,7 +156,7 @@ function SkuForm({
                 <div className="md:col-span-2 space-y-2">
                     <Label className="text-foreground">Stock</Label>
                     <Input 
-                        type="number" 
+                        type="text" 
                         inputMode="decimal"
                         value={stock} 
                         onChange={(e) => setStock(e.target.value)} 

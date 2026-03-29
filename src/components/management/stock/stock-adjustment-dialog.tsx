@@ -165,10 +165,8 @@ export function StockAdjustmentDialog({
             <div className="relative">
               <Input
                 id="stock-value"
-                type="number"
+                type="text"
                 inputMode="decimal"
-                min="0"
-                step={step}
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 className="pr-14 text-lg font-semibold rounded-xl"

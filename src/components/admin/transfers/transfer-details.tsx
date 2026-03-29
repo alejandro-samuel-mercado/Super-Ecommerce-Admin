@@ -8,8 +8,9 @@ import { useToast } from "@/components/ui/use-toast"
 import stockTransferService from "@/services/stock-transfer.service"
 import { useBranchStore } from "@/store/branch.store"
 import { StockTransfer } from "@/types/schema"
-import { ArrowRight, Box, CheckCircle, Loader2, Send, XCircle } from "lucide-react"
+import { CheckCircle, Loader2, Send, XCircle, ArrowRight, Box } from "lucide-react"
 import { useState } from "react"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 
 interface TransferDetailsProps {
     transfer: StockTransfer | null
@@ -22,12 +23,15 @@ export function TransferDetails({ transfer, open, onOpenChange, onUpdate }: Tran
     const { toast } = useToast()
     const [loading, setLoading] = useState(false)
     const { activeBranch } = useBranchStore() 
+    const [confirmState, setConfirmState] = useState<{open: boolean, action: 'ship' | 'receive' | 'cancel' | null}>({open: false, action: null})
 
     if (!transfer) return null
 
-    const handleAction = async (action: 'ship' | 'receive' | 'cancel') => {
-        if(!confirm(`¿Estás seguro de ${action} esta transferencia?`)) return;
+    const handleActionClick = (action: 'ship' | 'receive' | 'cancel') => {
+        setConfirmState({ open: true, action })
+    }
 
+    const handleActionConfirmed = async (action: 'ship' | 'receive' | 'cancel') => {
         setLoading(true)
         try {
             if (action === 'ship') await stockTransferService.ship(transfer.id)
@@ -37,6 +41,7 @@ export function TransferDetails({ transfer, open, onOpenChange, onUpdate }: Tran
             toast({ title: "Transferencia actualizada exitosamente" })
             onUpdate()
             onOpenChange(false)
+            setConfirmState({ open: false, action: null })
         } catch (error: any) {
              toast({ title: "Error", description: error.response?.data?.message || "Error", variant: "destructive" })
         } finally {
@@ -123,19 +128,19 @@ export function TransferDetails({ transfer, open, onOpenChange, onUpdate }: Tran
                  
                     <div className="flex flex-col gap-2 pt-4 border-t">
                         {canShip && (
-                             <Button onClick={() => handleAction('ship')} disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white hover:cursor-pointer">
+                             <Button onClick={() => handleActionClick('ship')} disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white hover:cursor-pointer">
                                 {loading ? <Loader2 className="animate-spin mr-2" /> : <Send className="mr-2 h-4 w-4" />}
                                 Despachar Mercadería (Saldrá de Stock)
                              </Button>
                         )}
                         {canReceive && (
-                             <Button onClick={() => handleAction('receive')} disabled={loading} className="w-full bg-green-600 hover:bg-green-700 text-white hover:cursor-pointer">
+                             <Button onClick={() => handleActionClick('receive')} disabled={loading} className="w-full bg-green-600 hover:bg-green-700 text-white hover:cursor-pointer">
                                  {loading ? <Loader2 className="animate-spin mr-2" /> : <CheckCircle className="mr-2 h-4 w-4" />}
                                 Recepcionar (Ingresará a Stock)
                              </Button>
                         )}
                         {canCancel && (
-                             <Button onClick={() => handleAction('cancel')} variant="destructive" disabled={loading} className="w-full hover:cursor-pointer">
+                             <Button onClick={() => handleActionClick('cancel')} variant="destructive" disabled={loading} className="w-full hover:cursor-pointer">
                                  {loading ? <Loader2 className="animate-spin mr-2" /> : <XCircle className="mr-2 h-4 w-4" />}
                                 Cancelar Transferencia
                              </Button>
@@ -148,6 +153,20 @@ export function TransferDetails({ transfer, open, onOpenChange, onUpdate }: Tran
                         )}
                     </div>
                 </div>
+                
+                <ConfirmDialog 
+                    open={confirmState.open}
+                    onOpenChange={(open) => setConfirmState(prev => ({ ...prev, open }))}
+                    title={confirmState.action === 'ship' ? 'Despachar Transferencia' : confirmState.action === 'receive' ? 'Recepcionar Transferencia' : 'Cancelar Transferencia'}
+                    description={`¿Estás seguro de ${confirmState.action === 'ship' ? 'despachar' : confirmState.action === 'receive' ? 'recepcionar' : 'cancelar'} esta transferencia?`}
+                    onConfirm={() => {
+                        if (confirmState.action) {
+                             handleActionConfirmed(confirmState.action)
+                        }
+                    }}
+                    variant={confirmState.action === 'cancel' ? 'destructive' : 'default'}
+                    loading={loading}
+                />
             </SheetContent>
         </Sheet>
     )

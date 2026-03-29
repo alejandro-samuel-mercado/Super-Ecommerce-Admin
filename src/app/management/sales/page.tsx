@@ -55,12 +55,10 @@ function SalesPageContent() {
 
   const loadSales = useCallback(
     async (pageNum = page) => {
-      if (!activeBranch) return;
-
       setLoading(true);
       try {
         const params: any = {
-          branchId: activeBranch.id,
+          branchId: activeBranch?.id,
           page: pageNum,
           limit,
           search,

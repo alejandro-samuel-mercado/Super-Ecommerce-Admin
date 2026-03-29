@@ -5,12 +5,15 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { InventoryItem, formatPrice, formatStock } from "@/services/stock-control.service"
+import { useBranchStore } from "@/store/branch.store"
+import api from "@/services/api"
 import { useConfigStore } from "@/store/config.store"
 import { useAuthStore } from "@/store/use-auth-store"
 import { UserRole } from "@/types/schema"
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
 import { Edit3, Loader2, Settings2, X } from "lucide-react"
-import { useState } from "react"
+import { cn } from "@/lib/utils"
+import { useEffect, useMemo, useState } from "react"
 import { BulkEditDialog } from "./bulk-edit-dialog"
 import { StockAdjustmentDialog } from "./stock-adjustment-dialog"
 
@@ -35,6 +38,8 @@ export function StockTable({
     pagination,
     loading
 }: StockTableProps) {
+    const { activeBranch } = useBranchStore()
+    const [branches, setBranches] = useState<any[]>([])
     const { user } = useAuthStore()
     const { config } = useConfigStore()
     const currentUserRole = (user?.role?.name || 'EMPLOYEE') as UserRole
@@ -44,110 +49,160 @@ export function StockTable({
     const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null)
     const [dialogOpen, setDialogOpen] = useState(false)
     const [bulkEditOpen, setBulkEditOpen] = useState(false)
-    
-    const columns: ColumnDef<InventoryItem>[] = [
-        {
-            id: "select",
-            header: ({ table }: { table: any }) => (
-                <Checkbox
-                    checked={table.getIsAllPageRowsSelected()}
-                    onCheckedChange={(value: any) => table.toggleAllPageRowsSelected(!!value)}
-                    aria-label="Seleccionar todos"
-                />
-            ),
-            cell: ({ row }: { row: any }) => (
-                <Checkbox
-                    checked={row.getIsSelected()}
-                    onCheckedChange={(value:any) => row.toggleSelected(!!value)}
-                    aria-label="Seleccionar fila"
-                    onClick={(e) => e.stopPropagation()}
-                />
-            ),
-            enableSorting: false,
-            enableHiding: false,
-        },
-        {
-            accessorKey: "skuCode",
-            header: "SKU",
-            cell: ({ row }: { row: any }) => <span className="font-mono text-xs">{row.getValue("skuCode")}</span>
-        },
-        {
-            accessorKey: "productName",
-            header: "Producto",
-            cell: ({ row }: { row: any }) => {
-                const variant = row.original.variant;
-                return (
-                    <div className="flex flex-col">
-                        <div className="font-medium">
-                            {row.getValue("productName")}
-                            {variant && <span className="text-muted-foreground font-normal ml-1">({variant})</span>}
-                        </div>
-                        <span className="text-xs text-muted-foreground">{row.original.categoryName}</span>
-                    </div>
-                );
-            }
-        },
-        {
-            accessorKey: "stock",
-            header: "Stock",
-            cell: ({ row }: { row: any }) => {
-                const item = row.original
-                const low = lowThreshold ?? item.minStock ?? 10
-                const critical = criticalThreshold ?? 5
-                
-                const isEmpty = item.stock === 0
-                const isCritical = !isEmpty && item.stock <= critical
-                const isLow = !isEmpty && !isCritical && item.stock <= low
-                
-                return (
-                    <div className="flex items-center gap-1.5">
-                        <Badge variant={isEmpty || isCritical ? "destructive" : isLow ? "outline" : "outline"}
-                            className={
-                                isCritical ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800' : 
-                                isLow ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800' : 
-                                ''
-                            }>
-                            {formatStock(item.stock, item.measurementUnit ?? 'UNIDAD')}
-                        </Badge>
-                    </div>
-                )
-            }
-        },
-        {
-            accessorKey: "price",
-            header: "Precio",
-            cell: ({ row }: { row: any }) => {
-                const item = row.original
-                return (
-                    <span className="font-mono">{formatPrice(parseFloat(item.price), item.measurementUnit, config?.baseCurrency || 'USD', config?.currencySymbol)}</span>
-                )
-            }
-        },
-        {
-            id: "actions",
-            header: "Acciones",
-            cell: ({ row }: { row: any }) => {
-                const item = row.original
-                return (
-                    <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => {
-                            setSelectedItem(item)
-                            setDialogOpen(true)
-                        }}
-                        className="h-8 w-8 p-0 hover:cursor-pointer"
-                        title="Ajustar Stock"
-                    >
-                        <Settings2 className="h-4 w-4" />
-                    </Button>
-                )
-            }
+
+    useEffect(() => {
+        api.get('/branches').then(res => {
+            const fetchedBranches = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : [];
+            setBranches(fetchedBranches.filter((b: any) => b.isActive));
+        }).catch(() => {});
+    }, []);
+
+    const renderStockCell = (item: InventoryItem, stockAmount: number) => {
+        const low = lowThreshold ?? item.minStock ?? 10;
+        const critical = criticalThreshold ?? 5;
+        const isEmpty = stockAmount === 0;
+        const isCritical = !isEmpty && stockAmount <= critical;
+        const isLow = !isEmpty && !isCritical && stockAmount <= low;
+        
+        let extraClasses = '';
+        if (isCritical) {
+            extraClasses = 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
+        } else if (isLow) {
+            extraClasses = 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800';
         }
-    ].filter(col => {
-        if (col.id === 'actions' && currentUserRole === 'EMPLOYEE') return false;
-        return true;
-    })
+
+        return (
+            <div className="flex items-center gap-1.5 ">
+                <Badge variant={isEmpty || isCritical ? "destructive" : "outline"}
+                    className={extraClasses}>
+                    {formatStock(stockAmount, item.measurementUnit ?? 'UNIDAD')}
+                </Badge>
+            </div>
+        );
+    };
+    
+    const columns: ColumnDef<InventoryItem>[] = useMemo(() => {
+        const baseCols: ColumnDef<InventoryItem>[] = [
+            {
+                id: "select",
+                header: ({ table }: { table: any }) => (
+                    <Checkbox
+                        checked={table.getIsAllPageRowsSelected()}
+                        onCheckedChange={(value: any) => table.toggleAllPageRowsSelected(!!value)}
+                        aria-label="Seleccionar todos"
+                    />
+                ),
+                cell: ({ row }: { row: any }) => (
+                    <Checkbox
+                        checked={row.getIsSelected()}
+                        onCheckedChange={(value:any) => row.toggleSelected(!!value)}
+                        aria-label="Seleccionar fila"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                ),
+                enableSorting: false,
+                enableHiding: false,
+            },
+            {
+                accessorKey: "skuCode",
+                header: "SKU",
+                cell: ({ row }: { row: any }) => <span className="font-mono text-xs whitespace-nowrap">{row.getValue("skuCode")}</span>,
+                meta: { className: "w-[120px]" } as any
+            },
+            {
+                accessorKey: "productName",
+                header: "Producto",
+                cell: ({ row }: { row: any }) => {
+                    const variant = row.original.variant;
+                    return (
+                        <div className="flex flex-col py-2">
+                            <div className="font-medium leading-tight whitespace-normal break-words">
+                                {row.getValue("productName")}
+                                {variant && <span className="text-foreground font-bold ml-1">({variant})</span>}
+                            </div>
+                            <span className="text-[10px] text-muted-foreground leading-tight mt-1">{row.original.categoryName}</span>
+                        </div>
+                    );
+                },
+                meta: { className: "min-w-[250px]" } as any
+            },
+            {
+                accessorKey: "price",
+                header: "Precio",
+                cell: ({ row }: { row: any }) => {
+                    const item = row.original
+                    return (
+                        <span className="font-mono">{formatPrice(parseFloat(item.price), item.measurementUnit, config?.baseCurrency || 'USD', config?.currencySymbol)}</span>
+                    )
+                },
+                meta: { className: "w-[140px]" } as any
+            },
+        ];
+
+        const metricCols: ColumnDef<InventoryItem>[] = []
+
+        if (activeBranch) {
+            metricCols.push({
+                id: `stock_${activeBranch.id}`,
+                header: () => <span className="font-semibold">Stock - {activeBranch.name}</span>,
+                cell: ({ row }: { row: any }) => renderStockCell(row.original, row.original.stock),
+                meta: { isHighlighted: true } as any
+            });
+        }
+
+        branches.forEach(b => {
+            if (activeBranch && b.id === activeBranch.id) return;
+            metricCols.push({
+                id: `stock_branch_${b.id}`,
+                header: `Stock - ${b.name}`,
+                cell: ({ row }: { row: any }) => {
+                    const bs = row.original.branchStocks?.find((bs: any) => bs.branchId === b.id);
+                    return renderStockCell(row.original, bs?.stock || 0);
+                }
+            });
+        });
+
+        metricCols.push({
+            id: `stock_total`,
+            header: "Stock Total",
+            cell: ({ row }: { row: any }) => renderStockCell(row.original, row.original.totalStock || 0)
+        });
+
+        const endCols: ColumnDef<InventoryItem>[] = [
+            {
+                id: "actions",
+                header: "Acciones",
+                cell: ({ row }: { row: any }) => {
+                    const item = row.original
+                    return (
+                        <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                                setSelectedItem(item)
+                                setDialogOpen(true)
+                            }}
+                            className="h-8 w-8 p-0 hover:cursor-pointer"
+                            title="Ajustar Stock"
+                        >
+                            <Settings2 className="h-4 w-4" />
+                        </Button>
+                    )
+                },
+                meta: { className: "w-[80px] text-center" } as any
+            }
+        ];
+
+        return [...baseCols, ...metricCols, ...endCols].filter(col => {
+            if (col.id === 'actions') {
+                if (!activeBranch || (currentUserRole !== 'SUPER_ADMIN' && currentUserRole !== 'ADMIN')) {
+                    return false;
+                }
+            }
+            return true;
+        });
+
+    }, [activeBranch, branches, currentUserRole, lowThreshold, criticalThreshold, config]);
 
     const table = useReactTable({
         data,
@@ -178,7 +233,7 @@ export function StockTable({
                         <span className="text-sm font-semibold text-secondary">
                             {selectedCount} producto(s) seleccionado(s)
                         </span>
-                        {currentUserRole !== 'EMPLOYEE' && (
+                        {activeBranch && (currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'ADMIN') && (
                             <Button
                                 size="sm"
                                 onClick={() => setBulkEditOpen(true)}
@@ -205,16 +260,26 @@ export function StockTable({
                     <TableHeader className="bg-muted/50">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id} className="hover:bg-muted/50 border-border">
-                                {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id} className="text-muted-foreground font-semibold">
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext()
+                                {headerGroup.headers.map((header) => {
+                                    const meta = (header.column.columnDef as any).meta;
+                                    return (
+                                        <TableHead 
+                                            key={header.id} 
+                                            className={cn(
+                                                "text-muted-foreground font-semibold",
+                                                meta?.isHighlighted && "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400",
+                                                meta?.className
                                             )}
-                                    </TableHead>
-                                ))}
+                                        >
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
+                                        </TableHead>
+                                    );
+                                })}
                             </TableRow>
                         ))}
                     </TableHeader>
@@ -244,11 +309,20 @@ export function StockTable({
                                     data-state={row.getIsSelected() && "selected"}
                                     className={`text-foreground transition-colors border-border hover:bg-gray-800/20 hover:rounded-2xl data-[state=selected]:bg-secondary/5 ${row.original.stock <= row.original.minStock ? "bg-destructive/10" : ""}`}
                                 >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </TableCell>
-                                    ))}
+                                    {row.getVisibleCells().map((cell) => {
+                                        const meta = (cell.column.columnDef as any).meta;
+                                        return (
+                                            <TableCell 
+                                                key={cell.id} 
+                                                className={cn(
+                                                    meta?.isHighlighted && "bg-indigo-50/50 dark:bg-indigo-950/20",
+                                                    meta?.className
+                                                )}
+                                            >
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        );
+                                    })}
                                 </TableRow>
                             ))
                         ) : (

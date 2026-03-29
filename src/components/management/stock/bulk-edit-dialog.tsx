@@ -141,7 +141,8 @@ export function BulkEditDialog({ open, onOpenChange, selectedItems, onSuccess }:
                     <div className="space-y-1.5">
                         <Label>Valor — <span className="text-muted-foreground font-normal">{modeLabels[editMode]}</span></Label>
                         <Input
-                            type="number"
+                            type="text"
+                            inputMode="decimal"
                             placeholder={getPlaceholder()}
                             value={value}
                             onChange={(e) => setValue(e.target.value)}

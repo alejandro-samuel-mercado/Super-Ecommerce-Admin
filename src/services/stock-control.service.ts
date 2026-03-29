@@ -10,6 +10,8 @@ export interface InventoryItem {
     variant: string
     stock: number
     minStock: number
+    totalStock?: number
+    branchStocks?: { branchId: number; branchName: string; isActive: boolean; stock: number; minStock: number }[]
     price: string
     measurementUnit: string   
     allowFractional: boolean  
@@ -63,7 +65,7 @@ export function convertToBaseUnit(qty: number, displayUnit: string): number {
 
 export const StockControlService = {
    
-    getInventory: async (branchId: number, params?: { search?: string, categoryId?: number, supplierId?: number, brand?: string, stockLevel?: string, page?: number, limit?: number }) => {
+    getInventory: async (branchId: number | null, params?: { search?: string, categoryId?: number, supplierId?: number, brand?: string, stockLevel?: string, page?: number, limit?: number }) => {
         const { data } = await api.get('/admin/stock/inventory', {
             params: { ...params, branchId }
         })

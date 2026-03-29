@@ -21,12 +21,9 @@ export default function SalesPage() {
     const [sales, setSales] = useState<Sale[]>([])
     const [isLoadingSales, setIsLoadingSales] = useState(false)
     const loadSalesHistory = useCallback(async () => {
-        if (!activeBranch) return
         setIsLoadingSales(true)
         try {
-
-            const data = await DataService.getSales({ branchId: activeBranch.id })
-
+            const data = await DataService.getSales({ branchId: activeBranch?.id })
             setSales(data as any)
         } finally {
             setIsLoadingSales(false)

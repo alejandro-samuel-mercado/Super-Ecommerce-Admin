@@ -54,14 +54,10 @@ export default function ProductsPage() {
 
   const loadProducts = useCallback(
     async (pageNum = page) => {
-      if (!activeBranch) {
-        return;
-      }
-
       setLoading(true);
       try {
         const response = await ProductsAPI.getAll({
-          branchId: activeBranch.id,
+          branchId: activeBranch?.id,
           page: pageNum,
           limit,
           search,

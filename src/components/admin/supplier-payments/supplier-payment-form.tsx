@@ -254,10 +254,10 @@ export function SupplierPaymentForm({ onSuccess, onCancel, initialPurchaseId, in
                             <div className="relative">
                                 <span className="absolute left-3 top-2.5 text-muted-foreground font-semibold">{config?.currencySymbol || "$"}</span>
                                 <Input 
-                                    type="number" 
+                                    type="text" 
+                                    inputMode="decimal"
                                     className={`pl-8 border-input text-lg font-bold text-foreground placeholder:text-muted-foreground ${purchaseId !== "none" ? "bg-muted" : "bg-background"}`}
                                     placeholder="0.00" 
-                                    step="0.01"
                                     value={amount}
                                     onChange={e => setAmount(e.target.value)}
                                    
