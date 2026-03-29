@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { SafeNumericInput } from "@/components/ui/safe-numeric-input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { InventoryItem, StockControlService } from "@/services/stock-control.service"
 import { Loader2, Package } from "lucide-react"
@@ -140,12 +141,11 @@ export function BulkEditDialog({ open, onOpenChange, selectedItems, onSuccess }:
 
                     <div className="space-y-1.5">
                         <Label>Valor — <span className="text-muted-foreground font-normal">{modeLabels[editMode]}</span></Label>
-                        <Input
-                            type="text"
-                            inputMode="decimal"
+                        <SafeNumericInput
                             placeholder={getPlaceholder()}
-                            value={value}
-                            onChange={(e) => setValue(e.target.value)}
+                            value={parseFloat(value) || 0}
+                            onChange={(val) => setValue(String(val))}
+                            onStringChange={setValue}
                             className="text-lg font-mono"
                         />
                     </div>

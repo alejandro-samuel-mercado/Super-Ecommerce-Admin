@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { SafeNumericInput } from "@/components/ui/safe-numeric-input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { formatCurrency } from "@/lib/utils"
@@ -133,33 +134,30 @@ function SkuForm({
                
                 <div className="md:col-span-2 space-y-2">
                     <Label className="text-foreground">Precio</Label>
-                    <Input 
-                        type="text" 
-                        inputMode="decimal"
-                        value={price} 
-                        onChange={(e) => setPrice(e.target.value)} 
+                    <SafeNumericInput 
+                        value={parseFloat(price) || 0} 
+                        onChange={(val) => setPrice(String(val))} 
+                        onStringChange={setPrice}
                         placeholder={String(product.basePrice)} 
                         className="bg-background border-input placeholder:text-muted-foreground text-foreground font-medium" 
                     />
                 </div>
                 <div className="md:col-span-2 space-y-2">
                     <Label className="text-foreground">Costo Compra</Label>
-                    <Input 
-                        type="text" 
-                        inputMode="decimal"
-                        value={costPrice} 
-                        onChange={(e) => setCostPrice(e.target.value)} 
+                    <SafeNumericInput 
+                        value={parseFloat(costPrice) || 0} 
+                        onChange={(val) => setCostPrice(String(val))} 
+                        onStringChange={setCostPrice}
                         placeholder="Costo" 
                         className="bg-background border-input placeholder:text-muted-foreground text-foreground font-medium" 
                     />
                 </div>
                 <div className="md:col-span-2 space-y-2">
                     <Label className="text-foreground">Stock</Label>
-                    <Input 
-                        type="text" 
-                        inputMode="decimal"
-                        value={stock} 
-                        onChange={(e) => setStock(e.target.value)} 
+                    <SafeNumericInput 
+                        value={parseFloat(stock) || 0} 
+                        onChange={(val) => setStock(String(val))} 
+                        onStringChange={setStock}
                         placeholder="0" 
                         disabled={true}
                         title="El stock solo se modifica mediante Compras o Ventas"

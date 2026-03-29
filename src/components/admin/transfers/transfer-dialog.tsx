@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { SafeNumericInput } from "@/components/ui/safe-numeric-input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
@@ -134,7 +135,7 @@ export function TransferDialog({ open, onOpenChange, onSuccess }: TransferDialog
     const currentItem = newItems[index]
     
     if (field === "quantity") {
-        const val = parseFloat(value) || 0
+        const val = typeof value === 'string' ? parseFloat(value) || 0 : value
         const selectedSku = availableSkus.find(s => s.id === currentItem.selectedSkuId)
         
         if (selectedSku && val > selectedSku.stock) {
@@ -327,12 +328,10 @@ export function TransferDialog({ open, onOpenChange, onSuccess }: TransferDialog
                             </div>
                             <div className="w-24 space-y-1">
                                 <Label className="text-xs">Cantidad</Label>
-                                <Input 
-                                    type="text" 
-                                    inputMode="decimal"
+                                <SafeNumericInput 
                                     className="h-9"
                                     value={item.quantity} 
-                                    onChange={(e) => handleRowChange(index, "quantity", e.target.value)} 
+                                    onChange={(val) => handleRowChange(index, "quantity", val)} 
                                 />
                             </div>
                             <Button variant="ghost" size="icon" className="h-9 w-9 text-red-500 hover:cursor-pointer" onClick={() => handleRemoveItem(index)}>

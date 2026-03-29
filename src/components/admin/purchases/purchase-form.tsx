@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { SafeNumericInput } from "@/components/ui/safe-numeric-input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
@@ -268,23 +269,21 @@ export function PurchaseForm({ onSuccess, onCancel }: PurchaseFormProps) {
                             
                             <div className="col-span-4 md:col-span-2 space-y-1">
                                 <Label className="text-xs text-muted-foreground">Cantidad</Label>
-                                <Input 
-                                    type="text" 
-                                    inputMode="decimal"
+                                <SafeNumericInput 
                                     className="h-9 bg-background border-input"
-                                    value={item.quantity} 
-                                    onChange={e => updateItem(idx, 'quantity', e.target.value)} 
+                                    value={parseFloat(item.quantity) || 0} 
+                                    onChange={val => updateItem(idx, 'quantity', String(val))} 
+                                    onStringChange={val => updateItem(idx, 'quantity', val)}
                                 />
                             </div>
                             
                              <div className="col-span-4 md:col-span-3 space-y-1">
                                 <Label className="text-xs text-muted-foreground">Precio Unit. ({items[idx].skuId && supplierSkus.find(s => s.skuId == items[idx].skuId)?.moneda})</Label>
-                                <Input 
-                                    type="text" 
-                                    inputMode="decimal"
+                                <SafeNumericInput 
                                     className="h-9 bg-background border-input"
-                                    value={item.unitPrice} 
-                                    onChange={e => updateItem(idx, 'unitPrice', e.target.value)} 
+                                    value={parseFloat(item.unitPrice) || 0} 
+                                    onChange={val => updateItem(idx, 'unitPrice', String(val))} 
+                                    onStringChange={val => updateItem(idx, 'unitPrice', val)}
                                 />
                             </div>
 

@@ -10,8 +10,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { SafeNumericInput } from "@/components/ui/safe-numeric-input"
 import { useToast } from "@/components/ui/use-toast"
 import { InventoryItem, StockControlService, formatStock, getUnitLabel } from "@/services/stock-control.service"
 import { Loader2, Minus, Plus, Scale } from "lucide-react"
@@ -163,12 +163,11 @@ export function StockAdjustmentDialog({
               {mode === 'set' ? 'Nuevo stock' : mode === 'add' ? 'Cantidad a agregar' : 'Cantidad a reducir'}
             </Label>
             <div className="relative">
-              <Input
+              <SafeNumericInput
                 id="stock-value"
-                type="text"
-                inputMode="decimal"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
+                value={parseFloat(value) || 0}
+                onChange={(val) => setValue(String(val))}
+                onStringChange={setValue}
                 className="pr-14 text-lg font-semibold rounded-xl"
                 placeholder={isFractional ? 'Ej: 2.500' : 'Ej: 50'}
                 autoFocus

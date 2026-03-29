@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { SafeNumericInput } from "@/components/ui/safe-numeric-input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
@@ -253,14 +254,12 @@ export function SupplierPaymentForm({ onSuccess, onCancel, initialPurchaseId, in
                             <Label className="text-foreground">Monto <span className="text-destructive">*</span></Label>
                             <div className="relative">
                                 <span className="absolute left-3 top-2.5 text-muted-foreground font-semibold">{config?.currencySymbol || "$"}</span>
-                                <Input 
-                                    type="text" 
-                                    inputMode="decimal"
+                                <SafeNumericInput 
                                     className={`pl-8 border-input text-lg font-bold text-foreground placeholder:text-muted-foreground ${purchaseId !== "none" ? "bg-muted" : "bg-background"}`}
                                     placeholder="0.00" 
-                                    value={amount}
-                                    onChange={e => setAmount(e.target.value)}
-                                   
+                                    value={parseFloat(amount) || 0}
+                                    onChange={val => setAmount(String(val))}
+                                    onStringChange={setAmount}
                                     disabled={purchaseId !== "none"}
                                 />
                             </div>
