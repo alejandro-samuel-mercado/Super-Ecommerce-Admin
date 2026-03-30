@@ -742,7 +742,7 @@ export function RegistrationTab() {
 
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:h-[calc(100vh-140px)] bg-background pb-2 pt-2  lg:overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-300">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:h-[calc(100vh)] bg-background pb-2 pt-2  lg:overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-300">
             {/* COL IZQUIERDA: Búsqueda y Carrito  */}
             <div className="flex flex-col lg:h-full gap-4">
                 <Card className="flex-shrink-0 border-2 border-border shadow-md bg-card rounded-xl">
