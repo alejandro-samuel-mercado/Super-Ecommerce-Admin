@@ -153,8 +153,13 @@ export interface Coupon {
 export interface Sale {
   id?: number; 
   uuid?: string;
-  userId: number;
+  userId?: number | null;
   user?: User;
+  customerName?: string | null;
+  customerEmail?: string | null;
+  customerPhone?: string | null;
+  customerDni?: string | null;
+  customerAddress?: string | null;
   employeeId?: number | null;
   employee?: User;
   total: number;

@@ -13,7 +13,7 @@ export default function ManagementLayout({
 }) {
     return (
         <ProtectedRoute>
-            <div className="flex h-screen bg-primary overflow-hidden transition-colors duration-300">
+            <div className="flex h-[100dvh] bg-primary overflow-hidden transition-colors duration-300">
                 <Sidebar className="hidden md:flex" />
                 <AdminChatWidget />
                    

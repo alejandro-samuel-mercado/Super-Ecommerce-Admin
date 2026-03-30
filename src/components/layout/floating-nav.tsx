@@ -13,7 +13,7 @@ export function FloatingNav() {
   const { isProcessing } = useCartStore()
   
   
-  const isSales = pathname=="/sales"
+  const isSales = pathname?.startsWith("/sales")
   const isAdmin = pathname?.includes("/management")
 
   return (

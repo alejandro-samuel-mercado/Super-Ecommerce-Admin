@@ -66,7 +66,7 @@ export function MercadoPagoTab({ sales }: MercadoPagoTabProps) {
     })
 
      return (
-        <div className="bg-card rounded-lg border border-border sm:p-4 pt-4 md:p-6 shadow-sm space-y-4 md:space-y-6 h-full flex flex-col">
+        <div className="bg-card rounded-lg border border-border sm:p-4 pt-4 md:p-6 shadow-sm space-y-4 md:space-y-6 flex flex-col">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 px-4">
                 <div>
                      <h2 className="text-lg font-bold">Pagos Mercado Pago</h2>
@@ -169,7 +169,7 @@ export function MercadoPagoTab({ sales }: MercadoPagoTabProps) {
                 </div>
             </div>
 
-            <div className="pb-40 -mx-2 px-2">
+            <div className="-mx-2 px-2">
                 <SalesTable data={filteredSales} onView={setSelectedSale} hideSearch={true} />
             </div>
 

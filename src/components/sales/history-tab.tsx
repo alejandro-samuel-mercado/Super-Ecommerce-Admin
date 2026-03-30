@@ -66,7 +66,7 @@ export function HistoryTab({ sales }: HistoryTabProps) {
     })
 
     return (
-        <div className="bg-card rounded-lg border border-border sm:p-4 md:p-6 pt-4 shadow-sm space-y-4 md:space-y-6 h-full flex flex-col  pb-40 px-0">
+        <div className="bg-card rounded-lg border border-border sm:p-4 md:p-6 pt-4 shadow-sm space-y-4 md:space-y-6 flex flex-col px-0">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 px-4">
                 <div>
                      <h2 className="text-lg font-bold">Historial de Ventas</h2>
@@ -172,7 +172,7 @@ export function HistoryTab({ sales }: HistoryTabProps) {
                 </div>
             </div>
 
-             <div className="flex-1  pb-40">
+             <div className="flex-1">
                   <SalesTable data={filteredData} onView={setSelectedSale} hideSearch={true} />
              </div>
 

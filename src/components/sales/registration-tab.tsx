@@ -228,16 +228,19 @@ export function RegistrationTab() {
 
         let totalTax = 0;
         items.forEach(item => {
-            const itemTaxRate = item.taxRate !== undefined && item.taxRate !== null ? Number(item.taxRate) : Number(storeConfig.taxRate || 0);
+            const itemTaxRate = (item.taxRate !== undefined && item.taxRate !== null) ? Number(item.taxRate) : 0;
+
+            const itemGross = item.unitPrice * item.quantity;
+            const itemTaxable = itemGross * discountRatio;
+
             if (itemTaxRate > 0) {
-                const itemGross = item.unitPrice * item.quantity;
-                const itemTaxable = itemGross * discountRatio;
-                totalTax += itemTaxable * (itemTaxRate / 100);
+            } else if (storeConfig?.taxRate && Number(storeConfig.taxRate) > 0) {
+                totalTax += itemTaxable * (Number(storeConfig.taxRate) / 100);
             }
         });
 
         return totalTax;
-    }, [items, grossSubtotal, netItemsSubtotal, appliedCoupon, manualDiscount, pointsToUse, storeConfig]);
+    }, [netItemsSubtotal, appliedCoupon, manualDiscount, pointsToUse, storeConfig]);
 
     const handlePrintTicket = useReactToPrint({
         contentRef: ticketRef,

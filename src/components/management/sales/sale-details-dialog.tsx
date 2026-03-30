@@ -368,6 +368,19 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                                         <p className="text-muted-foreground">{sale.user.email}</p>
                                         <p className="text-muted-foreground mt-2">{sale.user.phone || 'Teléfono no registrado'}</p>
                                     </>
+                                ) : sale.customerEmail ? (
+                                    <>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <p className="font-bold text-foreground text-base">{sale.customerName || 'Invitado'}</p>
+                                            <Badge variant="outline" className="text-[10px] uppercase font-bold text-amber-600 border-amber-200 bg-amber-50 dark:bg-amber-900/10">Compra de Invitado</Badge>
+                                        </div>
+                                        <p className="text-muted-foreground">{sale.customerEmail}</p>
+                                        <p className="text-muted-foreground mt-1">{sale.customerPhone || 'Sin teléfono'}</p>
+                                        {sale.customerDni && <p className="text-[10px] text-muted-foreground mt-1">DNI/CUIT: {sale.customerDni}</p>}
+                                        {sale.customerAddress && sale.deliveryType === 'PICKUP' && (
+                                            <p className="text-[10px] text-muted-foreground mt-1">DIR: {sale.customerAddress}</p>
+                                        )}
+                                    </>
                                 ) : (
                                     <p className="text-muted-foreground italic">Consumidor Final / Anónimo</p>
                                 )}
@@ -461,7 +474,7 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                         {/* Impuesto */}
                         {Number(sale.taxAmount) > 0 && (
                             <div className="flex justify-between text-zinc-500 text-sm">
-                                <span>Impuesto (IVA Incl.)</span>
+                                <span>Impuesto</span>
                                 <span>{formatCurrency(sale.taxAmount, sale.currencyCode || config?.baseCurrency || "USD", config?.currencySymbol)}</span>
                             </div>
                         )}

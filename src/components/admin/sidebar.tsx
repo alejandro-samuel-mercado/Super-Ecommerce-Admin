@@ -60,7 +60,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
 
     return (
         <aside className={cn(
-            "h-screen flex flex-col transition-all duration-300 ease-linear z-50 relative",
+            "h-[100dvh] flex flex-col transition-all duration-300 ease-linear z-50 relative",
             "bg-primary text-white", 
             collapsed ? "w-20" : "w-72",
             className

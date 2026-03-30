@@ -35,7 +35,7 @@ export default function SalesPage() {
     }, [loadSalesHistory])
 
     return (
-        <div className="flex flex-col h-screen bg-background overflow-hidden ">
+        <div className="flex flex-col h-[100dvh] bg-background overflow-hidden ">
 
             <Tabs defaultValue="registro" className="flex-1 flex flex-col overflow-hidden">
                 <div className="bg-background border-b border-border shadow-sm relative z-30">
@@ -57,8 +57,8 @@ export default function SalesPage() {
                     </TabsList>
                 </div>
 
-                <div className="flex-1 sm:p-4 pt-4 md:p-6 overflow-y-auto bg-background relative z-10 w-full   ">
-                    <TabsContent value="registro" className="h-full m-0 data-[state=active]:flex flex-col animate-in fade-in-50 duration-200 overflow-y-auto max-lg:pb-40">
+                <div className="flex-1 sm:p-4 pt-4 md:p-6 overflow-y-auto bg-background relative z-10 w-full pb-32">
+                    <TabsContent value="registro" className="h-full m-0 data-[state=active]:flex flex-col animate-in fade-in-50 duration-200 overflow-y-auto">
                         <RegistrationTab />
                     </TabsContent>
 

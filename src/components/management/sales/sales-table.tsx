@@ -77,10 +77,12 @@ export function SalesTable({ data, onView, hideSearch = false, search, onSearchC
             header: "Cliente",
             cell: ({ row }) => {
                 const user = row.original.user
+                const name = user?.name || row.original.customerName || "Invitado"
+                const email = user?.email || row.original.customerEmail || "Sin email"
                 return (
                     <div className="flex flex-col">
-                        <span className="font-medium text-sm">{user?.name || "Consumidor Final"}</span>
-                        <span className="text-xs text-muted-foreground">{user?.email}</span>
+                        <span className="font-medium text-sm">{name}</span>
+                        <span className="text-xs text-muted-foreground">{email}</span>
                     </div>
                 )
             }
