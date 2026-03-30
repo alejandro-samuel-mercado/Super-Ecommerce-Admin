@@ -56,6 +56,8 @@ export default function StockControlPage() {
 
   const [config, setConfig] = useState<any>(null);
 
+  const { fetchConfig: refreshGlobalConfig } = useConfigStore();
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -69,16 +71,18 @@ export default function StockControlPage() {
         setSuppliers(data?.data?.data || data?.data || data || []);
       } catch {}
     };
-    const fetchConfig = async () => {
+    const fetchConfigLocal = async () => {
       try {
         const data = await api.get("/config");
         setConfig(data.data || data);
       } catch {}
     };
+    
     fetchCategories();
     fetchSuppliers();
-    fetchConfig();
-  }, []);
+    fetchConfigLocal();
+    refreshGlobalConfig(); 
+  }, [refreshGlobalConfig]);
 
   const loadInventory = useCallback(
     async (pageNum = page) => {

@@ -18,6 +18,7 @@ export interface Product {
   brand?: string;
   model?: string;
   pointsValue?: number;
+  taxRate?: number;
 }
 
 export interface SKU {
@@ -92,6 +93,7 @@ export interface StoreConfig {
   enableTransfers: boolean;
   enableStockMovements: boolean;
   enableStockControl: boolean;
+  enableManualStock: boolean;
 
   socialInstagram?: string;
   socialFacebook?: string;

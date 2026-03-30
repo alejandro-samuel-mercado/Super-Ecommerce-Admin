@@ -212,7 +212,7 @@ export function RegistrationTab() {
         return cost;
     }, [deliveryType, storeConfig, isShippingDisabledByEvent, shippingCost, netItemsSubtotal, currentEvent]);
     const calculatedTax = useMemo(() => {
-        if (!storeConfig?.taxRate || Number(storeConfig.taxRate) <= 0) return 0;
+        if (!storeConfig) return 0;
 
         const couponValue = appliedCoupon ? (Number(appliedCoupon.value) || 0) : 0;
         const couponDiscount = appliedCoupon?.type === 'PERCENTAGE'
@@ -223,9 +223,21 @@ export function RegistrationTab() {
         const manualD = manualDiscount > 0 ? parseFloat((afterC * (manualDiscount / 100)).toFixed(2)) : 0;
         const pointsD = (pointsToUse > 0 && storeConfig?.enablePointsRedemption) ? (pointsToUse * (Number(storeConfig.moneyPerPoint) || 0)) : 0;
 
-        const taxBase = Math.max(0, afterC - manualD - pointsD);
-        return taxBase * (Number(storeConfig.taxRate) / 100);
-    }, [netItemsSubtotal, appliedCoupon, manualDiscount, pointsToUse, storeConfig]);
+        const totalPayableForItems = Math.max(0, afterC - manualD - pointsD);
+        const discountRatio = grossSubtotal > 0 ? totalPayableForItems / grossSubtotal : 0;
+
+        let totalTax = 0;
+        items.forEach(item => {
+            const itemTaxRate = item.taxRate !== undefined && item.taxRate !== null ? Number(item.taxRate) : Number(storeConfig.taxRate || 0);
+            if (itemTaxRate > 0) {
+                const itemGross = item.unitPrice * item.quantity;
+                const itemTaxable = itemGross * discountRatio;
+                totalTax += itemTaxable * (itemTaxRate / 100);
+            }
+        });
+
+        return totalTax;
+    }, [items, grossSubtotal, netItemsSubtotal, appliedCoupon, manualDiscount, pointsToUse, storeConfig]);
 
     const handlePrintTicket = useReactToPrint({
         contentRef: ticketRef,
@@ -523,7 +535,8 @@ export function RegistrationTab() {
                 skuId: i.skuId,
                 quantity: i.quantity,
                 unitPrice: i.unitPrice,
-                subtotal: i.subtotal
+                subtotal: i.subtotal,
+                taxRate: i.taxRate
             })),
 
             clientId: client?.id || null,
@@ -625,7 +638,8 @@ export function RegistrationTab() {
             brand: product.brand,
             pointsReward: product.pointsReward || 0,
             allowFractional: product.allowFractional,
-            measurementUnit: product.measurementUnit
+            measurementUnit: product.measurementUnit,
+            taxRate: product.taxRate
         })
     }
 
@@ -1172,9 +1186,9 @@ export function RegistrationTab() {
                             </div>
 
                             {/* Impuestos */}
-                            {storeConfig?.taxRate && Number(storeConfig.taxRate) > 0 && (
+                            {((storeConfig?.taxRate && Number(storeConfig.taxRate) > 0) || items.some(i => i.taxRate && Number(i.taxRate) > 0)) && (
                                 <div className="flex justify-between items-center text-muted-foreground">
-                                    <span className="text-xs font-bold uppercase">Impuestos ({storeConfig.taxRate}%)</span>
+                                    <span className="text-xs font-bold uppercase">Impuestos</span>
                                     <span className="font-mono text-foreground">
                                         +{formatCurrency((
                                             (() => {
@@ -1184,18 +1198,34 @@ export function RegistrationTab() {
                                                     const { amount } = getItemDiscount(item);
                                                     netItemsTotal += Math.max(0, item.unitPrice * item.quantity - amount);
                                                 });
-                                                let finalPreTax = netItemsTotal;
-
+                                                
+                                                let totalTax = 0;
+                                                const globalTaxRate = Number(storeConfig?.taxRate) || 0;
+                                                
+                                                let totalGlobalDiscount = 0;
                                                 if (appliedCoupon) {
                                                     const couponValue = Number(appliedCoupon.value) || 0;
-                                                    if (appliedCoupon.type === 'PERCENTAGE') finalPreTax -= (netItemsTotal * (couponValue / 100));
-                                                    else finalPreTax -= couponValue;
+                                                    if (appliedCoupon.type === 'PERCENTAGE') totalGlobalDiscount += (netItemsTotal * (couponValue / 100));
+                                                    else totalGlobalDiscount += couponValue;
                                                 }
-                                                if (manualDiscount > 0) finalPreTax -= (finalPreTax * (manualDiscount / 100));
+                                                const manualDiscountAmount = manualDiscount > 0 ? ((netItemsTotal - totalGlobalDiscount) * (manualDiscount / 100)) : 0;
+                                                totalGlobalDiscount += manualDiscountAmount;
                                                 const pointsDiscountAmount = (pointsToUse > 0 && storeConfig?.enablePointsRedemption) ? (pointsToUse * (Number(storeConfig.moneyPerPoint) || 0)) : 0;
-                                                finalPreTax -= pointsDiscountAmount;
+                                                totalGlobalDiscount += pointsDiscountAmount;
 
-                                                return Math.max(0, finalPreTax) * (Number(storeConfig.taxRate) / 100);
+                                                const discountRatio = netItemsTotal > 0 ? Math.min(1, totalGlobalDiscount / netItemsTotal) : 0;
+
+                                                items.forEach(item => {
+                                                    const { amount: itemEventDiscount } = getItemDiscount(item);
+                                                    const itemOriginalSubtotal = (item.unitPrice * item.quantity);
+                                                    const itemNetSubtotal = Math.max(0, itemOriginalSubtotal - itemEventDiscount);
+                                                    const itemFinalSubtotal = itemNetSubtotal * (1 - discountRatio);
+                                                    const itemTaxRate = item.taxRate !== undefined && item.taxRate !== null ? Number(item.taxRate) : globalTaxRate;
+                                                    const tax = (itemFinalSubtotal / (1 + (itemTaxRate / 100))) * (itemTaxRate / 100);
+                                                    totalTax += tax;
+                                                });
+
+                                                return totalTax;
                                             })()
                                         ), storeConfig?.baseCurrency || "USD", storeConfig?.currencySymbol)}
                                     </span>

@@ -2,15 +2,15 @@
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useToast } from "@/components/ui/use-toast"
 import stockTransferService from "@/services/stock-transfer.service"
 import { useBranchStore } from "@/store/branch.store"
 import { StockTransfer } from "@/types/schema"
-import { CheckCircle, Loader2, Send, XCircle, ArrowRight, Box } from "lucide-react"
+import { ArrowRight, Box, CheckCircle, Loader2, Send, XCircle } from "lucide-react"
 import { useState } from "react"
-import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 
 interface TransferDetailsProps {
     transfer: StockTransfer | null
@@ -151,6 +151,14 @@ export function TransferDetails({ transfer, open, onOpenChange, onUpdate }: Tran
                                 Esta transferencia está finalizada y no se pueden realizar más acciones.
                             </div>
                         )}
+
+                        <Button 
+                            variant="outline" 
+                            onClick={() => stockTransferService.downloadPdf(transfer.id)}
+                            className="w-full mt-4 hover:cursor-pointer"
+                        >
+                            Descargar PDF (Comprobante Legal)
+                        </Button>
                     </div>
                 </div>
                 

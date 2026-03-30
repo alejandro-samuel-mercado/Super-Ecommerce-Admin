@@ -4,15 +4,15 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { cn } from "@/lib/utils"
+import api from "@/services/api"
 import { InventoryItem, formatPrice, formatStock } from "@/services/stock-control.service"
 import { useBranchStore } from "@/store/branch.store"
-import api from "@/services/api"
 import { useConfigStore } from "@/store/config.store"
 import { useAuthStore } from "@/store/use-auth-store"
 import { UserRole } from "@/types/schema"
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
 import { Edit3, Loader2, Settings2, X } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { useEffect, useMemo, useState } from "react"
 import { BulkEditDialog } from "./bulk-edit-dialog"
 import { StockAdjustmentDialog } from "./stock-adjustment-dialog"
@@ -195,7 +195,8 @@ export function StockTable({
 
         return [...baseCols, ...metricCols, ...endCols].filter(col => {
             if (col.id === 'actions') {
-                if (!activeBranch || (currentUserRole !== 'SUPER_ADMIN' && currentUserRole !== 'ADMIN')) {
+                const canEditManual = config?.enableManualStock !== false;
+                if (!activeBranch || (currentUserRole !== 'SUPER_ADMIN' && currentUserRole !== 'ADMIN') || !canEditManual) {
                     return false;
                 }
             }
@@ -233,7 +234,7 @@ export function StockTable({
                         <span className="text-sm font-semibold text-secondary">
                             {selectedCount} producto(s) seleccionado(s)
                         </span>
-                        {activeBranch && (currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'ADMIN') && (
+                        {activeBranch && (currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'ADMIN') && config?.enableManualStock !== false && (
                             <Button
                                 size="sm"
                                 onClick={() => setBulkEditOpen(true)}

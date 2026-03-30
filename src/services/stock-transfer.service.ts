@@ -32,6 +32,19 @@ const stockTransferService = {
   cancel: async (id: number): Promise<StockTransfer> => {
     const { data } = await api.put<{ success: boolean; data: StockTransfer }>(`/stock-transfers/${id}/cancel`);
     return data.data;
+  },
+
+  downloadPdf: async (id: number): Promise<void> => {
+    const response = await api.get(`/stock-transfers/${id}/pdf`, {
+        responseType: 'blob'
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `transferencia-${id}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   }
 };
 

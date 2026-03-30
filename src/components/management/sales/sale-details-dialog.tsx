@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { formatCurrency } from "@/lib/utils"
 import { ConfigAPI, SalesAPI } from "@/services/api"
 import { useBranchStore } from "@/store/branch.store"
+import { useConfigStore } from "@/store/config.store"
 import { Sale } from "@/types/schema"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -19,7 +20,6 @@ import { useEffect, useRef, useState } from "react"
 import { useReactToPrint } from "react-to-print"
 import { toast } from "sonner"
 import { TicketTemplate } from "../../sales/ticket-template"
-import { useConfigStore } from "@/store/config.store"
 
 interface SaleDetailsDialogProps {
     open: boolean
@@ -457,6 +457,14 @@ export function SaleDetailsDialog({ open, onOpenChange, sale, onSaleUpdated }: S
                             <span>Subtotal Productos</span>
                              <span>{formatCurrency(sale.subtotal, sale.currencyCode || config?.baseCurrency || "USD", config?.currencySymbol)}</span>
                         </div>
+                        
+                        {/* Impuesto */}
+                        {Number(sale.taxAmount) > 0 && (
+                            <div className="flex justify-between text-zinc-500 text-sm">
+                                <span>Impuesto (IVA Incl.)</span>
+                                <span>{formatCurrency(sale.taxAmount, sale.currencyCode || config?.baseCurrency || "USD", config?.currencySymbol)}</span>
+                            </div>
+                        )}
                         
                         {/* Descuento */}
                         {(Number(sale.discount) > 0 || (sale.coupon && sale.coupon !== null)) ? (

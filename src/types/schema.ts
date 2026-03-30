@@ -55,6 +55,7 @@ export interface Product {
   isActive: boolean;
   measurementUnit?: string;
   allowFractional?: boolean;
+  taxRate?: number;
   categoryId: number;
   category?: Category;
   skus?: SKU[];
@@ -139,6 +140,7 @@ export interface SaleItem {
   pointsReward?: number;
   measurementUnit?: string;
   allowFractional?: boolean;
+  taxRate?: number;
 }
 
 export interface Coupon {
@@ -157,6 +159,7 @@ export interface Sale {
   employee?: User;
   total: number;
   subtotal: number;
+  taxAmount: number;
   discount: number;
   observations?:string;
   cancelReason?: string | null;
@@ -292,6 +295,7 @@ export interface Purchase {
     estimatedTotal: number; 
     deliveryDate?: string;
     notes?: string;
+    invoiceUrl?: string;
     createdAt: string;
     updatedAt: string;
     items?: PurchaseItem[];

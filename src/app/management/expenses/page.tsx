@@ -62,6 +62,7 @@ export default function ExpensesPage() {
         notes: "",
         expenseDate: new Date().toISOString().split('T')[0]
     })
+    const [invoiceFile, setInvoiceFile] = useState<File | null>(null)
 
     const [filters, setFilters] = useState({
         startDate: "",
@@ -103,16 +104,23 @@ export default function ExpensesPage() {
         }
         setFormLoading(true)
         try {
-            const payload = {
-                ...formData,
-                amount: parseFloat(formData.amount),
-                branchId: activeBranch?.id || null,
-                expenseDate: new Date(formData.expenseDate).toISOString()
+            const formDataPayload = new FormData()
+            formDataPayload.append('amount', formData.amount)
+            formDataPayload.append('currencyCode', formData.currencyCode)
+            formDataPayload.append('category', formData.category)
+            formDataPayload.append('notes', formData.notes)
+            formDataPayload.append('expenseDate', new Date(formData.expenseDate).toISOString())
+            if (activeBranch) formDataPayload.append('branchId', activeBranch.id.toString())
+            
+            if (invoiceFile) {
+                formDataPayload.append('invoice', invoiceFile)
             }
-            await api.post('/expenses', payload)
+
+            await api.post('/expenses', formDataPayload)
             toast({ title: "Gasto registrado exitosamente" })
             setOpenAdd(false)
             setFormData({ amount: "", currencyCode: config?.baseCurrency || "ARS", category: "", notes: "", expenseDate: new Date().toISOString().split('T')[0] })
+            setInvoiceFile(null)
             fetchExpenses()
         } catch (error: any) {
             toast({ title: "Error al registrar gasto", description: error.response?.data?.message, variant: "destructive" })
@@ -227,6 +235,15 @@ export default function ExpensesPage() {
                                     onChange={e => setFormData({ ...formData, notes: e.target.value })}
                                 />
                             </div>
+                            <div className="space-y-2">
+                                <Label>Factura (PDF o Imagen)</Label>
+                                <Input 
+                                    type="file" 
+                                    accept="application/pdf,image/*"
+                                    onChange={e => setInvoiceFile(e.target.files?.[0] || null)}
+                                    className="hover:cursor-pointer"
+                                />
+                            </div>
                         </div>
                         <Button onClick={handleAddExpense} disabled={formLoading} className="w-full">
                             {formLoading ? "Guardando..." : "Guardar Gasto"}
@@ -284,8 +301,8 @@ export default function ExpensesPage() {
                 </div>
             </Card>
 
-            <div className="sm:rounded-3xl rounded-none border-4 border-zinc-300 dark:border-zinc-600 shadow-[0_0_20px_rgba(0,0,0,0.2)] hover:shadow-[0_0_30px_rgba(0,0,0,0.2)] hover:border-borderH hover:ring-4 hover:ring-zinc-500/10 transition-all duration-300 bg-card  overflow-hidden">
-                <Table >
+            <div className="sm:rounded-3xl rounded-none border-4 border-zinc-300 dark:border-zinc-600 shadow-[0_0_20px_rgba(0,0,0,0.2)] hover:shadow-[0_0_30px_rgba(0,0,0,0.2)] hover:border-borderH hover:ring-4 hover:ring-zinc-500/10 transition-all duration-300 bg-card overflow-hidden">
+                <Table>
                     <TableHeader className="bg-muted/50">
                         <TableRow>
                             <TableHead>Fecha</TableHead>
@@ -310,16 +327,23 @@ export default function ExpensesPage() {
                                 <TableCell className="text-right font-bold text-rose-600">
                                     -{formatCurrency(Number(expense.amount), expense.currencyCode || config?.baseCurrency || 'ARS', config?.currencySymbol)}
                                 </TableCell>
-                                <TableCell className="text-right">
-                                    <Button variant="ghost" size="icon" onClick={() => setDeletingId(expense.id)} className="text-destructive hover:bg-destructive/10 hover:cursor-pointer">
+                                <TableCell className="text-right flex items-center justify-end gap-2">
+                                    {expense.invoiceUrl && (
+                                        <Button variant="outline" size="icon" asChild title="Ver Factura" className="hover:cursor-pointer h-8 w-8">
+                                            <a href={expense.invoiceUrl} target="_blank" rel="noopener noreferrer">
+                                                <Plus className="h-4 w-4 rotate-45" /> 
+                                            </a>
+                                        </Button>
+                                    )}
+                                    <Button variant="ghost" size="icon" onClick={() => setDeletingId(expense.id)} className="text-destructive hover:bg-destructive/10 hover:cursor-pointer h-8 w-8">
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
-                </Table >
-            </div >
+                </Table>
+            </div>
 
             <ConfirmDialog
                 open={deletingId !== null}
@@ -330,6 +354,6 @@ export default function ExpensesPage() {
                 variant="destructive"
                 onConfirm={handleDelete}
             />
-        </div >
+        </div>
     )
 }

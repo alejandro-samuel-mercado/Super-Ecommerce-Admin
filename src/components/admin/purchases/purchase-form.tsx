@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { SafeNumericInput } from "@/components/ui/safe-numeric-input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { SafeNumericInput } from "@/components/ui/safe-numeric-input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
 import { cn, formatCurrency } from "@/lib/utils"
@@ -28,6 +28,7 @@ export function PurchaseForm({ onSuccess, onCancel }: PurchaseFormProps) {
     const [supplierId, setSupplierId] = useState<string>("")
     const [notes, setNotes] = useState("")
     const [items, setItems] = useState<any[]>([])
+    const [invoiceFile, setInvoiceFile] = useState<File | null>(null)
     
     
     const [suppliers, setSuppliers] = useState<any[]>([])
@@ -128,16 +129,21 @@ export function PurchaseForm({ onSuccess, onCancel }: PurchaseFormProps) {
 
         try {
             setLoading(true)
-            await purchaseService.create({
-                branchId: activeBranch.id,
-                supplierId: parseInt(supplierId),
-                notes: notes,
-                items: items.map(i => ({
-                    skuId: parseInt(i.skuId),
-                    quantity: parseFloat(i.quantity),
-                    unitPrice: parseFloat(i.unitPrice)
-                }))
-            })
+            const formData = new FormData()
+            formData.append('branchId', activeBranch.id.toString())
+            formData.append('supplierId', supplierId)
+            formData.append('notes', notes)
+            formData.append('items', JSON.stringify(items.map(i => ({
+                skuId: parseInt(i.skuId),
+                quantity: parseFloat(i.quantity),
+                unitPrice: parseFloat(i.unitPrice)
+            }))))
+
+            if (invoiceFile) {
+                formData.append('invoice', invoiceFile)
+            }
+
+            await purchaseService.create(formData)
             
             toast({ title: "Orden de compra creada" })
             if (onSuccess) onSuccess()
@@ -224,6 +230,17 @@ export function PurchaseForm({ onSuccess, onCancel }: PurchaseFormProps) {
                     <div className="space-y-2">
                         <Label>Notas / Referencia</Label>
                         <Input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Ej: Reposición semanal" className="bg-background border-input" />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Factura (PDF o Imagen)</Label>
+                        <Input 
+                            type="file" 
+                            accept="application/pdf,image/*"
+                            onChange={e => setInvoiceFile(e.target.files?.[0] || null)}
+                            className="bg-background border-input hover:cursor-pointer"
+                        />
+                        <p className="text-[10px] text-muted-foreground">Opcional. Permite subir comprobante en PDF o Imagen.</p>
                     </div>
                 </div>
                 

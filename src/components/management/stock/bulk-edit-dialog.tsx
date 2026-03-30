@@ -2,11 +2,11 @@
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { SafeNumericInput } from "@/components/ui/safe-numeric-input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { InventoryItem, StockControlService } from "@/services/stock-control.service"
+import { useConfigStore } from "@/store/config.store"
 import { Loader2, Package } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -24,6 +24,7 @@ export function BulkEditDialog({ open, onOpenChange, selectedItems, onSuccess }:
     const [editMode, setEditMode] = useState<EditMode>('stock_add')
     const [value, setValue] = useState('')
     const [loading, setLoading] = useState(false)
+    const { config } = useConfigStore()
 
     const modeLabels: Record<EditMode, string> = {
         stock_set: 'Establecer stock exacto',
@@ -34,6 +35,11 @@ export function BulkEditDialog({ open, onOpenChange, selectedItems, onSuccess }:
     }
 
     const handleApply = async () => {
+        if (config?.enableManualStock === false && (editMode.startsWith('stock_'))) {
+            toast.error('La edición manual de stock está desactivada')
+            return
+        }
+
         const numValue = parseFloat(value)
         if (isNaN(numValue) || value === '') {
             toast.error('Ingresa un valor válido')

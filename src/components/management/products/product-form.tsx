@@ -42,7 +42,8 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
         qr: "",
         isTrending: false,
         isRecommended: false,
-        images: []
+        images: [],
+        taxRate: undefined
     })
     const [customUnits, setCustomUnits] = useState<string[]>([])
     const [categories, setCategories] = useState<Category[]>([])
@@ -120,7 +121,8 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                 qr: "",
                 isTrending: false,
                 isRecommended: false,
-                images: []
+                images: [],
+                taxRate: undefined
             })
             setManualPrices([])
             setActiveTab("general")
@@ -580,6 +582,34 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                                                     Margen: {formData.basePrice && Number(formData.basePrice) > 0 ? (((Number(formData.basePrice) - Number((formData as any).costPrice)) / Number((formData as any).costPrice)) * 100).toFixed(1) + '%' : 'N/A'}
                                                 </p>
                                             )}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-foreground">Impuesto Específico (%) <span className="text-xs text-muted-foreground font-normal ml-1">(Opcional, anula el global)</span></Label>
+                                            <Input
+                                                type="text"
+                                                inputMode="decimal"
+                                                placeholder="Usar global"
+                                                value={formData.taxRate !== undefined && formData.taxRate !== null ? formData.taxRate : ''}
+                                                onChange={(e) => {
+                                                    const val = e.target.value.replace(',', '.');
+                                                    if (val === '') {
+                                                        setFormData({ ...formData, taxRate: undefined });
+                                                        return;
+                                                    }
+                                                    if (/^\d*\.?\d*$/.test(val)) {
+                                                        setFormData({ ...formData, taxRate: val as any });
+                                                    }
+                                                }}
+                                                onBlur={() => {
+                                                    if (formData.taxRate === undefined || (formData.taxRate as any) === '') return;
+                                                    const parsed = parseFloat(String(formData.taxRate));
+                                                    setFormData({ ...formData, taxRate: isNaN(parsed) ? undefined : parsed });
+                                                }}
+                                                className="bg-background border-input text-foreground font-bold"
+                                            />
+                                            <p className="text-xs text-muted-foreground">
+                                                Ej: 15. Dejar vacío para usar el impuesto de {config?.taxRate}% configurado en la tienda.
+                                            </p>
                                         </div>
                                         <div className="grid grid-cols-1  sm:grid-cols-2 gap-4">
                                             <div className="space-y-2">

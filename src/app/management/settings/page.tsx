@@ -2,52 +2,54 @@
 
 import { Badge } from "@/components/ui/badge";
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbSeparator,
+      Breadcrumb,
+      BreadcrumbItem,
+      BreadcrumbLink,
+      BreadcrumbList,
+      BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+      Card,
+      CardContent,
+      CardDescription,
+      CardHeader,
+      CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+      Select,
+      SelectContent,
+      SelectItem,
+      SelectTrigger,
+      SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { ConfigAPI, CurrenciesAPI } from "@/services/api";
+import { useConfigStore } from "@/store/config.store";
 import { StoreConfig } from "@/types/extended";
 import {
-    AlertCircle,
-    Archive,
-    ArrowLeftRight,
-    Award,
-    CreditCard,
-    FileText,
-    LayoutGrid,
-    Loader2,
-    Printer,
-    Ruler,
-    Save,
-    Settings,
-    ShieldCheck,
-    StopCircle,
-    Store,
-    Truck,
+      AlertCircle,
+      Archive,
+      ArrowLeftRight,
+      Award,
+      CreditCard,
+      FileText,
+      LayoutGrid,
+      Loader2,
+      Printer,
+      Ruler,
+      Save,
+      Settings,
+      Settings2,
+      ShieldCheck,
+      StopCircle,
+      Store,
+      Truck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -82,6 +84,7 @@ export default function SettingsPage() {
         adText: "",
         enableAutoBackup: false,
         backupFrequency: "WEEKLY",
+        enableManualStock: true,
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -157,6 +160,8 @@ export default function SettingsPage() {
         loadConfig();
     }, [loadConfig]);
 
+    const { updateConfig: updateGlobalConfig } = useConfigStore();
+
     const handleSave = async () => {
         setSaving(true);
         try {
@@ -166,6 +171,10 @@ export default function SettingsPage() {
                     .filter((c) => c.id)
                     .map((c) => CurrenciesAPI.update(c.id, c)),
             ]);
+            
+            // Sincronizar store global
+            await updateGlobalConfig(config);
+
             toast({
                 title: "Configuración guardada",
                 description: "Los cambios se han aplicado correctamente.",
@@ -769,6 +778,29 @@ export default function SettingsPage() {
                                             />
                                         </div>
                                         <p className="text-xs ">Alertas y edición rápida.</p>
+                                    </div>
+                                </div>
+
+                                {/* Manual Stock Manipulation */}
+                                <div
+                                    className={`p-4 rounded-lg border-4 flex flex-col justify-between ${config.enableManualStock ? "border-gray-300/80 dark:bg-blue-900/10" : "bg-slate-50 border-red-500/20 dark:bg-slate-900/50"}`}
+                                >
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-2">
+                                                <Settings2 className="h-5 w-5 text-blue-600" />
+                                                <Label className="font-semibold">
+                                                    Edición Manual Stock
+                                                </Label>
+                                            </div>
+                                            <Switch
+                                                checked={config.enableManualStock ?? true}
+                                                onCheckedChange={(c) =>
+                                                    setConfig({ ...config, enableManualStock: c })
+                                                }
+                                            />
+                                        </div>
+                                        <p className="text-xs ">Permite ajustar stock a mano.</p>
                                     </div>
                                 </div>
 

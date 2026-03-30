@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label"
 import { SafeNumericInput } from "@/components/ui/safe-numeric-input"
 import { useToast } from "@/components/ui/use-toast"
 import { InventoryItem, StockControlService, formatStock, getUnitLabel } from "@/services/stock-control.service"
+import { useConfigStore } from "@/store/config.store"
 import { Loader2, Minus, Plus, Scale } from "lucide-react"
 import { useEffect, useState } from "react"
 
@@ -36,6 +37,7 @@ export function StockAdjustmentDialog({
   const [value, setValue] = useState<string>("")
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+  const { config } = useConfigStore()
 
   const isFractional = item?.allowFractional ?? false
   const unit = item?.measurementUnit ?? 'UNIDAD'
@@ -63,6 +65,15 @@ export function StockAdjustmentDialog({
 
   const handleAdjust = async () => {
     if (!item) return
+
+    if (config?.enableManualStock === false) {
+        toast({
+            title: "Acción no permitida",
+            description: "La edición manual de stock está desactivada en la configuración globlal.",
+            variant: "destructive",
+        })
+        return
+    }
 
     const newStock = computeResult()
     if (newStock === null || newStock < 0) {

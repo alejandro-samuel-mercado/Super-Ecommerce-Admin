@@ -291,6 +291,17 @@ export function PurchaseDetails({ id, onClose, onUpdate }: PurchaseDetailsProps)
                                 {purchase.notes || 'Sin notas'}
                             </div>
                         </div>
+
+                        {purchase.invoiceUrl && (
+                             <div className="space-y-1 pt-2">
+                                <div className="text-xs text-muted-foreground">Factura Adjunta</div>
+                                <Button variant="outline" size="sm" asChild className="w-full hover:cursor-pointer mt-1">
+                                    <a href={purchase.invoiceUrl} target="_blank" rel="noopener noreferrer">
+                                        Ver Factura (PDF/Imagen)
+                                    </a>
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
