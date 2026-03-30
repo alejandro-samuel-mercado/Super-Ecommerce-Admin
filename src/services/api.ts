@@ -109,11 +109,32 @@ api.interceptors.response.use(
         
         // 2. Disparo de Toast Gráfico (Ignorar si la petición pidió evadirlo explícitamente en el futuro)
         if (typeof window !== 'undefined' && error.response?.status !== 401) {
-             const message = error.response?.data?.message || 'Ocurrió un error inesperado al conectar con el servidor.';
-             throttledToastError(
-                 message, 
-                 error.response?.status >= 500 ? 'Contacte a soporte técnico.' : 'Revise los datos ingresados.'
-             );
+             // Skip toast if x-silence-toast header was sent
+             if (!error.config?.headers?.['x-silence-toast']) {
+                 const sanitizeErrorMessage = (msg: string) => {
+                    if (!msg) return 'Ocurrió un error inesperado al conectar con el servidor.';
+                    
+                    // Specific translations
+                    if (msg.includes('CURRENCY_NOT_SUPPORTED')) return 'PayPal no soporta esta moneda (e.g. ARS). \nUse otro método como MercadoPago.';
+                    if (msg.includes('INSTRUMENT_DECLINED')) return 'El medio de pago fue rechazado. \nVerifique fondos o use otra tarjeta.';
+                    
+                    // AGGRESSIVE: Detect JSON, technical terms, stack traces or very long strings
+                    if (msg.includes('{') || msg.includes('Error:') || msg.length > 180 || msg.includes(' at ')) {
+                        if (msg.includes('Venta creada')) {
+                            const match = msg.match(/Venta creada \(#.*?\)/);
+                            if (match) return `${match[0]} pero hubo un problema con el pago. \nContacte a soporte técnico.`;
+                        }
+                        return 'Error técnico al procesar su solicitud. \nPor favor intente nuevamente.';
+                    }
+                    return msg;
+                 };
+
+                 const message = sanitizeErrorMessage(error.response?.data?.message || error.message);
+                 throttledToastError(
+                     message, 
+                     error.response?.status >= 500 ? 'Contacte a soporte técnico.' : 'Revise los datos ingresados.'
+                 );
+             }
         }
 
         return Promise.reject(error)
