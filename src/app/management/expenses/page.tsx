@@ -328,13 +328,19 @@ export default function ExpensesPage() {
                                     -{formatCurrency(Number(expense.amount), expense.currencyCode || config?.baseCurrency || 'ARS', config?.currencySymbol)}
                                 </TableCell>
                                 <TableCell className="text-right flex items-center justify-end gap-2">
-                                    {expense.invoiceUrl && (
-                                        <Button variant="outline" size="icon" asChild title="Ver Factura" className="hover:cursor-pointer h-8 w-8">
-                                            <a href={expense.invoiceUrl} target="_blank" rel="noopener noreferrer">
-                                                <ExternalLink className="h-4 w-4" /> 
-                                            </a>
-                                        </Button>
-                                    )}
+                                    {expense.invoiceUrl && (() => {
+                                        let fileUrl = expense.invoiceUrl;
+                                        if (fileUrl.includes('cloudinary.com') && fileUrl.endsWith('.pdf') && !fileUrl.includes('fl_attachment')) {
+                                            fileUrl = fileUrl.replace('/upload/', '/upload/fl_attachment/');
+                                        }
+                                        return (
+                                            <Button variant="outline" size="icon" asChild title="Ver Factura" className="hover:cursor-pointer h-8 w-8">
+                                                <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                                                    <ExternalLink className="h-4 w-4" /> 
+                                                </a>
+                                            </Button>
+                                        );
+                                    })()}
                                     <Button variant="ghost" size="icon" onClick={() => setDeletingId(expense.id)} className="text-destructive hover:bg-destructive/10 hover:cursor-pointer h-8 w-8">
                                         <Trash2 className="h-4 w-4" />
                                     </Button>

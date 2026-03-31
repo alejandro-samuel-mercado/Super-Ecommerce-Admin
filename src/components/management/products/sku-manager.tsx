@@ -287,7 +287,7 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
                 if (!val) handleCancelEdit()
                 onOpenChange(val)
             }}>
-                <DialogContent className="w-[95vw] sm:w-[90vw] max-h-[90vh] overflow-y-auto overflow-x-auto text-foreground border-4 border-secondary/60 shadow-2xl ">
+                <DialogContent className="w-[95vw] sm:min-w-[700px] max-h-[90vh] overflow-y-auto overflow-x-auto text-foreground border-4 border-secondary/60 shadow-2xl ">
                     <DialogHeader className="w-full">
                         <DialogTitle className="text-xl font-bold text-foreground">Gestión de Variantes</DialogTitle>
                         <DialogDescription className="text-muted-foreground">
