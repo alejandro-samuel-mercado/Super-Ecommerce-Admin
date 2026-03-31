@@ -4,6 +4,7 @@ import { useConfigStore } from "@/store/config.store";
 import { Sale } from "@/types/schema";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { QRCodeSVG } from "qrcode.react";
 import { forwardRef } from "react";
 
 interface TicketTemplateProps {
@@ -124,41 +125,55 @@ export const TicketTemplate = forwardRef<HTMLDivElement, TicketTemplateProps>(({
                    </p>
                </div>
           
-           <style jsx global>{`
-               @media print {
-                   @page {
-                       size: 80mm auto;
-                       margin: 0;
-                       padding: 0;
-                   }
-                   body {
-                       margin: 0;
-                       padding: 0;
-                   }
-                   .ticket-container {
-                       width: 100%;
-                       max-width: 80mm;
-                       padding: 5mm 8mm 5mm 5mm;
-                       margin: 0;
-                       border: none;
-                       font-size: 12px;
-                   }
-                   /* Hide everything else */
-                   body > *:not(.print-area) {
-                       display: none;
-                   }
-                   .print-area {
-                       display: block;
-                       position: absolute;
-                       top: 0;
-                       left: 0;
-                       width: 100%;
-                   }
-               }
-           `}</style>
+                       <div className="mt-4 flex flex-col items-center justify-center gap-2 border-t border-black pt-4">
+                <QRCodeSVG 
+                    value={JSON.stringify({
+                        t: (sale as any).receipt?.ticketNumber || `SALE-${sale.id}`,
+                        s: (config as any)?.storeName,
+                        d: format(new Date(sale.createdAt || new Date()), "yyyy-MM-dd"),
+                        v: sale.total
+                    })}
+                    size={100}
+                    level="M"
+                    includeMargin={false}
+                />
+                <p className="text-[8px] uppercase font-bold text-center">Comprobante No Válido como Factura</p>
+            </div>
+
+            <style dangerouslySetInnerHTML={{ __html: `
+                @media print {
+                    @page {
+                        size: 80mm auto;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    body {
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .ticket-container {
+                        width: 100%;
+                        max-width: 80mm;
+                        padding: 5mm 8mm 5mm 5mm;
+                        margin: 0;
+                        border: none;
+                        font-size: 12px;
+                    }
+                    /* Hide everything else */
+                    body > *:not(.print-area) {
+                        display: none;
+                    }
+                    .print-area {
+                        display: block;
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                    }
+                }
+            `}} />
        </div>
    );
 });
 
 TicketTemplate.displayName = "TicketTemplate";
-
