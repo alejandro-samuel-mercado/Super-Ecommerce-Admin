@@ -19,13 +19,13 @@ interface SkuManagerProps {
     open: boolean
     onOpenChange: (open: boolean) => void
     product: Product
-    onUpdate: () => void 
+    onUpdate: () => void
 }
 
-function SkuForm({ 
-    product, skus, setSkus, editingSkuId, setEditingSkuId, handleCancelEdit, onUpdate 
-}: { 
-    product: Product, skus: SKU[], setSkus: any, editingSkuId: number | null, setEditingSkuId: any, handleCancelEdit: () => void, onUpdate: () => void 
+function SkuForm({
+    product, skus, setSkus, editingSkuId, setEditingSkuId, handleCancelEdit, onUpdate
+}: {
+    product: Product, skus: SKU[], setSkus: any, editingSkuId: number | null, setEditingSkuId: any, handleCancelEdit: () => void, onUpdate: () => void
 }) {
     const [attributes, setAttributes] = useState("")
     const [price, setPrice] = useState("")
@@ -66,7 +66,7 @@ function SkuForm({
 
     const handleSubmit = async () => {
         if (!attributes && !editingSkuId) return alert("Ingrese atributos")
-        
+
         setLoading(true)
         try {
             const validAttributes = attributes.split(',').map(part => {
@@ -91,14 +91,14 @@ function SkuForm({
                 setSkus(skus.map(s => s.id === editingSkuId ? updated : s))
             } else {
                 const newSkuData = {
-                   ...payload,
-                   productId: product.id,
-                   code: skuCode || `${product.model || 'PROD'}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
+                    ...payload,
+                    productId: product.id,
+                    code: skuCode || `${product.model || 'PROD'}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
                 }
                 const created = await SkuAPI.create(newSkuData)
                 setSkus([...skus, created])
             }
-            
+
             handleCancelEdit()
             onUpdate()
         } catch (error) {
@@ -109,7 +109,7 @@ function SkuForm({
     }
 
     return (
-        <div className={`sm:p-4 sm:w-full w-[80%] p-1 rounded-lg border transition-colors max-h-[60vh] overflow-y-auto ${editingSkuId ? 'bg-secondary/5 border-secondary/20' : 'bg-muted/30 border-border'}`}>
+        <div className={`sm:p-4 w-full p-1 rounded-lg border transition-colors max-h-[60vh] overflow-y-auto ${editingSkuId ? 'bg-secondary/5 border-secondary/20' : 'bg-muted/30 border-border'}`}>
             <div className="flex items-center justify-between mb-4">
                 <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
                     {editingSkuId ? 'Editar Variante' : 'Nueva Variante'}
@@ -120,48 +120,48 @@ function SkuForm({
                     </Button>
                 )}
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div className="md:col-span-4 space-y-2">
                     <Label className="text-foreground">Atributos (Ej: Color: Rojo, Talle: L)</Label>
-                    <Input 
-                        value={attributes} 
-                        onChange={(e) => setAttributes(e.target.value)} 
-                        placeholder="Color: Rojo, Talle: L" 
-                        className="bg-background border-input placeholder:text-muted-foreground text-foreground font-medium" 
+                    <Input
+                        value={attributes}
+                        onChange={(e) => setAttributes(e.target.value)}
+                        placeholder="Color: Rojo, Talle: L"
+                        className="bg-background border-input placeholder:text-muted-foreground text-foreground font-medium"
                     />
                 </div>
-               
+
                 <div className="md:col-span-2 space-y-2">
                     <Label className="text-foreground">Precio</Label>
-                    <SafeNumericInput 
-                        value={parseFloat(price) || 0} 
-                        onChange={(val) => setPrice(String(val))} 
+                    <SafeNumericInput
+                        value={parseFloat(price) || 0}
+                        onChange={(val) => setPrice(String(val))}
                         onStringChange={setPrice}
-                        placeholder={String(product.basePrice)} 
-                        className="bg-background border-input placeholder:text-muted-foreground text-foreground font-medium" 
+                        placeholder={String(product.basePrice)}
+                        className="bg-background border-input placeholder:text-muted-foreground text-foreground font-medium"
                     />
                 </div>
                 <div className="md:col-span-2 space-y-2">
                     <Label className="text-foreground">Costo Compra</Label>
-                    <SafeNumericInput 
-                        value={parseFloat(costPrice) || 0} 
-                        onChange={(val) => setCostPrice(String(val))} 
+                    <SafeNumericInput
+                        value={parseFloat(costPrice) || 0}
+                        onChange={(val) => setCostPrice(String(val))}
                         onStringChange={setCostPrice}
-                        placeholder="Costo" 
-                        className="bg-background border-input placeholder:text-muted-foreground text-foreground font-medium" 
+                        placeholder="Costo"
+                        className="bg-background border-input placeholder:text-muted-foreground text-foreground font-medium"
                     />
                 </div>
                 <div className="md:col-span-2 space-y-2">
                     <Label className="text-foreground">Stock</Label>
-                    <SafeNumericInput 
-                        value={parseFloat(stock) || 0} 
-                        onChange={(val) => setStock(String(val))} 
+                    <SafeNumericInput
+                        value={parseFloat(stock) || 0}
+                        onChange={(val) => setStock(String(val))}
                         onStringChange={setStock}
-                        placeholder="0" 
+                        placeholder="0"
                         disabled={true}
                         title="El stock solo se modifica mediante Compras o Ventas"
-                        className="bg-muted border-input placeholder:text-muted-foreground text-muted-foreground font-medium cursor-not-allowed" 
+                        className="bg-muted border-input placeholder:text-muted-foreground text-muted-foreground font-medium cursor-not-allowed"
                     />
                     <p className="text-[10px] text-muted-foreground leading-tight">
                         Gestionado por Compras/Ventas
@@ -169,11 +169,11 @@ function SkuForm({
                 </div>
                 <div className="md:col-span-4 space-y-2">
                     <Label className="text-foreground">Código SKU (Opcional)</Label>
-                    <Input 
-                        value={skuCode} 
-                        onChange={(e) => setSkuCode(e.target.value)} 
-                        placeholder="Auto-generado si se deja vacio" 
-                        className="bg-background border-input placeholder:text-muted-foreground text-foreground font-medium" 
+                    <Input
+                        value={skuCode}
+                        onChange={(e) => setSkuCode(e.target.value)}
+                        placeholder="Auto-generado si se deja vacio"
+                        className="bg-background border-input placeholder:text-muted-foreground text-foreground font-medium"
                     />
                 </div>
 
@@ -184,8 +184,8 @@ function SkuForm({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Tipo de Código</Label>
-                            <Select 
-                                value={barcodeType} 
+                            <Select
+                                value={barcodeType}
                                 onValueChange={(val: "EAN13" | "INTERNO") => setBarcodeType(val)}
                             >
                                 <SelectTrigger className="bg-background">
@@ -200,8 +200,8 @@ function SkuForm({
 
                         {barcodeType === 'EAN13' && (
                             <div className="flex items-center space-x-2 pt-8">
-                                <Switch 
-                                    id="auto-gen" 
+                                <Switch
+                                    id="auto-gen"
                                     checked={isAutoGenerated}
                                     onCheckedChange={setIsAutoGenerated}
                                 />
@@ -212,11 +212,11 @@ function SkuForm({
                         {!isAutoGenerated && (
                             <div className="col-span-2 md:col-span-1 space-y-2 ">
                                 <Label>Código {barcodeType}</Label>
-                                <Input 
-                                    value={barcode} 
+                                <Input
+                                    value={barcode}
                                     inputMode={barcodeType === 'EAN13' ? 'numeric' : 'text'}
                                     onChange={(e) => setBarcode(e.target.value)}
-                                    placeholder={barcodeType === 'EAN13' ? "779..." : "ABC-123..."} 
+                                    placeholder={barcodeType === 'EAN13' ? "779..." : "ABC-123..."}
                                     className="bg-background"
                                 />
                                 {barcodeType === 'EAN13' && barcode.length > 0 && barcode.length !== 13 && (
@@ -254,7 +254,7 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
         setEditingSkuId(null)
     }
 
-  
+
     useEffect(() => {
         if (!open) {
             handleCancelEdit()
@@ -264,16 +264,16 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
     const handleDeleteSku = async () => {
         if (!skuToDelete) return;
         const id = skuToDelete;
-       
+
         const toastId = toast.loading("Eliminando variante...");
         try {
             await SkuAPI.delete(id)
-         
+
             setSkus(skus.filter(s => s.id !== id))
             onUpdate()
-          
+
         } catch (error: any) {
-            
+
             const message = error.response?.data?.message || "No se pudo eliminar la variante. Intente nuevamente.";
             toast.error(message, { id: toastId });
         } finally {
@@ -283,116 +283,116 @@ export function SkuManager({ open, onOpenChange, product, onUpdate }: SkuManager
 
     return (
         <>
-        <Dialog open={open} onOpenChange={(val) => {
-            if (!val) handleCancelEdit()
-            onOpenChange(val)
-        }}>
-            <DialogContent className="sm:w-auto w-[95%] max-h-[90vh] overflow-y-auto overflow-x-auto text-foreground border-4 border-secondary/60 shadow-2xl ">
-                <DialogHeader className="sm:w-full w-[100%]">
-                    <DialogTitle className="text-xl font-bold text-foreground">Gestión de Variantes</DialogTitle>
-                    <DialogDescription className="text-muted-foreground">
-                        Administre las variantes (SKUs) para: <span className="font-semibold text-secondary">{product.name}</span>
-                    </DialogDescription>
-                </DialogHeader>
+            <Dialog open={open} onOpenChange={(val) => {
+                if (!val) handleCancelEdit()
+                onOpenChange(val)
+            }}>
+                <DialogContent className="w-[95vw] sm:w-[90vw] max-h-[90vh] overflow-y-auto overflow-x-auto text-foreground border-4 border-secondary/60 shadow-2xl ">
+                    <DialogHeader className="w-full">
+                        <DialogTitle className="text-xl font-bold text-foreground">Gestión de Variantes</DialogTitle>
+                        <DialogDescription className="text-muted-foreground">
+                            Administre las variantes (SKUs) para: <span className="font-semibold text-secondary">{product.name}</span>
+                        </DialogDescription>
+                    </DialogHeader>
 
-                <div className="space-y-6 py-4">
-                    <SkuForm 
-                        product={product} 
-                        skus={skus} 
-                        setSkus={setSkus} 
-                        editingSkuId={editingSkuId} 
-                        setEditingSkuId={setEditingSkuId} 
-                        handleCancelEdit={handleCancelEdit} 
-                        onUpdate={onUpdate} 
-                    />
+                    <div className="space-y-6 py-4">
+                        <SkuForm
+                            product={product}
+                            skus={skus}
+                            setSkus={setSkus}
+                            editingSkuId={editingSkuId}
+                            setEditingSkuId={setEditingSkuId}
+                            handleCancelEdit={handleCancelEdit}
+                            onUpdate={onUpdate}
+                        />
 
-                    {/* Lista */}
-                    <div className="border border-border rounded-lg sm:overflow-hidden overflow-x-auto shadow-sm sm:w-full w-[80%] ">
-                        <table className="w-full text-sm text-left">
-                            <thead className="bg-muted/50 text-muted-foreground font-semibold border-b border-border">
-                                <tr>
-                                    <th className="px-4 py-3">Código</th>
-                                    <th className="px-4 py-3">Atributos</th>
-                                    <th className="px-4 py-3">Precio</th>
-                                    <th className="px-4 py-3">Costo</th>
-                                    <th className="px-4 py-3">Stock</th>
-                                    <th className="px-4 py-3 text-right"></th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-border bg-background">
-                                {skus.map((sku) => (
-                                    <tr key={sku.id} className={`hover:bg-muted/50 transition-colors ${editingSkuId === sku.id ? 'bg-secondary/10' : ''}`}>
-                                        <td className="px-4 py-3 font-mono text-foreground">{sku.code}</td>
-                                        <td className="px-4 py-3 font-medium text-foreground">
-                                            {sku.variantOptions?.map(v => `${v.name}: ${v.value}`).join(', ') || 'Default'}
-                                        </td>
-                                        <td className="px-4 py-3 text-foreground">{formatCurrency(sku.price, config?.baseCurrency || 'USD', config?.currencySymbol)}</td>
-                                        <td className="px-4 py-3 text-foreground">{formatCurrency(sku.costPrice || 0, config?.baseCurrency || 'USD', config?.currencySymbol)}</td>
-                                        <td className="px-4 py-3 text-foreground">{Number(sku.stock).toFixed(3).replace(/\.?0+$/, '')}</td>
-                                        <td className="px-4 py-3 text-right space-x-2">
-                                            <Button 
-                                                variant="ghost" 
-                                                size="sm" 
-                                                onClick={() => handleEditClick(sku)}
-                                                className="text-secondary hover:cursor-pointer hover:text-secondary hover:bg-secondary/10"
-                                            >
-                                                <Edit className="h-4 w-4" />
-                                            </Button>
-                                            <BarcodePrintButton skus={[{ ...sku, product }]} />
-                                            <Button 
-                                                variant="ghost" 
-                                                size="sm" 
-                                                onClick={() => setSkuToDelete(sku.id)}
-                                                className="text-destructive hover:cursor-pointer hover:text-destructive hover:bg-destructive/10"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {skus.length === 0 && (
+                        {/* Lista */}
+                        <div className="border border-border rounded-lg sm:overflow-hidden overflow-x-auto shadow-sm w-full">
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-muted/50 text-muted-foreground font-semibold border-b border-border">
                                     <tr>
-                                        <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground border-dashed">
-                                            <div className="flex flex-col items-center justify-center gap-2">
-                                                <div className="p-3 rounded-full bg-muted">
-                                                    <Edit className="h-6 w-6 text-muted-foreground" />
-                                                </div>
-                                                <p>No hay variantes registradas</p>
-                                            </div>
-                                        </td>
+                                        <th className="px-4 py-3">Código</th>
+                                        <th className="px-4 py-3">Atributos</th>
+                                        <th className="px-4 py-3">Precio</th>
+                                        <th className="px-4 py-3">Costo</th>
+                                        <th className="px-4 py-3">Stock</th>
+                                        <th className="px-4 py-3 text-right"></th>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="divide-y divide-border bg-background">
+                                    {skus.map((sku) => (
+                                        <tr key={sku.id} className={`hover:bg-muted/50 transition-colors ${editingSkuId === sku.id ? 'bg-secondary/10' : ''}`}>
+                                            <td className="px-4 py-3 font-mono text-foreground">{sku.code}</td>
+                                            <td className="px-4 py-3 font-medium text-foreground">
+                                                {sku.variantOptions?.map(v => `${v.name}: ${v.value}`).join(', ') || 'Default'}
+                                            </td>
+                                            <td className="px-4 py-3 text-foreground">{formatCurrency(sku.price, config?.baseCurrency || 'USD', config?.currencySymbol)}</td>
+                                            <td className="px-4 py-3 text-foreground">{formatCurrency(sku.costPrice || 0, config?.baseCurrency || 'USD', config?.currencySymbol)}</td>
+                                            <td className="px-4 py-3 text-foreground">{Number(sku.stock).toFixed(3).replace(/\.?0+$/, '')}</td>
+                                            <td className="px-4 py-3 text-right space-x-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleEditClick(sku)}
+                                                    className="text-secondary hover:cursor-pointer hover:text-secondary hover:bg-secondary/10"
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                                <BarcodePrintButton skus={[{ ...sku, product }]} />
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => setSkuToDelete(sku.id)}
+                                                    className="text-destructive hover:cursor-pointer hover:text-destructive hover:bg-destructive/10"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {skus.length === 0 && (
+                                        <tr>
+                                            <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground border-dashed">
+                                                <div className="flex flex-col items-center justify-center gap-2">
+                                                    <div className="p-3 rounded-full bg-muted">
+                                                        <Edit className="h-6 w-6 text-muted-foreground" />
+                                                    </div>
+                                                    <p>No hay variantes registradas</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
 
-                <DialogFooter className="border-t border-border px-6 py-4 sm:w-full w-[80%] ">
-                    <Button variant="outline" onClick={() => onOpenChange(false)} className="border-gray-300 text-foreground hover:bg-muted hover:cursor-pointer">
-                        Cerrar
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                    <DialogFooter className="border-t border-border px-6 py-4 w-full">
+                        <Button variant="outline" onClick={() => onOpenChange(false)} className="border-gray-300 text-foreground hover:bg-muted hover:cursor-pointer">
+                            Cerrar
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
-        <Dialog open={!!skuToDelete} onOpenChange={(val) => !val && setSkuToDelete(null)}>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Confirmar Eliminación</DialogTitle>
-                    <DialogDescription>
-                        ¿Está seguro de que desea eliminar esta variante? Esta acción no se puede deshacer, pero conservaremos el historial de ventas si lo tiene.
-                    </DialogDescription>
-                </DialogHeader>
-                <DialogFooter className="gap-2 sm:gap-0">
-                    <Button variant="outline" onClick={() => setSkuToDelete(null)} className="hover:cursor-pointer">
-                        Cancelar
-                    </Button>
-                    <Button variant="destructive" onClick={handleDeleteSku} className="hover:cursor-pointer">
-                        Eliminar Variante
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+            <Dialog open={!!skuToDelete} onOpenChange={(val) => !val && setSkuToDelete(null)}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Confirmar Eliminación</DialogTitle>
+                        <DialogDescription>
+                            ¿Está seguro de que desea eliminar esta variante? Esta acción no se puede deshacer, pero conservaremos el historial de ventas si lo tiene.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="outline" onClick={() => setSkuToDelete(null)} className="hover:cursor-pointer">
+                            Cancelar
+                        </Button>
+                        <Button variant="destructive" onClick={handleDeleteSku} className="hover:cursor-pointer">
+                            Eliminar Variante
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     )
 }
