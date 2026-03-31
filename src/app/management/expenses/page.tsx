@@ -36,7 +36,7 @@ import api from "@/services/api"
 import { useBranchStore } from "@/store/branch.store"
 import { useConfigStore } from "@/store/config.store"
 import { format } from "date-fns"
-import { Plus, RefreshCcw, Trash2 } from "lucide-react"
+import { Plus, RefreshCcw, Trash2, ExternalLink } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 
 const CATEGORIES = [
@@ -331,7 +331,7 @@ export default function ExpensesPage() {
                                     {expense.invoiceUrl && (
                                         <Button variant="outline" size="icon" asChild title="Ver Factura" className="hover:cursor-pointer h-8 w-8">
                                             <a href={expense.invoiceUrl} target="_blank" rel="noopener noreferrer">
-                                                <Plus className="h-4 w-4 rotate-45" /> 
+                                                <ExternalLink className="h-4 w-4" /> 
                                             </a>
                                         </Button>
                                     )}
