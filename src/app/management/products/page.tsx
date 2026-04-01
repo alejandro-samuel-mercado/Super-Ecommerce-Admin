@@ -2,6 +2,7 @@
 
 import { ProductForm } from "@/components/management/products/product-form";
 import { ProductTable } from "@/components/management/products/product-table";
+import { BulkImportDialog } from "@/components/management/products/bulk-import-dialog";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -115,21 +116,55 @@ export default function ProductsPage() {
   };
 
   const handleExport = () => {
-    const dataToExport = products.map((p) => ({
-      ID: p.id,
-      Nombre: p.name,
-      Marca: p.brand || "-",
-      Tipo: p.type,
-      Precio_Base: p.basePrice,
-      Puntos_Recompensa: p.pointsReward,
-      Estado: p.isActive ? "ACTIVE" : "INACTIVO",
-    }));
+    const dataToExport: any[] = [];
 
-    exportToCSV(dataToExport, "catalogo_productos");
+    products.forEach((p) => {
+      // Si el producto no tiene SKUs (no debería pasar), crear una fila básica
+      if (!p.skus || p.skus.length === 0) {
+        dataToExport.push({
+          ID: p.id,
+          Nombre: p.name,
+          Marca: p.brand || "-",
+          Categoria: p.category?.name || "General",
+          Descripcion: p.description || "",
+          Tipo: p.type,
+          Precio_Base: p.basePrice,
+          Unidad_Medida: p.measurementUnit || "UNIDAD",
+          Codigo_SKU: "-",
+          Precio_SKU: p.basePrice,
+          Stock_Inicial: 0,
+          Codigo_Barras: "-",
+          Puntos_Recompensa: p.pointsReward,
+          Estado: p.isActive ? "ACTIVE" : "INACTIVO",
+        });
+      } else {
+        // Una fila por cada SKU para que sea compatible con el importador masivo
+        p.skus.forEach((sku) => {
+          dataToExport.push({
+            ID: p.id,
+            Nombre: p.name,
+            Marca: p.brand || "-",
+            Categoria: p.category?.name || "General",
+            Descripcion: p.description || "",
+            Tipo: p.type,
+            Precio_Base: p.basePrice,
+            Unidad_Medida: p.measurementUnit || "UNIDAD",
+            Codigo_SKU: sku.code,
+            Precio_SKU: sku.price,
+            Stock_Inicial: sku.stock || 0,
+            Codigo_Barras: sku.barcode || "-",
+            Puntos_Recompensa: p.pointsReward,
+            Estado: p.isActive ? "ACTIVE" : "INACTIVO",
+          });
+        });
+      }
+    });
+
+    exportToCSV(dataToExport, "catalogo_productos_completo");
 
     toast({
-      title: "Exportación exitosa",
-      description: `Se han exportado ${products.length} productos.`,
+      title: "Exportación completa",
+      description: `Se han exportado ${dataToExport.length} variantes de ${products.length} productos.`,
     });
   };
 
@@ -291,6 +326,9 @@ export default function ProductsPage() {
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           </Button>
+
+          <BulkImportDialog onSuccess={() => loadProducts(1)} />
+
           {currentUserRole !== "EMPLOYEE" && (
             <Button
               onClick={() => {

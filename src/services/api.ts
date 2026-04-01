@@ -173,6 +173,10 @@ export const ProductsAPI = {
     exportCodes: async (payload: { type: 'QR' | 'BARCODE', selectAll: boolean, selectedIds: number[], filters: any }) => {
         const response = await api.post('/products/export-codes', payload, { responseType: 'blob' })
         return response
+    },
+    bulkImport: async (payload: any[]) => {
+        const { data } = await api.post('/products/bulk', { products: payload })
+        return data
     }
 }
 
