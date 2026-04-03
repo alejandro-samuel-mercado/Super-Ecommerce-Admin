@@ -395,7 +395,7 @@ export default function CouponsPage() {
               <div className="grid gap-2">
                 <Label>Compra Mínima ({config?.currencySymbol || "\$"}) (Opcional)</Label>
                 <Input
-                  type="number"
+                  type="number" step="any"
                   value={formData.minPurchase || ""}
                   onChange={(e) =>
                     setFormData({
@@ -412,7 +412,7 @@ export default function CouponsPage() {
               <div className="grid gap-2">
                 <Label>Tope Reintegro ({config?.currencySymbol || "\$"}) (Opcional)</Label>
                 <Input
-                  type="number"
+                  type="number" step="any"
                   value={formData.maxDiscount || ""}
                   onChange={(e) =>
                     setFormData({

@@ -185,7 +185,7 @@ export default function ExpensesPage() {
                         <div className="grid gap-4 py-4">
                             <div className="space-y-2">
                                 <Label>Monto</Label>
-                                <Input type="number"
+                                <Input type="number" step="any"
                                     placeholder="0.00"
                                     value={formData.amount}
                                     onChange={e => setFormData({ ...formData, amount: e.target.value })}

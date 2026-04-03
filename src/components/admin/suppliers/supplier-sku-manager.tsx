@@ -188,7 +188,7 @@ export function SupplierSkuManager({ supplierId, initialSkus = [] }: SupplierSku
                                 <div className="space-y-2">
                                     <Label>Precio de Compra Base</Label>
                                     <Input 
-                                        type="number" 
+                                        type="number" step="any" 
                                         placeholder="0.00" 
                                         value={price}
                                         onChange={e => setPrice(e.target.value)}

@@ -440,6 +440,7 @@ export default function DiscountsPage() {
                                         <Label>Monto Mínimo ({config?.currencySymbol || '$'})</Label>
                                         <Input 
                                             type="number" 
+                                            step="any"
                                             inputMode="decimal"
                                             placeholder="0.00"
                                             value={newDiscount.conditions?.minAmount || ''}

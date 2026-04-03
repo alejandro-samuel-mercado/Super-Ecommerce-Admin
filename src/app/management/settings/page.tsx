@@ -966,7 +966,7 @@ export default function SettingsPage() {
                                                             </span>
                                                             <input
                                                                 type="number"
-                                                                step="0.001"
+                                                                step="any"
                                                                 inputMode="decimal"
                                                                 className="border border-gray-400 h-8 pl-5 text-xs bg-white text-black dark:bg-slate-950 font-bold w-full"
                                                                 value={config.moneyPerPoint || 0}
@@ -992,7 +992,7 @@ export default function SettingsPage() {
                                                         <Award className="absolute left-2 top-1.5 h-3 w-3 text-amber-500" />
                                                         <input
                                                             type="number"
-                                                            step="0.0001"
+                                                            step="any"
                                                             inputMode="decimal"
                                                             className="border border-gray-400 h-8 pl-5 text-xs bg-white text-black dark:bg-slate-950 font-bold w-full"
                                                             value={config.pointsPerCurrency || 0}
@@ -1238,6 +1238,7 @@ export default function SettingsPage() {
                                     <Label>Impuesto General (IVA %)</Label>
                                     <Input
                                         type="number"
+                                        step="any"
                                         inputMode="decimal"
                                         value={config.taxRate}
                                         onChange={(e) =>
@@ -1304,7 +1305,8 @@ export default function SettingsPage() {
                                                             </span>
                                                             <Input
                                                                 type="number"
-                                                                step="0.001"
+                                                                step="any"
+                                                                onWheel={(e) => e.currentTarget.blur()}
                                                                 value={c.exchangeRateToBase}
                                                                 onChange={(e) => {
                                                                     const updated = [...currencies];
@@ -1569,6 +1571,7 @@ export default function SettingsPage() {
                                             </span>
                                             <Input
                                                 type="number"
+                                                step="any"
                                                 inputMode="decimal"
                                                 className="pl-6"
                                                 value={config.freeShippingThreshold || 0}
