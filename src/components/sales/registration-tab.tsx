@@ -373,6 +373,7 @@ export function RegistrationTab() {
       const itemTaxable = itemGross * discountRatio;
 
       if (itemTaxRate > 0) {
+        totalTax += itemTaxable * (itemTaxRate / 100);
       } else if (storeConfig?.taxRate && Number(storeConfig.taxRate) > 0) {
         totalTax += itemTaxable * (Number(storeConfig.taxRate) / 100);
       }
@@ -779,6 +780,8 @@ export function RegistrationTab() {
 
       paymentStatus: paymentType === "QR" ? "PENDING" : "PAID",
       deliveryStatus: isDelivered ? "DELIVERED" : "PENDING_DELIVERY",
+      
+      currencyCode: storeConfig?.baseCurrency || "USD",
     };
     try {
       const clientName = client?.name || "N/A";
@@ -1748,10 +1751,7 @@ export function RegistrationTab() {
                             item.taxRate !== undefined && item.taxRate !== null
                               ? Number(item.taxRate)
                               : globalTaxRate;
-                          const tax =
-                            (itemFinalSubtotal / (1 + itemTaxRate / 100)) *
-                            (itemTaxRate / 100);
-                          totalTax += tax;
+                          totalTax += itemFinalSubtotal * (itemTaxRate / 100);
                         });
 
                         return totalTax;
