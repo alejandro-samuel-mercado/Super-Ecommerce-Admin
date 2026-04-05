@@ -13,10 +13,15 @@ import { adminNavigation } from "@/config/admin-navigation"
 import { Search } from "lucide-react"
 import { useRouter } from "next/navigation"
 import * as React from "react"
+import { useAuthStore } from "@/store/use-auth-store"
+import { useConfigStore } from "@/store/config.store"
 
 export function GlobalSearch() {
   const [open, setOpen] = React.useState(false)
   const router = useRouter()
+  const { user } = useAuthStore()
+  const { config } = useConfigStore()
+  const userRole = (user?.role?.name || 'EMPLOYEE') as string
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -42,6 +47,14 @@ export function GlobalSearch() {
     
     const traverse = (navItems: typeof adminNavigation) => {
         navItems.forEach(item => {
+            // RBAC Check
+            if (userRole.toUpperCase() !== 'SUPER_ADMIN' && item.permissionKey) {
+                const rolePerms = config?.rolePermissions?.[userRole.toUpperCase()];
+                if (rolePerms && rolePerms[item.permissionKey] === false) {
+                    return;
+                }
+            }
+
             if (item.href) {
                 items.push({ title: item.title, href: item.href, icon: item.icon })
             }
@@ -52,7 +65,7 @@ export function GlobalSearch() {
     }
     traverse(adminNavigation)
     return items
-  }, [])
+  }, [userRole, config])
 
 
   return (

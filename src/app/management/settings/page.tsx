@@ -29,8 +29,12 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+import { ThemeColorsManager } from "@/components/admin/theme-colors-manager";
+import { AccessControlManager } from "@/components/admin/access-control-manager";
+import { BankAccountsManager } from "@/components/admin/bank-accounts-manager";
 import { ConfigAPI, CurrenciesAPI } from "@/services/api";
 import { useConfigStore } from "@/store/config.store";
+import { useAuthStore } from "@/store/use-auth-store";
 import { StoreConfig } from "@/types/extended";
 import {
       AlertCircle,
@@ -89,6 +93,7 @@ export default function SettingsPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const { toast } = useToast();
+    const { user } = useAuthStore();
     const router = useRouter();
     const [activeEvent, setActiveEvent] = useState<any>(null);
     const [currencies, setCurrencies] = useState<any[]>([]);
@@ -310,6 +315,20 @@ export default function SettingsPage() {
                     >
                         Seguridad y Respaldos
                     </TabsTrigger>
+                    <TabsTrigger
+                        className="hover:cursor-pointer data-[state=active]:bg-secondary/60 dark:data-[state=active]:bg-secondary/60"
+                        value="appearance"
+                    >
+                        Apariencia
+                    </TabsTrigger>
+                    {user?.role?.name === 'SUPER_ADMIN' && (
+                        <TabsTrigger
+                            className="hover:cursor-pointer data-[state=active]:bg-secondary/60 dark:data-[state=active]:bg-secondary/60"
+                            value="access"
+                        >
+                            Control de Acceso
+                        </TabsTrigger>
+                    )}
                 </TabsList>
 
                 {/* TAB 1: GENERAL (Identidad, Horarios, Unidades) */}
@@ -1422,6 +1441,10 @@ export default function SettingsPage() {
                         </CardContent>
                     </Card>
 
+                    {config.enabledPaymentMethods && (config.enabledPaymentMethods as string[]).includes("TRANSFER") && (
+                        <BankAccountsManager config={config} setConfig={setConfig} />
+                    )}
+
                     {config.enabledPaymentMethods && (config.enabledPaymentMethods as string[]).includes("QR") && (
                         <Card className="border-purple-200 dark:border-purple-800">
                             <CardHeader>
@@ -1754,6 +1777,18 @@ export default function SettingsPage() {
                         </CardContent>
                     </Card>
                 </TabsContent>
+
+                {/* TAB 6: APARIENCIA */}
+                <TabsContent value="appearance" className="space-y-6">
+                    <ThemeColorsManager config={config} setConfig={setConfig} />
+                </TabsContent>
+
+                {/* TAB 7: ACCESO */}
+                {user?.role?.name === 'SUPER_ADMIN' && (
+                    <TabsContent value="access" className="space-y-6">
+                        <AccessControlManager config={config} setConfig={setConfig} />
+                    </TabsContent>
+                )}
             </Tabs>
         </div>
     );

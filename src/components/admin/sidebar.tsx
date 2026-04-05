@@ -55,6 +55,15 @@ export function Sidebar({ className, onClose }: SidebarProps) {
     const filteredMenu = adminNavigation.filter(item => {
         if (item.hidden) return false
         if (item.roles && !item.roles.includes(userRole as any)) return false
+        
+        // RBAC Check
+        if (userRole !== 'SUPER_ADMIN' && item.permissionKey) {
+            const rolePerms = config?.rolePermissions?.[userRole.toUpperCase()];
+            if (rolePerms && rolePerms[item.permissionKey] === false) {
+                return false;
+            }
+        }
+
         return true
     })
 
@@ -125,12 +134,14 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                         </div>
                     </div>
                 )}
-                <div className="min-[500px]:hidden w-full flex flex-col items-start pb-4">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-white/70 pb-1">Alertas</span>
-                    <div className="scale-90 origin-left text-white [&_button]:text-white">
-                        <SystemHealth />
+                {config?.rolePermissions?.[userRole]?.alerts !== false && (
+                    <div className="min-[500px]:hidden w-full flex flex-col items-start pb-4">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-white/70 pb-1">Alertas</span>
+                        <div className="scale-90 origin-left text-white [&_button]:text-white">
+                            <SystemHealth />
+                        </div>
                     </div>
-                </div>
+                )}
                 {filteredMenu.map((item) => {
                     const isChildrenActive = item.children?.some(child => pathname === child.href);
                     const isActive = pathname === item.href || isChildrenActive;
@@ -161,6 +172,15 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                                         {item.children.filter(child => {
                                             if (child.hidden) return false;
                                             if (child.roles && !child.roles.includes(userRole as any)) return false;
+
+                                            // RBAC Check for children
+                                            if (userRole.toUpperCase() !== 'SUPER_ADMIN' && child.permissionKey) {
+                                                const rolePerms = config?.rolePermissions?.[userRole.toUpperCase()];
+                                                if (rolePerms && rolePerms[child.permissionKey] === false) {
+                                                    return false;
+                                                }
+                                            }
+
                                             return true;
                                         }).map(child => {
                                             const isChildActive = pathname === child.href;

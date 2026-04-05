@@ -64,14 +64,16 @@ export function Header() {
                         </div>
                     </div>
                 )}
-                <div className="hidden min-[500px]:flex flex-col items-center">
-                         <span className="text-[10px] font-semibold uppercase tracking-wider">Alertas</span>
-                         <div className="scale-90 origin-right text-white [&_button]:text-white">
-                            <SystemHealth />
-                         </div>
-                     </div>
+                {config?.rolePermissions?.[userRole.toUpperCase()]?.alerts !== false && (
+                    <div className="hidden min-[500px]:flex flex-col items-center">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider">Alertas</span>
+                        <div className="scale-90 origin-right text-white [&_button]:text-white">
+                        <SystemHealth />
+                        </div>
+                    </div>
+                )}
                 <div className="flex items-center gap-1 sm:gap-2">
-                     {userRole !== 'EMPLOYEE' && (
+                     {userRole.toUpperCase() !== 'EMPLOYEE' && config?.rolePermissions?.[userRole.toUpperCase()]?.audit !== false && (
                          <Button 
                             variant="ghost" 
                             size="icon" 

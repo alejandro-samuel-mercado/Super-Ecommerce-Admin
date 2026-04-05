@@ -1427,6 +1427,36 @@ export function RegistrationTab() {
                                 ))}
                             </div>
                         </div>
+                        
+                        {/* Info Transferencia */}
+                        {paymentType === "TRANSFER" && storeConfig?.bankAccounts && storeConfig.bankAccounts.length > 0 && (
+                            <div className="space-y-2 pt-4 px-1">
+                                <Label className="text-[10px] md:text-xs font-bold text-muted-foreground uppercase flex items-center gap-1">
+                                    Datos para Transferencia
+                                </Label>
+                                <div className="grid gap-2">
+                                    {(storeConfig.bankAccounts as any[]).map((acc: any) => (
+                                        <div key={acc.id} className="p-3 border-2 border-border rounded-lg bg-muted/20 text-xs flex flex-col gap-1.5 shadow-sm">
+                                            <div className="font-bold text-sm text-indigo-700 dark:text-indigo-400">{acc.bankName}</div>
+                                            <div className="font-medium text-foreground">{acc.accountName}</div>
+                                            
+                                            <div className="flex justify-between items-center mt-1 pt-2 border-t border-border/50">
+                                                <span className="text-muted-foreground font-semibold text-[10px] uppercase">CBU/CVU</span>
+                                                <span className="font-mono bg-background px-2 py-0.5 border rounded-md text-foreground select-all">{acc.cbuCvu}</span>
+                                            </div>
+                                            
+                                            {acc.alias && (
+                                                <div className="flex justify-between items-center mt-0.5">
+                                                    <span className="text-muted-foreground font-semibold text-[10px] uppercase">Alias</span>
+                                                    <span className="font-mono bg-background px-2 py-0.5 border rounded-md text-foreground select-all">{acc.alias}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Switch de Estado de Entrega */}
                         <div className="flex items-center justify-between pt-3 px-1">
                             <Label
@@ -1932,7 +1962,7 @@ export function RegistrationTab() {
                             <span className="text-2xl font-black text-muted-foreground uppercase block">
                                 Total Final
                             </span>
-                            <span className="font-black text-4xl xl:text-5xl tracking-tighter text-foreground">
+                            <span className="font-black text-3xl xl:text-4xl tracking-tighter text-foreground">
                                 {formatCurrency(
                                     total,
                                     storeConfig?.baseCurrency || "USD"
@@ -1955,13 +1985,13 @@ export function RegistrationTab() {
                                 </span>
                             </div>
                         )}
-                        
-                        <POSCalculator 
-                            total={total} 
-                            currencyCode={storeConfig?.baseCurrency || "USD"} 
-                            currencySymbol={storeConfig?.currencySymbol} 
+
+                        <POSCalculator
+                            total={total}
+                            currencyCode={storeConfig?.baseCurrency || "USD"}
+                            currencySymbol={storeConfig?.currencySymbol}
                         />
-                        
+
                         <Button
                             className="w-full font-black text-lg h-14 shadow-orange-500/20 shadow-lg hover:shadow-orange-500/40 hover:scale-[1.02] transition-all bg-orange-600 hover:bg-orange-500 text-white rounded-lg uppercase tracking-wide hover:cursor-pointer"
                             size="lg"

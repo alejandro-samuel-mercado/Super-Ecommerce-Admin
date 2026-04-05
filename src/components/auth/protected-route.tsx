@@ -1,9 +1,11 @@
 "use client"
 
 import { useAuthStore } from "@/store/use-auth-store"
-import { Loader2, ShieldAlert } from "lucide-react"
+import { ArrowLeft, LayoutDashboard, Loader2, ShieldAlert } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { useConfigStore } from "@/store/config.store"
+import { adminNavigation } from "@/config/admin-navigation"
 
 interface ProtectedRouteProps {
     children: React.ReactNode
@@ -11,7 +13,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps) {
-    const { isAuthenticated, user} = useAuthStore()
+    const { isAuthenticated, user } = useAuthStore()
     const router = useRouter()
     const pathname = usePathname()
     const [hydrated, setHydrated] = useState(false)
@@ -21,7 +23,47 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
     }, [])
 
     const userRole = user?.role?.name || ''
-    const isAuthorized = !requiredRoles || (userRole && requiredRoles.includes(userRole))
+    const { config } = useConfigStore()
+
+
+    const isRBACAuthorized = () => {
+        if (!userRole || userRole === 'SUPER_ADMIN') return true;
+
+
+        let permissionKey: string | undefined;
+        const isPathMatch = (href?: string) => {
+            if (!href) return false;
+
+            const targetPath = href.split('?')[0];
+            if (targetPath === '/management') return pathname === '/management';
+            return pathname === targetPath || pathname.startsWith(targetPath + '/');
+        };
+
+        for (const item of adminNavigation) {
+            if (isPathMatch(item.href)) {
+                permissionKey = item.permissionKey;
+                break;
+            }
+            if (item.children) {
+                const child = item.children.find(c => isPathMatch(c.href));
+                if (child) {
+                    permissionKey = child.permissionKey || item.permissionKey;
+                    break;
+                }
+            }
+        }
+
+        if (permissionKey) {
+            const rolePerms = config?.rolePermissions?.[userRole.toUpperCase()];
+            if (rolePerms && rolePerms[permissionKey] === false) {
+                return false;
+            }
+        }
+
+        return true;
+    };
+
+    const isAuthorized = (!requiredRoles || (userRole && requiredRoles.includes(userRole))) && isRBACAuthorized();
 
     useEffect(() => {
         if (hydrated && !isAuthenticated) {
@@ -32,30 +74,48 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
 
     // 1. Estado de Carga Inicial (Antes de la Hidratación)
     if (!hydrated) {
-         return (
-             <div className="fixed inset-0 w-full flex flex-col items-center justify-center bg-background text-foreground gap-4 z-[100] overflow-hidden">
-                 <Loader2 className="h-12 w-12 animate-spin text-secondary" />
-                 <p className="text-muted-foreground font-medium animate-pulse">Verificando sesión...</p>
+        return (
+            <div className="fixed inset-0 w-full flex flex-col items-center justify-center bg-background text-foreground gap-4 z-[100] overflow-hidden">
+                <Loader2 className="h-12 w-12 animate-spin text-secondary" />
+                <p className="text-muted-foreground font-medium animate-pulse">Verificando sesión...</p>
             </div>
         )
     }
 
     if (!isAuthenticated) {
-        return null 
+        return null
     }
 
     if (!isAuthorized) {
         return (
-            <div className="fixed inset-0 w-full flex flex-col items-center justify-center bg-background text-foreground gap-4 z-[100]">
-                 <div className="p-4 rounded-full bg-destructive/10 text-destructive mb-2">
-                    <ShieldAlert className="w-12 h-12" />
-                 </div>
-                 <h1 className="text-3xl font-bold">Acceso Denegado</h1>
-                 <p className="text-muted-foreground text-center max-w-md">
-                     No tienes los permisos necesarios para acceder a esta sección.
-                     <br />
-                     Rol actual: <span className="font-mono bg-muted px-2 py-1 rounded text-sm mt-1 inline-block">{userRole}</span>
-                 </p>
+            <div className="fixed inset-0 w-full flex flex-col items-center justify-center bg-background text-foreground gap-1 z-[100] px-4">
+                <div className="p-4 rounded-full bg-destructive/10 text-destructive mb-4 animate-bounce">
+                    <ShieldAlert className="w-16 h-16" />
+                </div>
+                <h1 className="text-4xl font-bold tracking-tight mb-2">Acceso Denegado</h1>
+                <p className="text-muted-foreground text-center max-w-md text-lg mb-6">
+                    No tienes los permisos configurados para acceder a esta sección del panel administrativo.
+                    <br />
+                    <span className="text-sm opacity-80 mt-2 block italic">
+                        Rol asignado: <span className="font-mono bg-muted px-2 py-0.5 rounded border">{userRole == "EMPLOYEE" ? "EMPLEADO" : userRole == "ADMIN" ? "ADMINISTRADOR" : userRole == "SUPER_ADMIN" ? "SUPER ADMINISTRADOR" : "USUARIO"}</span>
+                    </span>
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
+                    <button
+                        onClick={() => router.back()}
+                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-slate-900 dark:bg-zinc-100 text-white dark:text-zinc-950 font-semibold hover:opacity-90 transition-all hover:scale-105 active:scale-95 shadow-lg"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Volver Atrás
+                    </button>
+
+
+                </div>
+
+                <p className="mt-12 text-xs text-gray-600 opacity-80">
+                    Si crees que esto es un error, contacta con el Super Administrador.
+                </p>
             </div>
         )
     }

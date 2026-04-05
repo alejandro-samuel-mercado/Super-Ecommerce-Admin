@@ -141,6 +141,17 @@ export interface StoreConfig {
     enablePoints?: boolean;
     enabledPaymentMethods?: boolean;
   };
+  bankAccounts?: BankAccount[];
+  themeColors?: Record<string, string>;
+  rolePermissions?: Record<string, Record<string, boolean>>;
+}
+
+export interface BankAccount {
+  id: string;
+  bankName: string;
+  accountName: string;
+  cbuCvu: string;
+  alias: string;
 }
 
 export interface ShippingZone {

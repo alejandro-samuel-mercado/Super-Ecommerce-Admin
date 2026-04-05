@@ -1,5 +1,6 @@
 
 import {
+    AlertCircle,
     Archive,
     ArrowLeftRight,
     Bot,
@@ -29,6 +30,7 @@ export interface NavItem {
     roles: string[]
     hidden?: boolean
     children?: NavItem[]
+    permissionKey?: string
 }
 
 export const adminNavigation: NavItem[] = [
@@ -36,30 +38,35 @@ export const adminNavigation: NavItem[] = [
         title: "Dashboard",
         icon: LayoutDashboard,
         href: "/management",
-        roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE']
+        roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'],
+        permissionKey: 'dashboard'
     },
     {
         title: "Reportes",
         icon: PieChart,
         href: "/management/reports",
-        roles: ['SUPER_ADMIN', 'ADMIN']  
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+        permissionKey: 'reports'
     },
     {
         title: "Sucursales",
         icon: Store,
         href: "/management/settings/branches",
         roles: ['SUPER_ADMIN'],
+        permissionKey: 'branches'
     },
     {
         title: "Productos",
         icon: Package,
         href: "/management/products",
-        roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE']
+        roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'],
+        permissionKey: 'products'
     },
     {
         title: "Usuarios",
         icon: Users,
         roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'],
+        permissionKey: 'users',
         children: [
             {
                 title: "Clientes",
@@ -92,25 +99,29 @@ export const adminNavigation: NavItem[] = [
         title: "Stock",
         icon: Archive,
         roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'],
+        permissionKey: 'stock',
         children: [
             {
                 title: "Control",
                 icon: Archive,
                 href: "/management/stock-control",
                 roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'],
+                permissionKey: 'stock_control'
             },
             {
                 title: "Movimientos",
                 icon: ArrowLeftRight,
                 href: "/management/transfers",
                 roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'],
+                permissionKey: 'stock_movements'
             },
         ]
     },
     {
         title: "Compras",
         icon: BadgeDollarSign,
-        roles: ['SUPER_ADMIN', 'ADMIN'], 
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+        permissionKey: 'purchases',
         children: [
             {
                 title: "Proveedores",
@@ -142,12 +153,14 @@ export const adminNavigation: NavItem[] = [
         title: "Ventas",
         icon: ShoppingCart,
         href: "/management/sales",
-        roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE']
+        roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'],
+        permissionKey: 'sales'
     },
      {
         title: "Administración",
         icon:  Wrench, 
         roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'], 
+        permissionKey: 'administration',
         children: [
             {
                 title: "Categorías",
@@ -174,49 +187,72 @@ export const adminNavigation: NavItem[] = [
                 title: "Envíos",
                 icon: Truck,
                 href: "/management/shipping",
-                roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE']  
+                roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'],
+                permissionKey: 'shipping'
             },
             {
                 title: "Pasarelas de Pago",
                 icon: DollarSign,
                 href: "/management/settings/gateways",
-                roles: ['SUPER_ADMIN']
+                roles: ['SUPER_ADMIN'],
+                permissionKey: 'payment_gateways'
             },
     {
         title: "Comentarios",
         icon: MessageSquare,
         href: "/management/comments",
-        roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE']  
+        roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'],
+        permissionKey: 'comments'
     },
     {
         title: "Eventos",
         icon: Calendar,
         href: "/management/events",
-        roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE']  
+        roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'],
+        permissionKey: 'events'
     },
       {
                 title: "Asistente Bot",
                 href: "/management/bot",
                 icon: Bot,
-                roles: ['SUPER_ADMIN', 'ADMIN']
+                roles: ['SUPER_ADMIN', 'ADMIN'],
+                permissionKey: 'bot_assistant'
             },
               {
                 title: "Blog",
                 href: "/management/content/blog",
                 icon: FileText,
-                roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE']
+                roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'],
+                permissionKey: 'blog'
             },
     {
         title: "Contenido Web",
         href: "/management/content",
                 icon: Globe,
-                roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE']
+                roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'],
+                permissionKey: 'web_content'
     },
     {
         title: "Configuración",
          href: "/management/settings",
                 icon: Settings,
         roles: ['SUPER_ADMIN'],
-       
+        permissionKey: 'settings'
+    },
+    {
+        title: "Auditoría",
+        href: "/management/system/audit",
+        icon: FileText,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+        hidden: true,
+        permissionKey: 'audit'
+    },
+    {
+        title: "Alertas",
+        href: "/management/system/alerts",
+        icon: AlertCircle,
+        roles: ['SUPER_ADMIN', 'ADMIN', 'EMPLOYEE'],
+        hidden: true,
+        permissionKey: 'alerts'
     },
 ]
