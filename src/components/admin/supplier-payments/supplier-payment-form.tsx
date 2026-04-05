@@ -253,9 +253,8 @@ export function SupplierPaymentForm({ onSuccess, onCancel, initialPurchaseId, in
                         <div className="space-y-2">
                             <Label className="text-foreground">Monto <span className="text-destructive">*</span></Label>
                             <div className="relative">
-                                <span className="absolute left-3 top-2.5 text-muted-foreground font-semibold">{config?.currencySymbol || "$"}</span>
                                 <SafeNumericInput 
-                                    className={`pl-8 border-input text-lg font-bold text-foreground placeholder:text-muted-foreground ${purchaseId !== "none" ? "bg-muted" : "bg-background"}`}
+                                    className={`border-input text-lg font-bold text-foreground placeholder:text-muted-foreground ${purchaseId !== "none" ? "bg-muted" : "bg-background"}`}
                                     placeholder="0.00" 
                                     value={parseFloat(amount) || 0}
                                     onChange={val => setAmount(String(val))}

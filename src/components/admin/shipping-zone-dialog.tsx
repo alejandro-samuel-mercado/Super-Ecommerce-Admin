@@ -136,13 +136,12 @@ export function ShippingZoneDialog({ open, onOpenChange, zone, onSuccess }: Ship
                         <div className="space-y-2">
                             <Label htmlFor="cost">Costo de Envío</Label>
                             <div className="relative">
-                                <span className="absolute left-3 top-2.5 text-muted-foreground">{config?.currencySymbol || "$"}</span>
                                 <Input
                                     id="cost"
                                     type="number"
                                     min="0"
                                     step="0.01"
-                                    className="pl-7"
+                                    className=""
                                     value={formData.cost}
                                     onChange={(e) => setFormData({ ...formData, cost: parseFloat(e.target.value) })}
                                 />
